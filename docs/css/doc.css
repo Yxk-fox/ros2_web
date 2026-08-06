@@ -1,0 +1,475 @@
+/* ============================================================
+   ROS2 Web 管理工具 · 文档中心统一样式（论文风格）
+   版权所有：上海伯镭科技有限公司
+   ============================================================ */
+
+:root {
+    --paper-bg: #fafaf7;
+    --paper-text: #1a1a1a;
+    --paper-text-soft: #4a4a4a;
+    --paper-muted: #6b6b6b;
+    --paper-border: #d4cfc4;
+    --paper-accent: #8b4513;
+    --paper-accent-soft: #b87333;
+    --paper-link: #5a3e1b;
+    --paper-code-bg: #f3efe6;
+    --paper-table-head: #ede8dc;
+    --paper-table-stripe: #f5f2ea;
+    --paper-quote: #6b4423;
+    --paper-warn-bg: #fdf6e3;
+    --paper-warn-border: #d4a017;
+    --paper-tip-bg: #eef5ee;
+    --paper-tip-border: #4a7c4a;
+    --paper-danger-bg: #fbeaea;
+    --paper-danger-border: #a33a3a;
+    --paper-max-width: 880px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper-bg);
+    color: var(--paper-text);
+    font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "SimSun",
+                 Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    line-height: 1.85;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 顶部文档头 ---------- */
+.doc-header {
+    border-bottom: 2px solid var(--paper-accent);
+    padding: 28px 0 18px;
+    margin-bottom: 28px;
+}
+.doc-header .doc-eyebrow {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--paper-muted);
+    margin-bottom: 8px;
+}
+.doc-header h1 {
+    font-family: "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: var(--paper-text);
+    letter-spacing: 0.5px;
+}
+.doc-header .doc-meta {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    color: var(--paper-muted);
+}
+.doc-header .doc-meta span { margin-right: 18px; }
+
+/* ---------- 主容器 ---------- */
+.doc-container {
+    max-width: var(--paper-max-width);
+    margin: 0 auto;
+    padding: 40px 48px 80px;
+}
+
+/* ---------- 摘要框 ---------- */
+.doc-abstract {
+    background: var(--paper-code-bg);
+    border-left: 4px solid var(--paper-accent);
+    padding: 18px 24px;
+    margin: 0 0 32px;
+    font-size: 15px;
+    color: var(--paper-text-soft);
+}
+.doc-abstract .abstract-title {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-weight: 700;
+    color: var(--paper-accent);
+    margin-bottom: 6px;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+/* ---------- 关键词 ---------- */
+.doc-keywords {
+    font-size: 14px;
+    color: var(--paper-muted);
+    margin-bottom: 36px;
+}
+.doc-keywords strong {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    color: var(--paper-text);
+}
+
+/* ---------- 目录 ---------- */
+.doc-toc {
+    background: #fff;
+    border: 1px solid var(--paper-border);
+    border-radius: 2px;
+    padding: 20px 28px;
+    margin-bottom: 40px;
+}
+.doc-toc .toc-title {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--paper-accent);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+.doc-toc ol {
+    margin: 0;
+    padding-left: 22px;
+    counter-reset: toc;
+}
+.doc-toc ol li {
+    margin: 4px 0;
+    font-size: 14px;
+}
+.doc-toc a {
+    color: var(--paper-link);
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+}
+.doc-toc a:hover { border-bottom-color: var(--paper-accent); }
+
+/* ---------- 章节标题（自动编号已由 HTML 结构承担） ---------- */
+h2.section-title {
+    font-family: "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC",
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--paper-text);
+    margin: 44px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--paper-border);
+}
+h3.subsection-title {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--paper-text);
+    margin: 32px 0 12px;
+}
+h4.sub-subsection-title {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--paper-accent);
+    margin: 22px 0 8px;
+}
+
+/* ---------- 正文段落 ---------- */
+p { margin: 0 0 14px; text-align: justify; }
+p.lead {
+    font-size: 17px;
+    color: var(--paper-text-soft);
+}
+
+/* ---------- 强调与术语 ---------- */
+strong, b { font-weight: 700; color: var(--paper-text); }
+em { font-style: italic; color: var(--paper-accent); }
+dfn {
+    font-style: normal;
+    font-weight: 600;
+    border-bottom: 1px dashed var(--paper-accent-soft);
+}
+
+/* ---------- 列表 ---------- */
+ul, ol { margin: 0 0 14px; padding-left: 26px; }
+li { margin: 5px 0; }
+
+/* ---------- 引用 ---------- */
+blockquote {
+    margin: 18px 0;
+    padding: 10px 22px;
+    border-left: 3px solid var(--paper-accent-soft);
+    background: var(--paper-code-bg);
+    color: var(--paper-quote);
+    font-size: 15px;
+}
+blockquote p { margin: 0; }
+
+/* ---------- 代码 ---------- */
+code {
+    font-family: "JetBrains Mono", "Fira Code", "Consolas", "Courier New", monospace;
+    font-size: 13.5px;
+    background: var(--paper-code-bg);
+    color: var(--paper-accent);
+    padding: 1px 6px;
+    border-radius: 2px;
+}
+pre {
+    background: var(--paper-code-bg);
+    border: 1px solid var(--paper-border);
+    border-radius: 3px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    margin: 14px 0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+pre code {
+    background: none;
+    color: var(--paper-text);
+    padding: 0;
+}
+
+/* ---------- 表格 ---------- */
+table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 14px;
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+}
+table.data-table caption {
+    caption-side: top;
+    text-align: left;
+    font-size: 13px;
+    color: var(--paper-muted);
+    margin-bottom: 6px;
+    font-style: italic;
+}
+table.data-table th {
+    background: var(--paper-table-head);
+    border: 1px solid var(--paper-border);
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--paper-text);
+}
+table.data-table td {
+    border: 1px solid var(--paper-border);
+    padding: 8px 12px;
+    vertical-align: top;
+}
+table.data-table tbody tr:nth-child(even) { background: var(--paper-table-stripe); }
+
+/* ---------- 提示框 ---------- */
+.doc-note {
+    margin: 18px 0;
+    padding: 12px 18px 12px 16px;
+    border-left: 4px solid var(--paper-tip-border);
+    background: var(--paper-tip-bg);
+    font-size: 14.5px;
+    border-radius: 0 3px 3px 0;
+}
+.doc-note .note-label {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-weight: 700;
+    color: var(--paper-tip-border);
+    margin-right: 6px;
+}
+.doc-warn {
+    margin: 18px 0;
+    padding: 12px 18px 12px 16px;
+    border-left: 4px solid var(--paper-warn-border);
+    background: var(--paper-warn-bg);
+    font-size: 14.5px;
+    border-radius: 0 3px 3px 0;
+}
+.doc-warn .note-label {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-weight: 700;
+    color: var(--paper-warn-border);
+    margin-right: 6px;
+}
+.doc-danger {
+    margin: 18px 0;
+    padding: 12px 18px 12px 16px;
+    border-left: 4px solid var(--paper-danger-border);
+    background: var(--paper-danger-bg);
+    font-size: 14.5px;
+    border-radius: 0 3px 3px 0;
+}
+.doc-danger .note-label {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-weight: 700;
+    color: var(--paper-danger-border);
+    margin-right: 6px;
+}
+
+/* ---------- 按钮示意（操作文档用） ---------- */
+.btn-demo {
+    display: inline-block;
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 13px;
+    padding: 3px 11px;
+    border: 1px solid var(--paper-border);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--paper-text);
+    margin: 0 2px;
+    white-space: nowrap;
+}
+.btn-demo.success { border-color: #4a7c4a; color: #4a7c4a; }
+.btn-demo.warn { border-color: #b8860b; color: #b8860b; }
+.btn-demo.danger { border-color: #a33a3a; color: #a33a3a; }
+.btn-demo.primary { border-color: var(--paper-accent); color: var(--paper-accent); }
+
+/* ---------- 步骤流程 ---------- */
+ol.doc-steps { counter-reset: step; list-style: none; padding-left: 0; }
+ol.doc-steps > li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 38px;
+    margin: 14px 0;
+}
+ol.doc-steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    background: var(--paper-accent);
+    color: #fff;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 50%;
+}
+
+/* ---------- 图表说明 ---------- */
+figure { margin: 22px 0; text-align: center; }
+figure figcaption {
+    font-size: 13px;
+    color: var(--paper-muted);
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* ---------- 参考文献 ---------- */
+.doc-references {
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid var(--paper-border);
+}
+.doc-references .ref-title {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--paper-accent);
+    margin-bottom: 10px;
+}
+.doc-references ol {
+    padding-left: 22px;
+    font-size: 13.5px;
+    color: var(--paper-text-soft);
+}
+.doc-references li { margin: 5px 0; }
+
+/* ---------- 页脚 ---------- */
+.doc-footer {
+    margin-top: 60px;
+    padding-top: 18px;
+    border-top: 2px solid var(--paper-accent);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 12px;
+    color: var(--paper-muted);
+    text-align: center;
+    line-height: 1.7;
+}
+
+/* ---------- 门户首页专用 ---------- */
+.portal-hero {
+    text-align: center;
+    padding: 50px 0 36px;
+    border-bottom: 2px solid var(--paper-accent);
+    margin-bottom: 36px;
+}
+.portal-hero h1 {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    letter-spacing: 1px;
+}
+.portal-hero .hero-sub {
+    font-size: 16px;
+    color: var(--paper-muted);
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+}
+.portal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin: 28px 0;
+}
+.portal-card {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--paper-border);
+    border-top: 3px solid var(--paper-accent);
+    border-radius: 3px;
+    padding: 24px 26px;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow .2s, transform .2s;
+}
+.portal-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+.portal-card .card-audience {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--paper-accent);
+    margin-bottom: 8px;
+}
+.portal-card h3 {
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 20px;
+    margin: 0 0 10px;
+    color: var(--paper-text);
+}
+.portal-card p {
+    font-size: 14px;
+    color: var(--paper-text-soft);
+    margin: 0 0 12px;
+    line-height: 1.7;
+}
+.portal-card .card-tags {
+    font-size: 12px;
+    color: var(--paper-muted);
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+}
+.portal-card .card-tags span {
+    display: inline-block;
+    margin-right: 8px;
+}
+
+/* ---------- 返回顶部导航 ---------- */
+.doc-back {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--paper-border);
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 14px;
+}
+.doc-back a {
+    color: var(--paper-link);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--paper-accent-soft);
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 720px) {
+    .doc-container { padding: 24px 20px 60px; }
+    .portal-grid { grid-template-columns: 1fr; }
+    .doc-header h1 { font-size: 24px; }
+    h2.section-title { font-size: 19px; }
+    h3.subsection-title { font-size: 16px; }
+}

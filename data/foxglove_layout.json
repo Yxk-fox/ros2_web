@@ -1,0 +1,106 @@
+{
+  "version": "2.0.0",
+  "metadata": {
+    "name": "ROS2 Simulation Layout",
+    "description": "Foxglove Studio layout for ROS2 vehicle simulation visualization",
+    "author": "Boonray"
+  },
+  "layout": {
+    "type": "SplitPanel",
+    "direction": "HORIZONTAL",
+    "children": [
+      {
+        "type": "Panel",
+        "pluginId": "Foxglove.3D",
+        "title": "3D View",
+        "config": {
+          "topics": [
+            {"topic": "/vehicle_marker", "messageType": "visualization_msgs/msg/MarkerArray", "enabled": true},
+            {"topic": "/localplan_markers", "messageType": "visualization_msgs/msg/MarkerArray", "enabled": true},
+            {"topic": "/globalplan_markers", "messageType": "visualization_msgs/msg/MarkerArray", "enabled": true},
+            {"topic": "/scan", "messageType": "sensor_msgs/msg/LaserScan", "enabled": true},
+            {"topic": "/points_raw", "messageType": "sensor_msgs/msg/PointCloud2", "enabled": true},
+            {"topic": "/map", "messageType": "nav_msgs/msg/OccupancyGrid", "enabled": true},
+            {"topic": "/ground_truth/pose", "messageType": "geometry_msgs/msg/PoseStamped", "enabled": true},
+            {"topic": "/localization/localization_data", "messageType": "nav_msgs/msg/Odometry", "enabled": true},
+            {"topic": "/cmd_vel", "messageType": "geometry_msgs/msg/Twist", "enabled": true}
+          ],
+          "scene": {
+            "backgroundColor": "#1a1a2e",
+            "fixedFrame": "map",
+            "cameraPreset": "top_down",
+            "showGrid": true,
+            "showAxes": true
+          }
+        }
+      },
+      {
+        "type": "SplitPanel",
+        "direction": "VERTICAL",
+        "children": [
+          {
+            "type": "Panel",
+            "pluginId": "Foxglove.Topics",
+            "title": "Topics"
+          },
+          {
+            "type": "Panel",
+            "pluginId": "Foxglove.State",
+            "title": "State"
+          },
+          {
+            "type": "Panel",
+            "pluginId": "Foxglove.TfTree",
+            "title": "TF Tree"
+          },
+          {
+            "type": "Panel",
+            "pluginId": "Foxglove.Odometry",
+            "title": "Odometry",
+            "config": {
+              "topic": "/localization/localization_data",
+              "messageType": "nav_msgs/msg/Odometry"
+            }
+          }
+        ]
+      },
+      {
+        "type": "SplitPanel",
+        "direction": "VERTICAL",
+        "children": [
+          {
+            "type": "Panel",
+            "pluginId": "Foxglove.Image",
+            "title": "Camera",
+            "config": {
+              "topic": "/camera/image_raw",
+              "messageType": "sensor_msgs/msg/Image"
+            }
+          },
+          {
+            "type": "Panel",
+            "pluginId": "Foxglove.Plot",
+            "title": "Velocity Plot",
+            "config": {
+              "plots": [
+                {"topic": "/localization/localization_data", "field": "twist.twist.linear.x", "label": "Linear Velocity X"},
+                {"topic": "/localization/localization_data", "field": "twist.twist.angular.z", "label": "Angular Velocity Z"}
+              ],
+              "timeRange": 10
+            }
+          },
+          {
+            "type": "Panel",
+            "pluginId": "Foxglove.Log",
+            "title": "ROS Log"
+          }
+        ]
+      }
+    ]
+  },
+  "userNodes": [],
+  "connectionConfig": {
+    "type": "foxglove-websocket",
+    "url": "ws://localhost:9090"
+  }
+}

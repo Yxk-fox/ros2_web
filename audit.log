@@ -1,0 +1,141 @@
+2026-08-05T02:58:44.687151 [ning.jiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T02:58:57.444272 [ning.jiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T02:59:03.519720 [admin] websocket_connected : WebSocket 连接
+2026-08-05T02:59:13.047302 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T02:59:35.793850 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T03:01:08.480982 [admin] websocket_connected : WebSocket 连接
+2026-08-05T03:03:51.914966 [admin] websocket_connected : WebSocket 连接
+2026-08-05T03:04:10.677553 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T03:04:19.251584 [ning.jiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T03:04:22.855712 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T03:04:28.051957 [admin] websocket_connected : WebSocket 连接
+2026-08-05T03:04:28.559625 [ning.jiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T03:04:42.661333 [admin] websocket_connected : WebSocket 连接
+2026-08-05T03:04:59.321676 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T03:05:23.117293 [admin] websocket_connected : WebSocket 连接
+2026-08-05T03:05:44.672553 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T03:57:47.821767 [admin] websocket_connected : WebSocket 连接
+2026-08-05T03:57:48.322541 [ning.jiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T03:58:03.199905 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T03:58:10.284962 [ning.jiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T04:01:02.091706 [admin] websocket_connected : WebSocket 连接
+2026-08-05T04:01:02.468190 [ning.jiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T04:01:18.392405 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T04:01:18.735781 [ning.jiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T05:32:57.185093 [ning.jiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T05:33:05.659137 [ning.jiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T05:33:06.644152 [ning_jiao] logout : 用户注销
+2026-08-05T05:33:11.949942 [admin] login_success : 登录成功, token有效1天
+2026-08-05T05:33:12.471638 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:33:28.522051 [ning.jiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T05:33:30.871730 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:33:43.349245 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:34:01.691324 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:35:41.390591 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:36:07.252842 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:38:43.316479 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:38:45.456524 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:41:01.000466 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:41:16.465377 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:41:20.384875 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:44:31.133602 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:44:32.005110 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:44:32.006392 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:44:49.293584 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:44:50.824511 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:45:03.233268 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:45:43.237414 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:45:51.022370 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:57:10.141214 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:57:10.479979 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:57:14.579685 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:57:33.411764 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T05:58:06.333052 [admin] websocket_connected : WebSocket 连接
+2026-08-05T05:58:07.695491 [admin] websocket_connected : WebSocket 连接
+2026-08-05T06:24:51.541727 [admin] websocket_connected : WebSocket 连接
+2026-08-05T06:24:51.862687 [admin] websocket_connected : WebSocket 连接
+2026-08-05T06:25:07.337457 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T06:25:08.371884 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T06:42:31.880173 [admin] stop_all_ros2 : 3 containers (all)
+2026-08-05T06:47:44.447652 [admin] clear_scripts : 清空 0 个脚本
+2026-08-05T06:48:00.384111 [admin] clear_scripts : 清空 0 个脚本
+2026-08-05T06:49:33.581688 [admin] websocket_connected : WebSocket 连接
+2026-08-05T06:49:34.459570 [admin] websocket_connected : WebSocket 连接
+2026-08-05T06:49:40.931990 [admin] websocket_connected : WebSocket 连接
+2026-08-05T06:49:47.080438 [admin] generate_scripts : 3 scripts
+2026-08-05T06:49:57.256814 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T06:49:57.584492 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T06:50:12.247876 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-05T06:50:32.557970 [admin] execute_script : start_docker_ros2_Supervisor_001.sh
+2026-08-05T06:50:43.159892 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T06:52:52.167488 [admin] stop_container : ros2_Supervisor_001
+2026-08-05T06:53:14.519269 [admin] execute_script : start_docker_ros2_Supervisor_001.sh
+2026-08-05T06:53:33.821765 [admin] execute_script : start_docker_ros2_Supervisor_002.sh
+2026-08-05T07:09:30.859404 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T07:09:37.216045 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T07:09:39.422414 [admin] websocket_connected : WebSocket 连接
+2026-08-05T07:09:41.511584 [admin] websocket_connected : WebSocket 连接
+2026-08-05T07:10:04.149926 [admin] websocket_connected : WebSocket 连接
+2026-08-05T07:10:04.473153 [admin] websocket_connected : WebSocket 连接
+2026-08-05T07:27:45.636398 [admin] websocket_connected : WebSocket 连接
+2026-08-05T07:27:51.606611 [admin] sync_bags : 4 bags target=self
+2026-08-05T07:28:06.166045 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T07:30:36.886087 [admin] stop_all_ros2 : 3 containers (all)
+2026-08-05T08:04:01.167091 [admin] websocket_connected : WebSocket 连接
+2026-08-05T08:04:31.509175 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T08:12:41.697910 [admin] websocket_connected : WebSocket 连接
+2026-08-05T08:12:52.924425 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T08:28:29.317770 [admin] websocket_connected : WebSocket 连接
+2026-08-05T08:48:42.457167 [admin] websocket_connected : WebSocket 连接
+2026-08-05T08:48:44.067306 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T08:48:48.488808 [admin] logout : 用户注销
+2026-08-05T08:48:52.242343 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-05T08:48:52.594731 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T08:49:06.043870 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T08:49:15.968287 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T08:49:24.322464 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T08:50:10.259144 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T08:56:04.919681 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T08:56:16.717341 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T09:20:18.094732 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T09:22:53.069854 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T09:22:57.835103 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T09:23:19.924147 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T09:23:25.917509 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T09:23:40.614958 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T09:23:46.736173 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T09:24:03.377910 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T09:24:16.227005 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T09:25:20.075546 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T09:25:22.817626 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T09:27:11.485357 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-05T09:27:17.386447 [honglan_wang] logout : 用户注销
+2026-08-05T09:27:20.296160 [admin] login_success : 登录成功, token有效1天
+2026-08-05T09:27:20.648227 [admin] websocket_connected : WebSocket 连接
+2026-08-05T09:27:22.767752 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T09:27:43.171326 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-05T09:30:51.676965 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T09:30:53.153685 [admin] websocket_connected : WebSocket 连接
+2026-08-05T09:32:12.028544 [admin] websocket_connected : WebSocket 连接
+2026-08-05T09:32:16.154807 [admin] websocket_connected : WebSocket 连接
+2026-08-05T09:32:24.778289 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T09:32:36.471417 [admin] websocket_connected : WebSocket 连接
+2026-08-05T09:32:44.498663 [admin] websocket_disconnected : WebSocket 断开
+2026-08-05T09:32:48.555665 [admin] websocket_disconnected : WebSocket 断开
+2026-08-06T00:29:37.003004 [admin] websocket_connected : WebSocket 连接
+2026-08-06T00:29:58.220153 [admin] websocket_connected : WebSocket 连接
+2026-08-06T01:46:59.930559 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-06T01:47:01.121738 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-06T01:47:33.686664 [honglan_wang] batch_generate : auto_test03 -> auto_test03
+2026-08-06T01:47:46.615088 [honglan_wang] sync_folder : mock_truck target=self
+2026-08-06T01:47:46.938774 [honglan_wang] sync_folder : simulation_launches target=self
+2026-08-06T01:47:57.802431 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-06T01:47:58.304469 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-06T01:48:32.083759 [honglan_wang] delete_script : start_docker_ros2_auto_ww_001.sh
+2026-08-06T01:49:49.649619 [honglan_wang] clear_scripts : 清空 6 个脚本
+2026-08-06T01:51:03.388609 [honglan_wang] clear_scripts : 清空 0 个脚本
+2026-08-06T01:51:05.079439 [honglan_wang] generate_scripts : 5 scripts
+2026-08-06T01:51:41.952560 [honglan_wang] execute_script : start_docker_ros2_auto_test03.sh
+2026-08-06T02:48:32.462608 [admin] websocket_disconnected : WebSocket 断开
+2026-08-06T06:51:32.330914 [admin] websocket_connected : WebSocket 连接
+2026-08-06T06:51:56.791969 [admin] websocket_disconnected : WebSocket 断开

@@ -1,0 +1,121 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8875,
+    "ssl_key": "",
+    "ssl_cert": ""
+  },
+  "cors": {
+    "allow_origins": [
+      "http://localhost:8875",
+      "http://192.168.20.254:8875"
+    ],
+    "allow_origin_regex": "https?://([a-zA-Z0-9.-]+):8875"
+  },
+  "plugins": {
+    "execution_enabled": false
+  },
+  "security": {
+    "jwt_secret": "1+n6+RmAaVt64dMIhOj1oCQa6RNnjhAMErri2VdA4ayLWdn6nD+V8MPGm4O8GGUDvfpqcVrtT643rq/96Mf4PQ==",
+    "jwt_algorithm": "HS256",
+    "jwt_expire_minutes": 1440,
+    "bcrypt_rounds": 12,
+    "rate_limit_enabled": false,
+    "rate_limit_requests": 5,
+    "rate_limit_period": 60,
+    "input_filter_enabled": false,
+    "input_filter_whitelist": [
+      "ros2",
+      "ls",
+      "pwd",
+      "echo",
+      "cat",
+      "source",
+      "docker",
+      "bash",
+      "sh",
+      "tc",
+      "stress"
+    ],
+    "audit_enabled": true,
+    "audit_log_file": "~/ros2_web/audit.log"
+  },
+  "database": {
+    "type": "supabase",
+    "path": "/home/fox/ros2_web/data/data.json",
+    "audit_path": "~/ros2_web/data/audit_logs.json",
+    "url": "https://ihbhbnkjaljajvgescih.supabase.co",
+    "key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYmhibmtqYWxqYWp2Z2VzY2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNTEwMDAsImV4cCI6MjA5OTcyNzAwMH0.1-6F2ZbLINplZ0sYN9HYLqY2XoM6qHjuZuKXsLUYJak",
+    "service_role_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloYmhibmtqYWxqYWp2Z2VzY2loIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDE1MTAwMCwiZXhwIjoyMDk5NzI3MDAwfQ.vEu95M7ac4jLRRBO6CnYVJjlfOl8oBmsOQVUrcXSMVA"
+  },
+  "docker": {
+    "default_image": "ros2_humble_image:v1",
+    "use_sudo": false
+  },
+  "ros2_workspace": {
+    "host_ws": "~/robotruck_ros2",
+    "host_install": "~/robotruck_ros2/install",
+    "container_install": "/home/boonray/install",
+    "container_bag_path": "/home/nvidia/data/.boonray/bagfiles",
+    "container_bag_path_alt": "/home/boonray/.boonray/bagfiles"
+  },
+  "paths": {
+    "launch_dir": "~/robotruck_ros2/install/simulation_launches/share/simulation_launches/launch",
+    "scripts_dir": "~/robotruck_ros2/Docker/scripts",
+    "logs_dir": "~/robotruck_ros2/Docker/logs",
+    "bag_storage": "~/robotruck_ros2/Docker/bags",
+    "config_dir": "~/robotruck_ros2/install/simulation_launches/share/simulation_launches/config",
+    "backup_dir": "~/robotruck_ros2/Docker/bk"
+  },
+  "whitelist": {
+    "default_prefixes": [
+      "ros2_"
+    ]
+  },
+  "cloud_env": {
+    "current_env": "106",
+    "current_ip": "106.14.223.60",
+    "ip_map": {
+      "106": "106.14.223.60",
+      "139": "139.196.75.44",
+      "192": "192.168.9.252"
+    }
+  },
+  "visualization": {
+    "default_method": "foxglove",
+    "order": [
+      "foxglove",
+      "vnc",
+      "rviz_x11"
+    ],
+    "methods": {
+      "foxglove": {
+        "name": "Foxglove Studio",
+        "description": "通过 rosbridge_server 将ROS数据转发到云端可视化工具（推荐）",
+        "enabled": true,
+        "port": 9091,
+        "container_port": 9090,
+        "auto_install": true
+      },
+      "vnc": {
+        "name": "VNC远程桌面",
+        "description": "容器中启动VNC服务和XFCE桌面，通过Web浏览器访问完整桌面环境",
+        "enabled": true,
+        "port": 5903,
+        "container_port": 5901,
+        "web_port": 6080,
+        "container_web_port": 6080,
+        "password": "",
+        "auto_install": true,
+        "geometry": "1920x1080"
+      },
+      "rviz_x11": {
+        "name": "原生RVIZ (X11转发)",
+        "description": "在容器中启动原生RVIZ2，通过VNC远程桌面查看",
+        "enabled": true,
+        "require_gpu": false,
+        "auto_install": true
+      }
+    }
+  }
+}

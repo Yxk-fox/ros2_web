@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按钮操作手册 · ROS2 Web 管理工具</title>
+    <link rel="stylesheet" href="css/doc.css">
+</head>
+<body>
+<div class="doc-container">
+
+    <header class="doc-header">
+        <div class="doc-eyebrow">OPERATIONS MANUAL · 一线操作 / 运维人员</div>
+        <h1>按钮操作手册</h1>
+        <div class="doc-meta">
+            <span>版本：4.0-decoupled</span>
+            <span>适用对象：一线操作 / 运维人员</span>
+            <span>更新：2026 年 8 月</span>
+        </div>
+    </header>
+
+    <div class="doc-abstract">
+        <div class="abstract-title">摘　要</div>
+        <p>本手册面向一线操作与运维人员，逐一说明 ROS2 Web 管理工具各功能面板中按钮的含义、操作步骤、前置条件与注意事项。全文按功能模块组织，涵盖首页、仿真控制、话题与节点、Docker 容器管理、脚本生成与执行、镜像管理、系统监控、系统工具、红绿灯模拟、主题与设置、高级功能（容器增强、脚本重试、监控增强、工单、API 管理、分布式与插件、故障注入）等共二十一个面板。每节均给出操作流程与风险提示，旨在使操作者能够准确、安全地完成日常任务。</p>
+    </div>
+
+    <div class="doc-keywords">
+        <strong>关键词：</strong>按钮操作；功能面板；操作流程；风险提示；故障排查
+    </div>
+
+    <nav class="doc-toc">
+        <div class="toc-title">目　录</div>
+        <ol>
+            <li><a href="#sec-1">一、阅读说明与通用约定</a></li>
+            <li><a href="#sec-2">二、首页与快速开始</a></li>
+            <li><a href="#sec-3">三、仿真控制面板</a></li>
+            <li><a href="#sec-4">四、ROS2 话题 / 节点 / 服务 / Action</a></li>
+            <li><a href="#sec-5">五、Docker 容器管理</a></li>
+            <li><a href="#sec-6">六、脚本生成与仿真车启动</a></li>
+            <li><a href="#sec-7">七、镜像管理</a></li>
+            <li><a href="#sec-8">八、系统监控</a></li>
+            <li><a href="#sec-9">九、系统工具（install 配置）</a></li>
+            <li><a href="#sec-10">十、红绿灯模拟</a></li>
+            <li><a href="#sec-11">十一、主题与系统设置</a></li>
+            <li><a href="#sec-12">十二、高级功能面板</a></li>
+            <li><a href="#sec-13">十三、常见问题排查</a></li>
+        </ol>
+    </nav>
+
+    <h2 class="section-title" id="sec-1">一、阅读说明与通用约定</h2>
+
+    <p>系统采用左侧导航栏加主内容区的布局。导航项分为基础功能与高级功能两组，点击导航项切换面板；部分导航项带有二级子菜单，点击后展开。所有按钮均以图标加文字形式呈现，本手册中以 <span class="btn-demo success">▶ 启动</span> 之类样式示意，颜色对应实际系统中的按钮配色。</p>
+
+    <table class="data-table">
+        <caption>表 1-1　按钮配色含义对照</caption>
+        <thead><tr><th>配色</th><th>含义</th><th>典型按钮</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo success">绿色</span></td><td>启动、确认、提交等正向操作</td><td>启动、执行、保存</td></tr>
+            <tr><td><span class="btn-demo warn">黄色</span></td><td>停止、警告、需谨慎的操作</td><td>停止、清空、移除参数</td></tr>
+            <tr><td><span class="btn-demo danger">红色</span></td><td>删除、注入等不可逆或高风险操作</td><td>删除、停止全部、注入故障</td></tr>
+            <tr><td><span class="btn-demo primary">棕色</span></td><td>主要业务操作</td><td>批量启动、可视化</td></tr>
+            <tr><td><span class="btn-demo">白色</span></td><td>辅助、查看、刷新类操作</td><td>刷新、全部、关闭</td></tr>
+        </tbody>
+    </table>
+
+    <div class="doc-note"><span class="note-label">注意：</span>凡涉及删除、停止全部、注入故障等操作，系统可能弹出二次确认或直接执行，操作前请务必核对目标对象。</div>
+
+    <div class="doc-warn"><span class="note-label">警告：</span>权限不足时按钮会显示为禁用态（灰色、不可点击）。普通用户仅能操作自己创建的容器与脚本，管理员可操作全部资源。</div>
+
+    <h2 class="section-title" id="sec-2">二、首页与快速开始</h2>
+
+    <p>首页为登录后默认页面，集中展示欢迎信息、安装目录状态与快速入口。其核心按钮如下。</p>
+
+    <h3 class="subsection-title">2.1 安装目录管理</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th><th>操作说明</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>重新检测 install 目录状态</td><td>点击后后台扫描安装目录，更新目录是否存在、关键子目录是否齐全等状态展示。</td></tr>
+            <tr><td><span class="btn-demo success">🚀 部署到 bk 空间</span></td><td>将当前 install 目录部署到备份（bk）空间</td><td>仅管理员可见。点击后触发部署流程，用于版本归档与回滚。</td></tr>
+            <tr><td><span class="btn-demo">📜 操作历史 / 回滚</span></td><td>查看部署历史并回滚到历史版本</td><td>仅管理员可见。弹出历史列表，可选择某次记录进行回滚。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-warn"><span class="note-label">警告：</span>回滚操作会覆盖当前 install 目录内容，执行前请确认目标版本正确，必要时先手动备份。</div>
+
+    <h3 class="subsection-title">2.2 快速开始</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th><th>操作说明</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">⚙ 配置</span></td><td>配置快速开始项</td><td>弹出配置面板，可设定常用启动命令、默认镜像等，配置后首页“快速开始”网格会生成对应快捷入口。</td></tr>
+        </tbody>
+    </table>
+
+    <h3 class="subsection-title">2.3 工作空间切换（管理员）</h3>
+    <p>页面右上角的下拉框 <code>workspaceUserSelect</code> 仅管理员可见，用于切换到目标用户的工作空间进行操作（部署、同步等）。切换后，页面顶部会提示当前操作空间。</p>
+    <div class="doc-note"><span class="note-label">注意：</span>管理员代操作用户空间时，所有写入行为都会记录到审计日志，请谨慎执行。</div>
+
+    <h2 class="section-title" id="sec-3">三、仿真控制面板</h2>
+
+    <h3 class="subsection-title">3.1 启动仿真</h3>
+    <ol class="doc-steps">
+        <li>在 <code>launchCmd</code> 输入框中填写启动命令，例如 <code>ros2 launch simulation_launches simulation.launch.py</code>。</li>
+        <li>点击 <span class="btn-demo success">▶ 启动</span>，系统在选中的容器内执行该命令。</li>
+        <li>观察右下角提示，成功后可在“节点管理”面板查看启动的节点。</li>
+    </ol>
+    <div class="doc-warn"><span class="note-label">警告：</span>启动仿真前必须先在“Docker 容器管理”面板选中一个运行中的 ROS2 容器，否则命令无处执行。</div>
+
+    <h3 class="subsection-title">3.2 速度控制（cmd_vel）</h3>
+    <p>该模块通过摇杆与滑块两种方式向 <code>/cmd_vel</code> 话题发送速度指令，用于手动控制仿真车运动。</p>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th><th>操作说明</th></tr></thead>
+        <tbody>
+            <tr><td>方向键 ▲▼◀▶</td><td>发送对应方向速度</td><td>按住发送、松开归零，默认线速度 0.5 m/s、角速度 0.5 rad/s。</td></tr>
+            <tr><td><span class="btn-demo">⏹ 中心键</span></td><td>立即停止</td><td>发送零速指令，使车辆停止。</td></tr>
+            <tr><td>线速度 / 角速度滑块</td><td>精细调节速度</td><td>拖动滑块设定数值，点击 <span class="btn-demo">📤 发送速度指令</span> 下发。</td></tr>
+        </tbody>
+    </table>
+    <p>“话题”输入框可修改下发的话题名，默认为 <code>/cmd_vel</code>，支持自定义。</p>
+    <div class="doc-danger"><span class="note-label">危险：</span>实车调试场景下，发送非零速度前请确保车辆周围无人员与障碍物，并做好急停准备。</div>
+
+    <h2 class="section-title" id="sec-4">四、ROS2 话题 / 节点 / 服务 / Action</h2>
+
+    <p>这四个面板结构相似，均提供“刷新加载—筛选—查看详情—调用”的操作链路。以下以话题面板为例说明，其余面板类同。</p>
+
+    <h3 class="subsection-title">4.1 话题面板</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th><th>操作说明</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>加载当前活跃话题列表</td><td>从选中容器内执行 <code>ros2 topic list</code> 并展示。</td></tr>
+            <tr><td>筛选输入框</td><td>按名称实时筛选</td><td>输入关键字后列表即时过滤，无需点击按钮。</td></tr>
+            <tr><td>话题行“详情”</td><td>查看话题类型与数据</td><td>点击后展开话题详情卡片，可查看消息类型与一次回显。</td></tr>
+            <tr><td>收起 / 展开</td><td>折叠面板</td><td>点击右上角 <span class="btn-demo">▼ 收起</span> 折叠卡片。</td></tr>
+        </tbody>
+    </table>
+
+    <h3 class="subsection-title">4.2 节点 / 服务 / Action 面板差异</h3>
+    <ul>
+        <li><strong>节点面板</strong>：点击节点名查看节点信息（发布者、订阅者、参数等）。</li>
+        <li><strong>服务面板</strong>：选中服务后，在“调用”卡片中填写请求 JSON，点击 <span class="btn-demo success">📞 调用</span> 发起 <code>ros2 service call</code>。</li>
+        <li><strong>Action 面板</strong>：填写目标值后点击 <span class="btn-demo success">🎯 发送</span> 发送 action goal，可观察反馈与结果。</li>
+    </ul>
+    <div class="doc-note"><span class="note-label">注意：</span>所有 ROS2 查询均依赖已选中运行中的 ROS2 容器，容器停止或未选中时相关按钮无效。</div>
+
+    <h2 class="section-title" id="sec-5">五、Docker 容器管理</h2>
+
+    <p>该面板是日常运维的核心。容器列表展示名称、镜像、运行状态、运行时长、云平台连接与操作按钮。</p>
+
+    <h3 class="subsection-title">5.1 顶部工具栏</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th><th>操作说明</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>刷新 ROS2 容器列表</td><td>默认仅显示 <code>ros2_</code> 前缀的运行中容器。</td></tr>
+            <tr><td><span class="btn-demo">📋 全部</span></td><td>显示全部容器</td><td>包括已停止的容器与非 ROS2 容器。</td></tr>
+            <tr><td><span class="btn-demo primary">🔍 ROS2 容器</span></td><td>仅显示 ROS2 容器</td><td>按名称前缀与镜像特征过滤。</td></tr>
+            <tr><td><span class="btn-demo">📦 其他容器</span></td><td>显示非 ROS2 容器</td><td>用于查看 grafana、prometheus 等辅助容器。</td></tr>
+            <tr><td><span class="btn-demo danger">⏹ 停止全部 ROS2</span></td><td>一键停止全部 ROS2 容器</td><td>仅管理员可见。使用 <code>docker kill</code> 并行停止，请谨慎使用。</td></tr>
+            <tr><td><span class="btn-demo">🕐 同步时间</span></td><td>同步宿主机时间到容器</td><td>仅管理员可见。用于修正容器内时间偏差。</td></tr>
+        </tbody>
+    </table>
+
+    <h3 class="subsection-title">5.2 容器行操作按钮</h3>
+    <p>每行容器提供基础操作与“更多”展开操作两组按钮。</p>
+
+    <h4 class="sub-subsection-title">5.2.1 基础按钮</h4>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>状态</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo success">▶ 启动</span></td><td>容器未运行时</td><td>启动该容器。</td></tr>
+            <tr><td><span class="btn-demo warn">⏹ 停止</span></td><td>容器运行中</td><td>停止该容器。停止后运行时长自动归零。</td></tr>
+            <tr><td><span class="btn-demo">✅ 选中</span></td><td>任意状态</td><td>将该容器设为当前操作目标，ROS2 功能依赖此选中项。</td></tr>
+        </tbody>
+    </table>
+
+    <h4 class="sub-subsection-title">5.2.2 更多操作（展开后）</h4>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th><th>说明</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">📜 日志</span></td><td>查看容器日志</td><td>可在“Docker 日志”与“ROS2 日志”间切换。</td></tr>
+            <tr><td><span class="btn-demo">💻 命令</span></td><td>在容器内执行命令</td><td>输入框支持常用命令补全，点击 <span class="btn-demo">▶ 执行</span> 运行。</td></tr>
+            <tr><td><span class="btn-demo">⚙ 资源</span></td><td>动态调整 CPU / 内存</td><td>填写数值后点击 <span class="btn-demo">💾 应用</span>，调用 <code>docker update</code> 即时生效。</td></tr>
+            <tr><td><span class="btn-demo primary">🖥 终端</span></td><td>打开普通终端</td><td>ROS2 容器自动 source 环境。</td></tr>
+            <tr><td><span class="btn-demo primary">👑 Root</span></td><td>打开 Root 终端</td><td>以 root 身份进入容器终端。</td></tr>
+            <tr><td><span class="btn-demo primary">🖼 可视化</span></td><td>启动可视化</td><td>下拉菜单可选择 VNC 远程桌面或原生 RVIZ（X11 转发），仅 ROS2 运行中容器可见。</td></tr>
+            <tr><td><span class="btn-demo danger">🗑 删除</span></td><td>删除容器</td><td>需有 Docker 权限，删除前请确认容器可弃。</td></tr>
+        </tbody>
+    </table>
+
+    <div class="doc-note"><span class="note-label">注意：</span>“运行时长”列以容器真实启动时间为准，每秒自动刷新。容器停止后该列显示“—”，无需手动清零。</div>
+    <div class="doc-warn"><span class="note-label">警告：</span>同一时刻仅允许展开一行的“更多”操作，展开新行时旧行自动收起。</div>
+
+    <h2 class="section-title" id="sec-6">六、脚本生成与仿真车启动</h2>
+
+    <h3 class="subsection-title">6.1 Launch 文件扫描</h3>
+    <p>点击 <span class="btn-demo">🔍 扫描 Launch 文件</span>，系统扫描选中容器的 launch 目录，列出可用的 launch 文件，供后续脚本生成使用。</p>
+
+    <h3 class="subsection-title">6.2 生成启动脚本</h3>
+    <p>该卡片展示脚本生成的各项路径与镜像参数（多数为只读，由系统配置自动填充）。</p>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo success">⚡ 生成 ROS2 脚本</span></td><td>按配置生成一批启动脚本，写入脚本输出目录。</td></tr>
+            <tr><td><span class="btn-demo">🗑 清空 Scripts</span></td><td>清空已生成的脚本文件。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-warn"><span class="note-label">警告：</span>“清空 Scripts”会删除脚本输出目录下的文件，请确认无误后再执行。</div>
+
+    <h3 class="subsection-title">6.3 启动车辆（脚本批量执行）</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td>筛选框</td><td>按名称筛选脚本。</td></tr>
+            <tr><td><span class="btn-demo">☑ 全选</span> / <span class="btn-demo">🔄 反选</span> / <span class="btn-demo">✕ 取消</span></td><td>批量选择脚本。</td></tr>
+            <tr><td>执行模式下拉</td><td>选择“顺序执行”或“并行执行”。</td></tr>
+            <tr><td><span class="btn-demo success">▶ 批量启动</span></td><td>按所选模式批量启动选中的脚本。</td></tr>
+            <tr><td><span class="btn-demo warn">🗑 移除 GPU 参数</span></td><td>从选中脚本中移除 GPU 相关参数，用于无 GPU 环境调试。</td></tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-title" id="sec-7">七、镜像管理</h2>
+
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>刷新本地镜像列表。</td></tr>
+            <tr><td><span class="btn-demo">📁 打开</span></td><td>弹出文件选择对话框，选择本地 tar 镜像文件。</td></tr>
+            <tr><td><span class="btn-demo">📥 导入</span></td><td>导入所选 tar 文件为 Docker 镜像，支持 .tar 与 .tgz。</td></tr>
+            <tr><td>镜像行“删除”</td><td>删除本地镜像（<code>docker rmi</code>）。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-warn"><span class="note-label">警告：</span>导入镜像前请确认文件来源可信，单个文件不超过 5 GB。删除镜像前请确认无容器依赖。</div>
+
+    <h2 class="section-title" id="sec-8">八、系统监控</h2>
+
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>立即采集一次 CPU、内存、GPU、进程数据。</td></tr>
+            <tr><td><span class="btn-demo">⏯ 自动刷新</span></td><td>开关自动刷新，开启后按固定间隔循环采集。</td></tr>
+            <tr><td><span class="btn-demo">🔄 刷新</span>（资源泄漏）</td><td>刷新资源泄漏监控数据。</td></tr>
+        </tbody>
+    </table>
+    <p>监控页展示 CPU 整体与每核使用率、平均负载、内存与 Swap、GPU 利用率与显存、温度功耗，以及 Top 20 进程。GPU 信息依赖 <code>nvidia-smi</code>，未安装驱动时显示提示。</p>
+
+    <h2 class="section-title" id="sec-9">九、系统工具（install 配置）</h2>
+
+    <h3 class="subsection-title">9.1 证书与云环境切换</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo">🔄 切换</span></td><td>切换证书与云环境配置（测试 / 生产等），同步更新云 IP。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-note"><span class="note-label">注意：</span>普通用户若无 bk 证书目录，系统会自动从管理员空间拷贝，无需手动干预。</div>
+
+    <h3 class="subsection-title">9.2 文件夹同步</h3>
+    <p>点击 <span class="btn-demo">同步 mock_truck / simulation_launches</span> 或 <span class="btn-demo">同步 control_launch</span>，将宿主机对应目录同步到容器挂载路径，使代码修改即时生效。</p>
+
+    <h3 class="subsection-title">9.3 bk 空间与车辆配置</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo warn">🧹 清空子目录</span></td><td>清空 bk 空间下选中子目录。</td></tr>
+            <tr><td><span class="btn-demo">📂 从 install 复制</span></td><td>将当前 install 内容复制到 bk 空间。</td></tr>
+            <tr><td><span class="btn-demo">🔄 刷新列表</span></td><td>刷新车辆配置列表。</td></tr>
+            <tr><td><span class="btn-demo success">💾 保存配置</span></td><td>保存当前车辆配置。</td></tr>
+            <tr><td><span class="btn-demo">🔄 重置</span></td><td>重置为上次保存的配置。</td></tr>
+        </tbody>
+    </table>
+
+    <h3 class="subsection-title">9.4 Bag 与 Log 清理</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo warn">清空 Bag</span></td><td>清空录制的 bag 文件目录。</td></tr>
+            <tr><td><span class="btn-demo warn">清空 Log</span></td><td>清空日志目录。</td></tr>
+            <tr><td><span class="btn-demo warn">打开 Bag</span> / <span class="btn-demo warn">打开 Log</span></td><td>在文件管理器中打开对应目录。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-danger"><span class="note-label">危险：</span>“清空 Bag / Log”不可恢复，执行前请确认无需保留的数据已转存。</div>
+
+    <h2 class="section-title" id="sec-10">十、红绿灯模拟</h2>
+
+    <h3 class="subsection-title">10.1 计时红绿灯</h3>
+    <p>填写 SN、端口、目标 IP 与红绿黄灯秒数，点击 <span class="btn-demo success">▶ 启动</span> 开始按计时循环切换；<span class="btn-demo danger">⏹ 停止</span> 终止。</p>
+
+    <h3 class="subsection-title">10.2 交通红绿灯（云端联动）</h3>
+    <p>该模块通过 HTTP 登录与 MQTT 上报与云端交互。填写矿区 ID、服务器地址、登录与上报间隔等参数。</p>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo success">▶ 启动</span></td><td>启动红绿灯模拟，自动登录并按间隔上报状态。</td></tr>
+            <tr><td><span class="btn-demo danger">⏹ 停止</span></td><td>停止模拟并断开连接。</td></tr>
+            <tr><td><span class="btn-demo warn">切换为手动</span></td><td>在自动与手动模式间切换。手动模式下可单选主灯 / 次灯颜色。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-note"><span class="note-label">注意：</span>若已手填 ID Token 并填写矿区 ID，系统跳过 HTTP 登录直接使用该 Token，便于调试。</div>
+
+    <h2 class="section-title" id="sec-11">十一、主题与系统设置</h2>
+
+    <h3 class="subsection-title">11.1 主题</h3>
+    <p>提供深色、浅色、护眼三种预设主题，点击对应卡片即切换。</p>
+
+    <h3 class="subsection-title">11.2 系统设置</h3>
+    <p>包含软件源切换、软件包安装 / 卸载、用户与权限管理、审计日志查看等。其中“停止全部 ROS2”“同步时间”“软件源切换”等高风险操作仅管理员可见。</p>
+
+    <h2 class="section-title" id="sec-12">十二、高级功能面板</h2>
+
+    <h3 class="subsection-title">12.1 容器日志实时跟踪</h3>
+    <p>选择容器后点击 <span class="btn-demo success">▶ 开始跟踪</span>，实时输出日志；<span class="btn-demo danger">⏹ 停止</span> 终止跟踪。</p>
+
+    <h3 class="subsection-title">12.2 容器提交为镜像</h3>
+    <p>选择容器、填写仓库名、标签与提交信息，点击 <span class="btn-demo success">📦 提交为镜像</span>，将当前容器状态固化为新镜像。</p>
+
+    <h3 class="subsection-title">12.3 Foxglove Studio</h3>
+    <p>选择容器后点击 <span class="btn-demo">🚀 打开 Foxglove</span>，跳转到 Foxglove 可视化界面。</p>
+
+    <h3 class="subsection-title">12.4 容器访问白名单</h3>
+    <p>输入前缀（如 <code>ros2_</code>）点击 <span class="btn-demo success">➕ 添加</span>，可限制容器访问范围。</p>
+
+    <h3 class="subsection-title">12.5 失败自动重试</h3>
+    <p>设置重试次数与间隔，点击 <span class="btn-demo">💾 保存设置</span>；在脚本列表中选择脚本，点击 <span class="btn-demo success">▶ 批量执行（带重试）</span>。</p>
+
+    <h3 class="subsection-title">12.6 GPU 监控增强</h3>
+    <p>点击 <span class="btn-demo">🔄 刷新 GPU 详情</span> 或 <span class="btn-demo">⏯ 自动刷新</span>，查看 GPU 进程级占用（<code>nvidia-smi pmon</code>）。</p>
+
+    <h3 class="subsection-title">12.7 工单管理</h3>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo primary">➕ 提交工单</span></td><td>新建工单，填写标题、分类、优先级与描述。</td></tr>
+            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>刷新工单列表。</td></tr>
+            <tr><td>状态 / 分类 / 优先级筛选</td><td>按条件过滤工单。</td></tr>
+        </tbody>
+    </table>
+
+    <h3 class="subsection-title">12.8 REST API 管理</h3>
+    <p>展示 API 服务状态与基础地址，可配置端口与 Token。按钮包括 <span class="btn-demo success">💾 保存设置</span>、<span class="btn-demo">🔍 测试连接</span>、<span class="btn-demo">📖 查看 Swagger 文档</span>、<span class="btn-demo">📄 查看 ReDoc 文档</span>。</p>
+
+    <h3 class="subsection-title">12.9 跨机器分布式管理</h3>
+    <p>填写名称、主机、端口、用户，点击 <span class="btn-demo success">➕ 添加主机</span>，可纳管多台远程机器。</p>
+
+    <h3 class="subsection-title">12.10 插件管理</h3>
+    <p>输入插件名与代码，点击 <span class="btn-demo success">➕ 创建</span> 注册自定义插件；<span class="btn-demo">🔄 刷新</span> 查看已有插件。</p>
+    <div class="doc-warn"><span class="note-label">警告：</span>插件执行默认关闭，启用前请审查插件代码，避免执行不可信代码。</div>
+
+    <h3 class="subsection-title">12.11 故障注入</h3>
+    <ol class="doc-steps">
+        <li>在“目标容器”中选择一个运行中的 ROS2 容器。</li>
+        <li>在“故障类型”网格中点击一种故障卡片（如 CPU 满载、内存泄漏、网络丢包等）。</li>
+        <li>在“参数配置”中填写参数（如持续时间、强度）。</li>
+        <li>点击 <span class="btn-demo danger">💥 注入故障</span> 执行。</li>
+        <li>排查完成后点击 <span class="btn-demo warn">🧹 清除故障</span> 恢复。</li>
+    </ol>
+    <div class="doc-danger"><span class="note-label">危险：</span>故障注入会人为制造异常，仅用于鲁棒性测试。严禁在生产环境或实车运行中注入，否则可能导致任务失败或设备损伤。</div>
+
+    <h2 class="section-title" id="sec-13">十三、常见问题排查</h2>
+
+    <table class="data-table">
+        <caption>表 13-1　常见问题与处理</caption>
+        <thead><tr><th style="width:30%">现象</th><th>可能原因</th><th>处理方法</th></tr></thead>
+        <tbody>
+            <tr>
+                <td>按钮灰色不可点击</td>
+                <td>权限不足或未选中容器</td>
+                <td>先在 Docker 面板选中运行中的 ROS2 容器；若仍不可用，联系管理员确认权限。</td>
+            </tr>
+            <tr>
+                <td>ROS2 话题列表为空</td>
+                <td>容器未运行 ROS2 程序</td>
+                <td>先在仿真控制面板启动 launch，再刷新话题。</td>
+            </tr>
+            <tr>
+                <td>运行时长显示“—”</td>
+                <td>容器已停止或启动时间未获取</td>
+                <td>属正常表现；启动容器后即显示时长，停止自动归零。</td>
+            </tr>
+            <tr>
+                <td>GPU 信息显示“无法获取”</td>
+                <td>未安装 NVIDIA 驱动或 nvidia-smi</td>
+                <td>确认宿主机已安装驱动；无 GPU 机器可忽略。</td>
+            </tr>
+            <tr>
+                <td>容器启动后云平台连接显示“未知”</td>
+                <td>容器未记录云 IP 标签</td>
+                <td>旧容器可能未设置 label，系统回退到当前配置 IP，可忽略或重建容器。</td>
+            </tr>
+            <tr>
+                <td>导入镜像失败</td>
+                <td>文件过大或格式不符</td>
+                <td>确认文件为 .tar 或 .tgz，且小于 5 GB。</td>
+            </tr>
+            <tr>
+                <td>批量执行脚本无响应</td>
+                <td>未选择脚本或镜像未拉取</td>
+                <td>确认已勾选脚本、目标镜像存在且容器已选中。</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="doc-back"><a href="index.html">← 返回文档中心</a></div>
+
+    <footer class="doc-footer">
+        版权所有 © 上海伯镭科技有限公司　|　ROS2 Web 管理工具 v4.0-decoupled<br>
+        按钮操作手册　|　最后更新：2026 年 8 月
+    </footer>
+
+</div>
+</body>
+</html>

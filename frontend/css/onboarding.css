@@ -1,0 +1,307 @@
+/* ============================================================
+   新手引导（Onboarding）样式
+   ============================================================ */
+
+/* 遮罩层 */
+.onboarding-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    pointer-events: all;
+}
+
+/* 高亮光圈 */
+.onboarding-highlight {
+    position: fixed;
+    z-index: 10001;
+    border: 3px solid #1890FF;
+    border-radius: 8px;
+    box-shadow: 0 0 15px 3px rgba(24, 144, 255, 0.5), 0 0 40px 6px rgba(24, 144, 255, 0.2);
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: onboarding-pulse 2s ease-in-out infinite;
+}
+
+@keyframes onboarding-pulse {
+    0%, 100% { box-shadow: 0 0 15px 3px rgba(24, 144, 255, 0.5), 0 0 40px 6px rgba(24, 144, 255, 0.2); }
+    50% { box-shadow: 0 0 25px 6px rgba(24, 144, 255, 0.7), 0 0 60px 10px rgba(24, 144, 255, 0.35); }
+}
+
+/* 气泡提示 */
+.onboarding-bubble {
+    position: fixed;
+    z-index: 10002;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 12px;
+    padding: 18px 22px;
+    max-width: 380px;
+    min-width: 260px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    font-size: 14px;
+    line-height: 1.6;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: onboarding-bubble-in 0.35s ease-out;
+}
+
+@keyframes onboarding-bubble-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 气泡箭头 */
+.onboarding-bubble::after {
+    content: '';
+    position: absolute;
+    width: 0; height: 0;
+    border: 8px solid transparent;
+}
+
+.onboarding-bubble.arrow-top::after {
+    top: -16px; left: 50%;
+    transform: translateX(-50%);
+    border-bottom-color: #ffffff;
+}
+
+.onboarding-bubble.arrow-bottom::after {
+    bottom: -16px; left: 50%;
+    transform: translateX(-50%);
+    border-top-color: #ffffff;
+}
+
+.onboarding-bubble.arrow-left::after {
+    left: -16px; top: 50%;
+    transform: translateY(-50%);
+    border-right-color: #ffffff;
+}
+
+.onboarding-bubble.arrow-right::after {
+    right: -16px; top: 50%;
+    transform: translateY(-50%);
+    border-left-color: #ffffff;
+}
+
+/* 进度条 */
+.onboarding-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.onboarding-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.onboarding-progress-fill {
+    height: 100%;
+    background: #1890FF;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.onboarding-progress-text {
+    white-space: nowrap;
+    font-weight: 600;
+    color: #1890FF;
+}
+
+/* 气泡内容 */
+.onboarding-bubble-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #111827;
+}
+
+.onboarding-bubble-desc {
+    color: #4b5563;
+    margin-bottom: 14px;
+}
+
+/* 气泡按钮 */
+.onboarding-bubble-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.onboarding-btn {
+    padding: 7px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.onboarding-btn-primary {
+    background: #1890FF;
+    color: #fff;
+}
+
+.onboarding-btn-primary:hover {
+    background: #1476d1;
+}
+
+.onboarding-btn-secondary {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.onboarding-btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.onboarding-btn-skip {
+    background: transparent;
+    color: #9ca3af;
+    font-size: 12px;
+    padding: 7px 10px;
+}
+
+.onboarding-btn-skip:hover {
+    color: #6b7280;
+}
+
+/* 首次登录弹窗 */
+.onboarding-welcome-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 10003;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.onboarding-welcome-dialog {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px 36px;
+    max-width: 440px;
+    width: 90%;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    animation: onboarding-dialog-in 0.4s ease-out;
+}
+
+@keyframes onboarding-dialog-in {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.onboarding-welcome-dialog h2 {
+    font-size: 20px;
+    color: #111827;
+    margin: 0 0 8px 0;
+}
+
+.onboarding-welcome-dialog p {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0 0 20px 0;
+    line-height: 1.6;
+}
+
+.onboarding-welcome-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.onboarding-welcome-actions .onboarding-btn {
+    padding: 10px 28px;
+    font-size: 14px;
+}
+
+.onboarding-remember {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #9ca3af;
+    cursor: pointer;
+    justify-content: center;
+}
+
+.onboarding-remember input {
+    accent-color: #1890FF;
+}
+
+/* 完成弹窗 */
+.onboarding-complete-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 10003;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.onboarding-complete-dialog {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px;
+    max-width: 460px;
+    width: 90%;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    animation: onboarding-dialog-in 0.4s ease-out;
+}
+
+.onboarding-complete-dialog .complete-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.onboarding-complete-dialog h2 {
+    font-size: 20px;
+    color: #111827;
+    margin: 0 0 10px 0;
+}
+
+.onboarding-complete-dialog p {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0 0 8px 0;
+    line-height: 1.6;
+}
+
+.onboarding-complete-dialog .contact-email {
+    color: #1890FF;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+/* 跳过提示 */
+.onboarding-skip-notice {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10004;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: onboarding-notice-in 0.3s ease-out;
+}
+
+@keyframes onboarding-notice-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
