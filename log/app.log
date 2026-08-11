@@ -1,6 +1,0 @@
-2026-08-11 15:27:26,102 - ros2-web - INFO - load_config:111 - 已加载配置文件: /home/fox/ros2_web/backend/config.json
-2026-08-11 15:27:26,585 - ros2-web - INFO - _init_client:37 - Supabase 客户端初始化成功
-2026-08-11 15:27:27,167 - ros2-web - INFO - _migrate_onboarding_columns:51 - 新手引导字段已存在，跳过迁移
-2026-08-11 15:27:38,327 - ros2-web - INFO - load_config:111 - 已加载配置文件: /home/fox/ros2_web/backend/config.json
-2026-08-11 15:27:38,774 - ros2-web - INFO - _init_client:37 - Supabase 客户端初始化成功
-2026-08-11 15:27:39,648 - ros2-web - INFO - _migrate_onboarding_columns:51 - 新手引导字段已存在，跳过迁移
