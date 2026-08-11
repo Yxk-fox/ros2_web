@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROS2 Web 管理工具 · 文档中心</title>
+    <link rel="stylesheet" href="css/doc.css">
+</head>
+<body>
+<div class="doc-container">
+
+    <header class="portal-hero">
+        <div class="doc-eyebrow">DOCUMENTATION CENTER</div>
+        <h1>ROS2 Web 管理工具 · 文档中心</h1>
+        <p class="hero-sub">版本 4.0-decoupled　|　上海伯镭科技有限公司　|　2026 年 8 月</p>
+    </header>
+
+    <div class="doc-abstract">
+        <div class="abstract-title">摘　要</div>
+        <p>本中心为 ROS2 Web 管理工具的统一文档入口，面向不同读者群体提供分层文档体系。工具定位为面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队的通用仿真测试平台，以 Web 化方式封装 Docker 容器调度、ROS2 话题与节点管理、脚本批量执行、系统监控、故障注入等核心能力，旨在降低一线操作门槛、统一操作规范、支撑远程协作与后续平台化扩展。全部文档按读者身份分为四类，风格统一，遵循论文式排版与中文标点规范。</p>
+    </div>
+
+    <div class="doc-keywords">
+        <strong>关键词：</strong>ROS2；Docker 容器管理；仿真测试平台；Web 运维；降本增效；标准化合规
+    </div>
+
+    <h2 class="section-title">一、文档体系总览</h2>
+    <p>文档体系依据读者职责与技术深度分为四类。各文档独立成篇，又彼此呼应：一线操作文档侧重“怎么点”，新入职手册侧重“怎么懂”，技术开发文档侧重“怎么改”，管理价值报告侧重“为什么建、带来什么”。读者可按身份选读，亦可交叉参考。</p>
+
+    <table class="data-table">
+        <caption>表 1　文档体系分组说明</caption>
+        <thead>
+            <tr><th style="width:18%">文档</th><th style="width:20%">目标读者</th><th>核心内容</th><th style="width:14%">文件</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>按钮操作手册</td>
+                <td>一线操作 / 运维人员</td>
+                <td>全部功能面板的按钮含义、操作步骤、注意事项与常见问题</td>
+                <td><code>operations.html</code></td>
+            </tr>
+            <tr>
+                <td>新入职培训手册</td>
+                <td>新入职同事</td>
+                <td>项目背景、登录注册、功能地图、典型工作流与上手路径</td>
+                <td><code>onboarding.html</code></td>
+            </tr>
+            <tr>
+                <td>技术开发文档</td>
+                <td>技术开发团队</td>
+                <td>系统架构、目录结构、API 清单、二次开发规范与扩展点</td>
+                <td><code>development.html</code></td>
+            </tr>
+            <tr>
+                <td>建设后续与价值报告</td>
+                <td>公司管理层 / 决策者</td>
+                <td>建设历程、收益分析、为公司带来的价值与后续规划</td>
+                <td><code>value-report.html</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-title">二、按身份选读</h2>
+    <p>请根据自身角色选择对应文档。点击卡片即可进入。</p>
+
+    <div class="portal-grid">
+
+        <a class="portal-card" href="operations.html">
+            <div class="card-audience">一线操作 / 运维人员</div>
+            <h3>按钮操作手册</h3>
+            <p>逐一说明仿真控制、Docker 管理、话题节点、脚本执行、监控、红绿灯、故障注入等全部面板的按钮作用、操作顺序与风险提示，附常见问题排查。</p>
+            <div class="card-tags">
+                <span># 操作步骤</span><span># 按钮释义</span><span># 故障排查</span>
+            </div>
+        </a>
+
+        <a class="portal-card" href="onboarding.html">
+            <div class="card-audience">新入职同事</div>
+            <h3>新入职培训手册</h3>
+            <p>从账号注册到独立完成一次仿真车启动的完整上手路径，涵盖项目背景、功能地图、权限模型与三条典型工作流，帮助新人快速融入。</p>
+            <div class="card-tags">
+                <span># 快速上手</span><span># 功能地图</span><span># 典型流程</span>
+            </div>
+        </a>
+
+        <a class="portal-card" href="development.html">
+            <div class="card-audience">技术开发团队</div>
+            <h3>技术开发文档</h3>
+            <p>四层解耦架构说明、目录约定、REST API 与 WebSocket 清单、数据库适配、安全机制及二次开发规范，供维护与扩展参考。</p>
+            <div class="card-tags">
+                <span># 架构设计</span><span># API 参考</span><span># 二次开发</span>
+            </div>
+        </a>
+
+        <a class="portal-card" href="value-report.html">
+            <div class="card-audience">公司管理层 / 决策者</div>
+            <h3>建设后续与价值报告</h3>
+            <p>系统建设历程回顾，从降本增效、标准化合规、远程协作、可扩展平台化四个维度量化收益，并给出后续建设规划与风险提示。</p>
+            <div class="card-tags">
+                <span># 收益分析</span><span># 价值评估</span><span># 后续规划</span>
+            </div>
+        </a>
+
+    </div>
+
+    <h2 class="section-title">三、阅读约定</h2>
+    <ul>
+        <li>文档统一采用论文式排版，章节以“一、二、三”与“1.1、1.2”分级编号。</li>
+        <li>按钮示意以 <span class="btn-demo success">▶ 启动</span>、<span class="btn-demo warn">⏹ 停止</span>、<span class="btn-demo danger">🗑 删除</span> 形式呈现，颜色与系统中保持一致。</li>
+        <li>提示框分为 <strong>注意</strong>（绿色）、<strong>警告</strong>（黄色）、<strong>危险</strong>（红色）三级，分别对应一般提醒、易错点与可能导致数据丢失的操作。</li>
+        <li>代码与命令以等宽字体呈现，路径、字段名等以 <code>code</code> 样式标识。</li>
+        <li>本文档随系统迭代持续更新，如发现与实际界面不符，请以系统实际行为为准并反馈修订。</li>
+    </ul>
+
+    <footer class="doc-footer">
+        版权所有 © 上海伯镭科技有限公司　|　ROS2 Web 管理工具 v4.0-decoupled<br>
+        文档中心　|　最后更新：2026 年 8 月
+    </footer>
+
+</div>
+</body>
+</html>

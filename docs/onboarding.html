@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新入职培训手册 · ROS2 Web 管理工具</title>
+    <link rel="stylesheet" href="css/doc.css">
+</head>
+<body>
+<div class="doc-container">
+
+    <header class="doc-header">
+        <div class="doc-eyebrow">ONBOARDING GUIDE · 新入职同事</div>
+        <h1>新入职培训手册</h1>
+        <div class="doc-meta">
+            <span>版本：4.0-decoupled</span>
+            <span>适用对象：新入职同事</span>
+            <span>更新：2026 年 8 月</span>
+        </div>
+    </header>
+
+    <div class="doc-abstract">
+        <div class="abstract-title">摘　要</div>
+        <p>本手册面向新入职同事，旨在帮助其在最短时间内理解 ROS2 Web 管理工具的定位、功能边界与使用方法，并独立完成一次仿真车启动与验证。手册首先交代项目背景与价值，继而说明账号注册与登录流程，随后给出功能地图与权限模型，最后以三条典型工作流串联核心功能。阅读本手册后，新人应能顺利过渡到《按钮操作手册》进行深入练习。</p>
+    </div>
+
+    <div class="doc-keywords">
+        <strong>关键词：</strong>项目背景；功能地图；权限模型；典型工作流；快速上手
+    </div>
+
+    <nav class="doc-toc">
+        <div class="toc-title">目　录</div>
+        <ol>
+            <li><a href="#sec-1">一、项目背景与定位</a></li>
+            <li><a href="#sec-2">二、账号注册与登录</a></li>
+            <li><a href="#sec-3">三、功能地图</a></li>
+            <li><a href="#sec-4">四、权限模型</a></li>
+            <li><a href="#sec-5">五、典型工作流</a></li>
+            <li><a href="#sec-6">六、上手练习清单</a></li>
+            <li><a href="#sec-7">七、常见误区与求助渠道</a></li>
+        </ol>
+    </nav>
+
+    <h2 class="section-title" id="sec-1">一、项目背景与定位</h2>
+
+    <p>ROS2 Web 管理工具是公司面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队所使用的通用仿真测试平台。其核心价值在于：将原本散落在命令行、脚本与多台机器上的研发与运维操作，收敛为统一的 Web 界面，使研发、测试与运维人员能够通过浏览器完成容器调度、ROS2 调试、脚本批量执行、系统监控与故障注入等工作。</p>
+
+    <p>工具采用前后端分离架构：后端基于 FastAPI 与 WebSocket，负责与 Docker、ROS2 及系统资源交互；前端为独立静态文件，提供图形化操作界面。当前版本为 <code>4.0-decoupled</code>，后端已实现四层解耦，便于维护与扩展。</p>
+
+    <blockquote>一句话理解：这是一个把“ROS2 + Docker 的复杂命令行操作”变成“网页按钮”的内部工具，目的是让团队成员都能高效、规范地完成仿真与运维。</blockquote>
+
+    <h2 class="section-title" id="sec-2">二、账号注册与登录</h2>
+
+    <h3 class="subsection-title">2.1 注册</h3>
+    <ol class="doc-steps">
+        <li>打开系统登录页，切换到“注册”标签。</li>
+        <li>使用公司邮箱注册（用户名须为邮箱格式），密码不少于 6 位。</li>
+        <li>注册成功后，系统自动为该用户创建独立的工作目录，默认角色为 <code>user</code>，仅拥有首页权限。</li>
+    </ol>
+    <div class="doc-note"><span class="note-label">注意：</span>新注册用户默认无 Docker、脚本等权限，需联系管理员按需分配。</div>
+
+    <h3 class="subsection-title">2.2 登录</h3>
+    <ol class="doc-steps">
+        <li>在登录页输入邮箱与密码。</li>
+        <li>可勾选“记住我”并选择 7 / 15 / 30 天有效期；不勾选则默认 1 天。</li>
+        <li>登录成功后跳转至首页，左下角显示当前用户与登出按钮。</li>
+    </ol>
+    <p>系统采用 JWT 鉴权，Token 过期后需重新登录。连续登录失败受速率限制保护（默认 5 次 / 分钟）。</p>
+
+    <h2 class="section-title" id="sec-3">三、功能地图</h2>
+
+    <p>系统左侧导航分为基础功能与高级功能两组。新人首周应重点掌握基础功能，高级功能可按需了解。</p>
+
+    <table class="data-table">
+        <caption>表 3-1　功能地图一览</caption>
+        <thead><tr><th>分组</th><th>面板</th><th>用途</th></tr></thead>
+        <tbody>
+            <tr><td rowspan="8">基础</td><td>首页</td><td>欢迎信息、安装目录状态、快速开始</td></tr>
+            <tr><td>仿真控制</td><td>启动 launch、速度控制</td></tr>
+            <tr><td>话题 / 节点 / 服务 / Action</td><td>ROS2 运行时查询与调用</td></tr>
+            <tr><td>Docker 管理</td><td>容器启停、终端、日志、资源调整</td></tr>
+            <tr><td>脚本管理</td><td>Launch 扫描、脚本生成</td></tr>
+            <tr><td>仿真车启动</td><td>脚本批量执行</td></tr>
+            <tr><td>镜像管理</td><td>镜像导入、删除</td></tr>
+            <tr><td>系统监控 / 工具 / 红绿灯 / 主题 / 设置</td><td>监控、文件同步、红绿灯模拟、个性化</td></tr>
+            <tr><td rowspan="6">高级</td><td>容器管理增强</td><td>实时日志、提交镜像、Foxglove、白名单</td></tr>
+            <tr><td>脚本执行增强</td><td>失败自动重试</td></tr>
+            <tr><td>监控面板增强</td><td>GPU 进程级占用</td></tr>
+            <tr><td>工单系统</td><td>问题反馈与跟踪</td></tr>
+            <tr><td>REST API 管理</td><td>对外接口配置与文档</td></tr>
+            <tr><td>扩展 / 故障注入</td><td>分布式管理、插件、故障测试</td></tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-title" id="sec-4">四、权限模型</h2>
+
+    <p>系统采用基于角色的权限控制（RBAC），并辅以细粒度权限点。</p>
+
+    <ul>
+        <li><strong>角色</strong>：分为 <code>admin</code>（管理员）与 <code>user</code>（普通用户）两种。管理员可操作全部资源并管理用户；普通用户仅能操作自己创建的容器与脚本。</li>
+        <li><strong>权限点</strong>：如 <code>docker</code>（容器管理）、<code>tools</code>（系统工具）、<code>advanced-docker</code>（高级容器操作）等，由管理员分配。</li>
+        <li><strong>资源隔离</strong>：普通用户启动的容器仅自己可见；管理员可查看全部，并支持切换到目标用户空间代操作。</li>
+        <li><strong>审计</strong>：登录、容器操作、用户管理等关键行为均写入审计日志，管理员可查询。</li>
+    </ul>
+
+    <div class="doc-note"><span class="note-label">注意：</span>若发现某项功能不可见或按钮灰色，通常是权限不足，请联系管理员开通相应权限点。</div>
+
+    <h2 class="section-title" id="sec-5">五、典型工作流</h2>
+
+    <h3 class="subsection-title">5.1 工作流一：启动一辆仿真车</h3>
+    <ol class="doc-steps">
+        <li>登录系统，确认拥有 <code>docker</code> 权限。</li>
+        <li>进入“Docker 管理”面板，点击 <span class="btn-demo">🔄 刷新</span> 查看可用容器。</li>
+        <li>找到目标 ROS2 容器，点击 <span class="btn-demo success">▶ 启动</span>（若已运行则跳过）。</li>
+        <li>点击该行的 <span class="btn-demo">✅ 选中</span>，将其设为当前操作目标。</li>
+        <li>进入“仿真控制”面板，在启动命令框输入 launch 命令，点击 <span class="btn-demo success">▶ 启动</span>。</li>
+        <li>进入“节点管理”面板点击 <span class="btn-demo">🔄 刷新</span>，确认关键节点已启动。</li>
+        <li>如需手动控车，在“速度控制”中使用摇杆或滑块。</li>
+    </ol>
+
+    <h3 class="subsection-title">5.2 工作流二：生成并批量执行脚本</h3>
+    <ol class="doc-steps">
+        <li>进入“脚本管理”面板，点击 <span class="btn-demo">🔍 扫描 Launch 文件</span>。</li>
+        <li>确认脚本生成参数无误，点击 <span class="btn-demo success">⚡ 生成 ROS2 脚本</span>。</li>
+        <li>进入“仿真车启动”面板，勾选需要执行的脚本。</li>
+        <li>选择执行模式（顺序或并行），点击 <span class="btn-demo success">▶ 批量启动</span>。</li>
+        <li>观察执行结果，失败可在“脚本执行增强”中开启自动重试。</li>
+    </ol>
+
+    <h3 class="subsection-title">5.3 工作流三：监控与排障</h3>
+    <ol class="doc-steps">
+        <li>进入“系统监控”面板，点击 <span class="btn-demo">⏯ 自动刷新</span> 持续观察资源占用。</li>
+        <li>若 CPU 或内存异常，展开“进程列表”定位高占用进程。</li>
+        <li>如需排查容器内问题，在 Docker 面板点击 <span class="btn-demo">📜 日志</span> 或 <span class="btn-demo">💻 命令</span>。</li>
+        <li>遇到无法解决的问题，可在“工单系统”提交工单并指派处理人。</li>
+    </ol>
+
+    <h2 class="section-title" id="sec-6">六、上手练习清单</h2>
+
+    <p>建议新人在首周完成以下练习，以巩固理解。每项练习完成后在括号内打勾。</p>
+
+    <ol class="doc-steps">
+        <li>独立完成注册、登录与登出（　）。</li>
+        <li>在 Docker 面板选中一个容器并查看其日志（　）。</li>
+        <li>启动一辆仿真车并查看话题列表（　）。</li>
+        <li>使用速度控制发送一次零速指令（　）。</li>
+        <li>生成一批脚本并执行其中一个（　）。</li>
+        <li>在系统监控面板识别当前 CPU 与内存使用率（　）。</li>
+        <li>提交一条测试工单并关闭（　）。</li>
+    </ol>
+
+    <h2 class="section-title" id="sec-7">七、常见误区与求助渠道</h2>
+
+    <table class="data-table">
+        <thead><tr><th>误区</th><th>纠正</th></tr></thead>
+        <tbody>
+            <tr><td>“为什么我看不到容器？”</td><td>普通用户仅可见自己创建的容器；需先启动自己的容器或联系管理员。</td></tr>
+            <tr><td>“按钮点了没反应”</td><td>检查是否已选中运行中的 ROS2 容器；查看浏览器控制台是否有报错。</td></tr>
+            <tr><td>“运行时长怎么不走了？”</td><td>容器停止后运行时长自动归零，属正常；运行中每秒刷新。</td></tr>
+            <tr><td>“误删了镜像 / 容器怎么办”</td><td>容器与镜像删除不可恢复，操作前务必确认；如影响业务及时通知团队。</td></tr>
+        </tbody>
+    </table>
+
+    <p>求助渠道：日常问题优先查阅《按钮操作手册》；技术细节参考《技术开发文档》；仍无法解决时提交工单或联系管理员。</p>
+
+    <div class="doc-back"><a href="index.html">← 返回文档中心</a></div>
+
+    <footer class="doc-footer">
+        版权所有 © 上海伯镭科技有限公司　|　ROS2 Web 管理工具 v4.0-decoupled<br>
+        新入职培训手册　|　最后更新：2026 年 8 月
+    </footer>
+
+</div>
+</body>
+</html>

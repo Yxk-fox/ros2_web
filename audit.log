@@ -1,0 +1,100 @@
+2026-08-11T02:37:18.244111 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-11T02:37:19.133047 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T02:37:29.948663 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-11T02:37:30.474783 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-11T02:38:06.281875 [honglan_wang] execute_script : start_docker_ros2_auto_test03.sh
+2026-08-11T02:40:22.776489 [admin] websocket_connected : WebSocket 连接
+2026-08-11T02:40:22.936846 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T02:59:07.453735 [admin] websocket_connected : WebSocket 连接
+2026-08-11T02:59:24.352359 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T03:49:38.916453 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:02:12.289951 [honglan_wang] stop_container : ros2_auto_test03
+2026-08-11T06:02:52.045698 [honglan_wang] execute_script : start_docker_ros2_auto_test03.sh
+2026-08-11T06:03:15.871721 [honglan_wang] switch_cert : 切换到 106 证书 target=self
+2026-08-11T06:03:16.507545 [honglan_wang] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-11T06:03:19.130800 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:03:22.023470 [honglan_wang] stop_container : ros2_auto_test03
+2026-08-11T06:03:27.299873 [admin] logout : 用户注销
+2026-08-11T06:03:28.824802 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-11T06:03:29.302945 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-11T06:03:30.575284 [admin] login_success : 登录成功, token有效1天
+2026-08-11T06:03:30.907982 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:03:55.947846 [honglan_wang] execute_script : start_docker_ros2_auto_test03.sh
+2026-08-11T06:04:08.527753 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:06:16.724980 [admin] switch_cert : 切换到 139 证书 target=self
+2026-08-11T06:06:17.245078 [admin] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-11T06:06:25.309681 [admin] switch_cert : 切换到 106 证书 target=self
+2026-08-11T06:06:25.680597 [admin] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-11T06:13:07.192688 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:13:10.572455 [admin] logout : 用户注销
+2026-08-11T06:13:12.547779 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-11T06:13:13.653144 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:13:24.332752 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:13:38.696792 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-11T06:13:39.209047 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-11T06:13:41.943227 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:14:04.831703 [honglan_wang] switch_cert : 切换到 106 证书 target=self
+2026-08-11T06:14:05.353482 [honglan_wang] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-11T06:14:31.109711 [honglan_wang] execute_script : start_docker_ros2_tb_v06.sh
+2026-08-11T06:18:23.448370 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:18:24.256423 [honglan_wang] stop_container : ros2_tb_v06
+2026-08-11T06:18:24.435201 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:18:25.309763 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:18:25.318005 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:18:25.885018 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:18:40.904844 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:18:41.641318 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:18:42.246741 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:19:09.263186 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:19:14.307805 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:19:14.467403 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:19:17.856001 [honglan_wang] stop_container : ros2_auto_test03
+2026-08-11T06:19:33.774763 [honglan_wang] clear_scripts : 清空 7 个脚本
+2026-08-11T06:19:34.952602 [honglan_wang] generate_scripts : 5 scripts
+2026-08-11T06:19:43.570279 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-11T06:19:44.087711 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-11T06:20:09.538900 [honglan_wang] execute_script : start_docker_ros2_auto_test03.sh
+2026-08-11T06:20:58.557478 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:21:12.367207 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:22:40.538200 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:23:19.669073 [honglan_wang] switch_cert : 切换到 106 证书 target=self
+2026-08-11T06:23:20.202527 [honglan_wang] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-11T06:24:05.715017 [honglan_wang] batch_generate : auto001 -> auto001
+2026-08-11T06:24:09.234346 [honglan_wang] sync_folder : mock_truck target=self
+2026-08-11T06:24:09.400624 [honglan_wang] sync_folder : simulation_launches target=self
+2026-08-11T06:24:18.049660 [honglan_wang] delete_script : start_docker_ros2_tb_v06.sh
+2026-08-11T06:24:33.371367 [honglan_wang] clear_scripts : 清空 6 个脚本
+2026-08-11T06:24:51.588678 [honglan_wang] clear_scripts : 清空 0 个脚本
+2026-08-11T06:26:47.095696 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:26:51.959148 [honglan_wang] generate_scripts : 3 scripts
+2026-08-11T06:27:06.793348 [honglan_wang] switch_cert : 切换到 106 证书 target=self
+2026-08-11T06:27:07.329793 [honglan_wang] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-11T06:27:10.480328 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:27:32.775249 [honglan_wang] execute_script : start_docker_ros2_auto001.sh
+2026-08-11T06:29:04.599901 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-11T06:29:08.541667 [honglan_wang] logout : 用户注销
+2026-08-11T06:29:13.497335 [admin] login_success : 登录成功, token有效7天
+2026-08-11T06:29:14.389840 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:29:38.039149 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-11T06:30:01.242816 [admin] batch_generate : 2026_0724_03 -> 2026_0724_03
+2026-08-11T06:30:15.557442 [admin] sync_folder : mock_truck target=self
+2026-08-11T06:30:15.731426 [admin] sync_folder : simulation_launches target=self
+2026-08-11T06:30:20.811936 [admin] generate_scripts : 4 scripts
+2026-08-11T06:30:45.412282 [admin] execute_script : start_docker_ros2_2026_0724_03.sh
+2026-08-11T06:30:52.995485 [admin] stop_container : ros2_2026_0724_03
+2026-08-11T06:30:57.974455 [admin] switch_cert : 切换到 139 证书 target=self
+2026-08-11T06:30:58.327188 [admin] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-11T06:31:22.012457 [admin] execute_script : start_docker_ros2_2026_0724_03.sh
+2026-08-11T06:32:20.063883 [admin] stop_container : ros2_2026_0724_03
+2026-08-11T06:32:56.954442 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:32:59.829402 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:33:40.849569 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:33:56.201086 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:34:01.885607 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:34:14.081347 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:34:24.654549 [admin] bk_rollback : backup=bk_backup_20260723_155230_install_deploy.tar.gz target=self result=fail
+2026-08-11T06:39:27.193691 [admin] websocket_disconnected : WebSocket 断开
+2026-08-11T06:39:39.838621 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:51:55.071351 [honglan_wang] stop_container : ros2_auto_test03
+2026-08-11T06:56:17.090696 [admin] websocket_connected : WebSocket 连接
+2026-08-11T06:56:42.275815 [admin] websocket_disconnected : WebSocket 断开

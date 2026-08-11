@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术开发文档 · ROS2 Web 管理工具</title>
+    <link rel="stylesheet" href="css/doc.css">
+</head>
+<body>
+<div class="doc-container">
+
+    <header class="doc-header">
+        <div class="doc-eyebrow">DEVELOPMENT GUIDE · 技术开发团队</div>
+        <h1>技术开发文档</h1>
+        <div class="doc-meta">
+            <span>版本：4.0-decoupled</span>
+            <span>适用对象：技术开发团队</span>
+            <span>更新：2026 年 8 月</span>
+        </div>
+    </header>
+
+    <div class="doc-abstract">
+        <div class="abstract-title">摘　要</div>
+        <p>本文档面向技术开发团队，系统阐述 ROS2 Web 管理工具的架构设计、目录约定、API 清单、数据库适配、安全机制与二次开发规范。后端采用 core、database、services、routers 四层解耦架构，入口文件 <code>app.py</code> 仅承担装配职责；前端为独立静态文件，通过 REST API 与 WebSocket 与后端交互。本文档旨在为维护者提供足够的设计上下文，使其能够安全地进行功能扩展与缺陷修复。</p>
+    </div>
+
+    <div class="doc-keywords">
+        <strong>关键词：</strong>四层解耦架构；FastAPI；WebSocket；REST API；数据库适配；安全机制；二次开发
+    </div>
+
+    <nav class="doc-toc">
+        <div class="toc-title">目　录</div>
+        <ol>
+            <li><a href="#sec-1">一、系统架构总览</a></li>
+            <li><a href="#sec-2">二、后端目录结构与职责</a></li>
+            <li><a href="#sec-3">三、前端结构</a></li>
+            <li><a href="#sec-4">四、REST API 清单</a></li>
+            <li><a href="#sec-5">五、WebSocket 通信</a></li>
+            <li><a href="#sec-6">六、数据库适配层</a></li>
+            <li><a href="#sec-7">七、安全机制</a></li>
+            <li><a href="#sec-8">八、二次开发规范</a></li>
+            <li><a href="#sec-9">九、部署与运维</a></li>
+        </ol>
+    </nav>
+
+    <h2 class="section-title" id="sec-1">一、系统架构总览</h2>
+
+    <p>系统采用前后端分离架构。后端基于 FastAPI 提供 REST API 与 WebSocket，封装 Docker、ROS2 与系统资源的调用；前端为纯静态站点，通过 <code>apiGet</code> / <code>apiPost</code> 封装访问后端。鉴权使用 JWT，数据库支持 JSON 文件与 Supabase 两种适配器，可按配置切换。</p>
+
+    <figure>
+        <pre><code>┌──────────────┐     HTTP/WS      ┌──────────────────────────┐
+│   前端静态    │ ◄──────────────► │      FastAPI 后端         │
+│ index.html   │   JWT Bearer     │  app.py (入口装配)         │
+│ sj_script.js │                  │  ├─ routers (API 路由)     │
+└──────────────┘                  │  ├─ services (业务服务)     │
+                                  │  ├─ core     (配置/安全/工具)│
+                                  │  └─ database (JSON/Supabase)│
+                                  └────────────┬─────────────┘
+                                               │ subprocess / docker SDK
+                                  ┌────────────▼─────────────┐
+                                  │  Docker / ROS2 / nvidia-smi│
+                                  └──────────────────────────┘</code></pre>
+        <figcaption>图 1　系统架构示意</figcaption>
+    </figure>
+
+    <h2 class="section-title" id="sec-2">二、后端目录结构与职责</h2>
+
+    <p>后端代码位于 <code>backend/</code> 目录，遵循四层分离原则。</p>
+
+    <table class="data-table">
+        <caption>表 2-1　后端目录职责</caption>
+        <thead><tr><th>路径</th><th>职责</th><th>关键文件</th></tr></thead>
+        <tbody>
+            <tr><td><code>app.py</code></td><td>入口，创建应用、注册中间件、挂载路由与静态文件</td><td>app.py</td></tr>
+            <tr><td><code>core/</code></td><td>配置、常量、安全、工具、缓存、中间件、工作空间</td><td>config.py、constants.py、security.py、utils.py、workspace.py</td></tr>
+            <tr><td><code>database/</code></td><td>数据库适配器，支持 JSON 与 Supabase</td><td>json_db.py、supabase_db.py、__init__.py</td></tr>
+            <tr><td><code>services/</code></td><td>业务服务，封装 Docker、脚本生成、监控等</td><td>docker_manager.py、script_generator.py、system_monitor.py、traffic_light.py</td></tr>
+            <tr><td><code>routers/</code></td><td>统一 API 路由（可按领域拆分）</td><td>api.py</td></tr>
+            <tr><td><code>deps.py</code></td><td>依赖注入：当前用户、权限校验</td><td>deps.py</td></tr>
+            <tr><td><code>models.py</code></td><td>Pydantic 数据模型</td><td>models.py</td></tr>
+            <tr><td><code>logger.py</code></td><td>统一日志配置</td><td>logger.py</td></tr>
+        </tbody>
+    </table>
+
+    <h3 class="subsection-title">2.1 core 层要点</h3>
+    <ul>
+        <li><strong>config.py</strong>：运行时配置加载与热保存，配置文件为 <code>config.json</code>。</li>
+        <li><strong>constants.py</strong>：集中常量（端口、路径、权限点、可视化配置、缓存与 WebSocket 客户端容器等）。</li>
+        <li><strong>security.py</strong>：密码哈希、JWT 签发与校验、命令清洗、速率限制器。</li>
+        <li><strong>workspace.py</strong>：用户工作空间路径校验与创建，支撑多用户资源隔离。</li>
+    </ul>
+
+    <h3 class="subsection-title">2.2 services 层要点</h3>
+    <ul>
+        <li><strong>DockerManager</strong>：封装 <code>docker ps / inspect / kill / update / exec</code> 等，统一带 <code>sudo</code> 前缀（<code>DOCKER_PREFIX</code>）。</li>
+        <li><strong>SystemMonitor</strong>：采集 CPU、内存、GPU（nvidia-smi）与进程列表。</li>
+        <li><strong>ROS2ScriptGenerator</strong>：依据 launch 文件生成启动脚本。</li>
+        <li><strong>TrafficLightSender / TimerTrafficLightSender</strong>：红绿灯模拟的云端联动与计时模式。</li>
+    </ul>
+
+    <h2 class="section-title" id="sec-3">三、前端结构</h2>
+
+    <p>前端位于 <code>frontend/</code>，无构建步骤，直接由后端挂载为静态文件。</p>
+
+    <table class="data-table">
+        <thead><tr><th>路径</th><th>职责</th></tr></thead>
+        <tbody>
+            <tr><td><code>index.html</code></td><td>主页面，包含全部面板与模态框</td></tr>
+            <tr><td><code>js/sj_script.js</code></td><td>主脚本，含 API 封装、面板逻辑、容器与脚本管理</td></tr>
+            <tr><td><code>js/sj_validators.js</code></td><td>输入校验</td></tr>
+            <tr><td><code>js/onboarding.js</code></td><td>新手引导</td></tr>
+            <tr><td><code>js/panels/terminal.js</code></td><td>终端面板（基于 WebSocket）</td></tr>
+            <tr><td><code>css/sj_style.css</code> / <code>onboarding.css</code></td><td>样式</td></tr>
+            <tr><td><code>sw.js</code></td><td>Service Worker</td></tr>
+        </tbody>
+    </table>
+
+    <div class="doc-note"><span class="note-label">注意：</span>前端通过全局函数 <code>apiGet</code> / <code>apiPost</code> 访问后端，自动携带 JWT。新增功能时优先复用既有封装，避免直接使用 <code>fetch</code>。</div>
+
+    <h2 class="section-title" id="sec-4">四、REST API 清单</h2>
+
+    <p>所有 API 统一注册于 <code>routers/api.py</code>，前缀 <code>/api</code>。下表按领域列出主要端点。</p>
+
+    <table class="data-table">
+        <caption>表 4-1　主要 REST API</caption>
+        <thead><tr><th>领域</th><th>方法 / 路径</th><th>说明</th></tr></thead>
+        <tbody>
+            <tr><td rowspan="4">认证</td><td><code>POST /api/auth/login</code></td><td>登录，返回 JWT</td></tr>
+            <tr><td><code>POST /api/auth/register</code></td><td>注册（邮箱）</td></tr>
+            <tr><td><code>POST /api/auth/logout</code></td><td>登出</td></tr>
+            <tr><td><code>GET /api/auth/me</code></td><td>当前用户信息</td></tr>
+            <tr><td rowspan="2">系统</td><td><code>GET /api/system/status</code></td><td>ROS2 / Docker / 目录可用性</td></tr>
+            <tr><td><code>GET /api/system/monitor</code></td><td>CPU / 内存 / GPU / 进程</td></tr>
+            <tr><td rowspan="6">Docker</td><td><code>GET /api/docker/containers</code></td><td>容器列表（含 started_at）</td></tr>
+            <tr><td><code>POST /api/docker/container/{id}/start</code></td><td>启动容器</td></tr>
+            <tr><td><code>POST /api/docker/container/{id}/stop</code></td><td>停止容器</td></tr>
+            <tr><td><code>POST /api/docker/container/{id}/restart</code></td><td>重启容器</td></tr>
+            <tr><td><code>GET /api/docker/container/{id}/logs</code></td><td>容器日志</td></tr>
+            <tr><td><code>POST /api/docker/container/{id}/exec</code></td><td>容器内执行命令</td></tr>
+            <tr><td>脚本</td><td><code>POST /api/scripts/generate</code></td><td>生成启动脚本</td></tr>
+            <tr><td>工单</td><td><code>GET/POST /api/tickets</code></td><td>工单 CRUD</td></tr>
+            <tr><td>故障</td><td><code>POST /api/fault/inject</code></td><td>故障注入</td></tr>
+        </tbody>
+    </table>
+
+    <div class="doc-note"><span class="note-label">注意：</span>容器列表接口返回字段包含 <code>started_at</code>（运行中容器的 Docker <code>State.StartedAt</code>，ISO8601）；停止容器不返回该字段，前端据此归零运行时长。新增依赖此时长的功能时，应统一从该字段取值，不得改用客户端时间。</div>
+
+    <h2 class="section-title" id="sec-5">五、WebSocket 通信</h2>
+
+    <p>系统通过 WebSocket 实现终端、实时日志与消息推送。连接客户端集中维护于 <code>core/constants.ws_clients</code>。鉴权时 Token 通过查询参数或首条消息传递，连接建立后绑定到用户上下文。</p>
+
+    <ul>
+        <li><strong>终端</strong>：<code>/ws/terminal/{container}</code>，前端 <code>terminal.js</code> 负责收发。</li>
+        <li><strong>实时日志</strong>：流式推送 <code>docker logs -f</code> 输出。</li>
+        <li><strong>广播日志</strong>：<code>broadcast_log</code> 工具函数向全部在线客户端推送系统消息。</li>
+    </ul>
+
+    <h2 class="section-title" id="sec-6">六、数据库适配层</h2>
+
+    <p><code>database/</code> 提供统一接口 <code>db</code>，底层可切换 JSON 文件或 Supabase。</p>
+
+    <table class="data-table">
+        <thead><tr><th>适配器</th><th>适用场景</th><th>存储</th></tr></thead>
+        <tbody>
+            <tr><td><code>json_db.py</code></td><td>单机、轻量、无外部依赖</td><td><code>data/data.json</code>、<code>data/audit_logs.json</code></td></tr>
+            <tr><td><code>supabase_db.py</code></td><td>多实例、需共享数据</td><td>Supabase（PostgreSQL）</td></tr>
+        </tbody>
+    </table>
+
+    <p>初始化脚本见 <code>data/ros2_web_supabase.sql</code>。切换方式由 <code>DB_TYPE</code> 常量决定。</p>
+
+    <h2 class="section-title" id="sec-7">七、安全机制</h2>
+
+    <ul>
+        <li><strong>JWT 鉴权</strong>：HS256，默认 1 天有效期，记住我可延至 7/15/30 天。</li>
+        <li><strong>密码哈希</strong>：bcrypt，轮数可配（默认 12）。</li>
+        <li><strong>速率限制</strong>：基于 <code>slowapi</code>，登录注册默认 5 次 / 分钟。</li>
+        <li><strong>命令清洗</strong>：<code>sanitize_command</code> 对容器内执行命令做白名单过滤（可配）。</li>
+        <li><strong>权限校验</strong>：<code>require_permission</code> / <code>require_admin</code> 依赖注入。</li>
+        <li><strong>审计日志</strong>：登录、容器操作、用户管理等写入审计库，可查询与清理。</li>
+        <li><strong>资源隔离</strong>：普通用户仅可见与操作自有资源，<code>_check_container_access</code> 校验归属。</li>
+    </ul>
+
+    <div class="doc-warn"><span class="note-label">警告：</span>修改安全相关逻辑（JWT 密钥、命令白名单、权限点）须充分回归测试，避免引入越权或命令注入风险。</div>
+
+    <h2 class="section-title" id="sec-8">八、二次开发规范</h2>
+
+    <h3 class="subsection-title">8.1 新增 API</h3>
+    <ol class="doc-steps">
+        <li>在 <code>routers/api.py</code> 中新增路由函数，使用 <code>@router.get/post</code> 装饰器。</li>
+        <li>按需注入 <code>get_current_user</code> / <code>require_permission</code> / <code>require_admin</code>。</li>
+        <li>业务逻辑放入 <code>services/</code> 对应类，保持路由层轻量。</li>
+        <li>涉及配置的项写入 <code>config.json</code> 与 <code>core/constants.py</code>。</li>
+        <li>关键操作写入审计日志（<code>db.add_audit_log</code>）。</li>
+    </ol>
+
+    <h3 class="subsection-title">8.2 新增前端面板</h3>
+    <ol class="doc-steps">
+        <li>在 <code>index.html</code> 增加 <code>&lt;div class="panel" id="panel-xxx"&gt;</code>。</li>
+        <li>在导航栏增加对应 <code>nav-item</code>，<code>data-panel</code> 指向新面板。</li>
+        <li>逻辑写入 <code>sj_script.js</code>，复用 <code>apiGet/apiPost</code> 与 <code>showToast</code>。</li>
+        <li>需要权限控制的按钮加 <code>admin-only</code> 类或运行时判断 <code>hasPermission</code>。</li>
+    </ol>
+
+    <h3 class="subsection-title">8.3 编码约定</h3>
+    <ul>
+        <li>Python 遵循 PEP 8，类型注解齐全；前端兼容老浏览器，使用 ES5 兼容写法（<code>var</code>、函数表达式）。</li>
+        <li>新增常量集中到 <code>constants.py</code>，避免散落硬编码。</li>
+        <li>外部命令统一经 <code>DockerManager.run_cmd</code>，带超时与错误处理。</li>
+        <li>涉及时间的展示一律以后端权威时间为准，前端不得自维护本地时钟态。</li>
+    </ul>
+
+    <h2 class="section-title" id="sec-9">九、部署与运维</h2>
+
+    <p>部署脚本 <code>deploy.py</code> 支持 <code>--skip-system</code> / <code>--skip-deps</code> / <code>--only-deps</code> 参数，可批量检查并安装依赖、生成 systemd 服务。依赖清单见 <code>redame/requirements.txt</code>。</p>
+
+    <ul>
+        <li>服务默认监听 <code>0.0.0.0:8875</code>，CORS 通过 <code>config.json</code> 配置。</li>
+        <li>日志文件 <code>audit.log</code> 与 <code>data/audit_logs.json</code> 按需轮转。</li>
+        <li>升级时优先在测试环境验证，确认 API 兼容后再推生产。</li>
+    </ul>
+
+    <div class="doc-references">
+        <div class="ref-title">参 考 文 献</div>
+        <ol>
+            <li>项目内 <code>redame/README.txt</code>，v4.0-decoupled 解耦架构说明。</li>
+            <li>FastAPI 官方文档：依赖注入、安全、WebSocket。</li>
+            <li>Docker 官方文档：<code>docker inspect</code> 与 <code>State.StartedAt</code> 字段。</li>
+            <li>Supabase Python 客户端文档。</li>
+        </ol>
+    </div>
+
+    <div class="doc-back"><a href="index.html">← 返回文档中心</a></div>
+
+    <footer class="doc-footer">
+        版权所有 © 上海伯镭科技有限公司　|　ROS2 Web 管理工具 v4.0-decoupled<br>
+        技术开发文档　|　最后更新：2026 年 8 月
+    </footer>
+
+</div>
+</body>
+</html>
