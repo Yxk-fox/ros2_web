@@ -1231,6 +1231,7 @@ def get_current_cloud_ip():
             pass
     return None
 
+<<<<<<< HEAD
 def get_cloud_ip_from_host_mount(container_name):
     """从容器在宿主机的挂载点读取实际云IP配置"""
     try:
@@ -1297,6 +1298,22 @@ def get_cloud_ip_from_container(container_name):
     if label_ip:
         return label_ip
 
+=======
+def get_cloud_ip_from_container(container_name):
+    """从容器标签中提取云平台IP（只读取标签，不回退到配置文件）
+    旧容器在启动时通过 --label ros2.cloud_ip=$CLOUD_IP 记录了当时的云IP，
+    切换环境不会修改已有容器的标签，因此旧容器保持旧IP。
+    """
+    try:
+        # 使用 index 函数访问带点号的标签键 "ros2.cloud_ip"
+        cmd = DOCKER_PREFIX.split() + ["docker", "inspect", "--format", "{{index .Config.Labels \"ros2.cloud_ip\"}}", container_name]
+        rc, out, _ = DockerManager.run_cmd(cmd)
+        if rc == 0 and out.strip() and out.strip() != "<no value>":
+            return out.strip()
+    except Exception:
+        pass
+    # 标签不存在时（旧容器未设置标签），回退到当前配置的IP
+>>>>>>> 26617438785a81afcc1056abc7ee93d8c6945ac4
     return get_current_cloud_ip()
 
 @router.get("/api/docker/containers")
