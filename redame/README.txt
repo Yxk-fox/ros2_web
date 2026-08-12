@@ -4,7 +4,7 @@
 @Time    :  2026/07/21
 @Author  :  Fox
 @Version :  4.0-decoupled
-@Desc    :  ROS2 Web 管理工具 - 项目说明文档（解耦版）
+@Desc    :  Mock Truck 管理工具 - 项目说明文档（解耦版）
 
             代码结构：
             1. 项目简介
@@ -17,7 +17,7 @@
             8. 解耦开发规范
 """
 ================================================================================
-                   ROS2 Web 管理工具 - 项目说明（解耦版）
+                   Mock Truck 管理工具 - 项目说明（解耦版）
 ================================================================================
 
 项目简介
@@ -291,7 +291,7 @@ v4.0-decoupled 主要更新：
 1. 创建服务文件：
    sudo tee /etc/systemd/system/ros2_web.service > /dev/null << 'EOF'
    [Unit]
-   Description=ROS2 Web Manager Service (Decoupled)
+   Description=Mock Truck Service (Decoupled)
    After=network.target docker.service
    Requires=docker.service
 

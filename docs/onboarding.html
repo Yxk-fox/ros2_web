@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新入职培训手册 · ROS2 Web 管理工具</title>
+    <title>新入职培训手册 · Mock Truck 管理工具</title>
     <link rel="stylesheet" href="css/doc.css">
 </head>
 <body>
@@ -21,7 +21,7 @@
 
     <div class="doc-abstract">
         <div class="abstract-title">摘　要</div>
-        <p>本手册面向新入职同事，旨在帮助其在最短时间内理解 ROS2 Web 管理工具的定位、功能边界与使用方法，并独立完成一次仿真车启动与验证。手册首先交代项目背景与价值，继而说明账号注册与登录流程，随后给出功能地图与权限模型，最后以三条典型工作流串联核心功能。阅读本手册后，新人应能顺利过渡到《按钮操作手册》进行深入练习。</p>
+        <p>本手册面向新入职同事，旨在帮助其在最短时间内理解 Mock Truck 管理工具的定位、功能边界与使用方法，并独立完成一次仿真车启动与验证。手册首先交代项目背景与价值，继而说明账号注册与登录流程，随后给出功能地图与权限模型，最后以三条典型工作流串联核心功能。阅读本手册后，新人应能顺利过渡到《按钮操作手册》进行深入练习。</p>
     </div>
 
     <div class="doc-keywords">
@@ -43,7 +43,7 @@
 
     <h2 class="section-title" id="sec-1">一、项目背景与定位</h2>
 
-    <p>ROS2 Web 管理工具是公司面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队所使用的通用仿真测试平台。其核心价值在于：将原本散落在命令行、脚本与多台机器上的研发与运维操作，收敛为统一的 Web 界面，使研发、测试与运维人员能够通过浏览器完成容器调度、ROS2 调试、脚本批量执行、系统监控与故障注入等工作。</p>
+    <p>Mock Truck 管理工具是公司面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队所使用的通用仿真测试平台。其核心价值在于：将原本散落在命令行、脚本与多台机器上的研发与运维操作，收敛为统一的 Web 界面，使研发、测试与运维人员能够通过浏览器完成容器调度、ROS2 调试、脚本批量执行、系统监控与故障注入等工作。</p>
 
     <p>工具采用前后端分离架构：后端基于 FastAPI 与 WebSocket，负责与 Docker、ROS2 及系统资源交互；前端为独立静态文件，提供图形化操作界面。当前版本为 <code>4.0-decoupled</code>，后端已实现四层解耦，便于维护与扩展。</p>
 
@@ -166,7 +166,7 @@
     <div class="doc-back"><a href="index.html">← 返回文档中心</a></div>
 
     <footer class="doc-footer">
-        版权所有 © 上海伯镭科技有限公司　|　ROS2 Web 管理工具 v4.0-decoupled<br>
+        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v4.0-decoupled<br>
         新入职培训手册　|　最后更新：2026 年 8 月
     </footer>
 

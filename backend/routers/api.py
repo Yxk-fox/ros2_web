@@ -1231,7 +1231,6 @@ def get_current_cloud_ip():
             pass
     return None
 
-<<<<<<< HEAD
 def get_cloud_ip_from_host_mount(container_name):
     """从容器在宿主机的挂载点读取实际云IP配置"""
     try:
@@ -1298,22 +1297,6 @@ def get_cloud_ip_from_container(container_name):
     if label_ip:
         return label_ip
 
-=======
-def get_cloud_ip_from_container(container_name):
-    """从容器标签中提取云平台IP（只读取标签，不回退到配置文件）
-    旧容器在启动时通过 --label ros2.cloud_ip=$CLOUD_IP 记录了当时的云IP，
-    切换环境不会修改已有容器的标签，因此旧容器保持旧IP。
-    """
-    try:
-        # 使用 index 函数访问带点号的标签键 "ros2.cloud_ip"
-        cmd = DOCKER_PREFIX.split() + ["docker", "inspect", "--format", "{{index .Config.Labels \"ros2.cloud_ip\"}}", container_name]
-        rc, out, _ = DockerManager.run_cmd(cmd)
-        if rc == 0 and out.strip() and out.strip() != "<no value>":
-            return out.strip()
-    except Exception:
-        pass
-    # 标签不存在时（旧容器未设置标签），回退到当前配置的IP
->>>>>>> 26617438785a81afcc1056abc7ee93d8c6945ac4
     return get_current_cloud_ip()
 
 @router.get("/api/docker/containers")
@@ -2635,6 +2618,50 @@ INSTALL_TO_BK_MAPPINGS: List[Dict[str, str]] = [
     },
 ]
 
+# ============================================================
+# bk 目录白名单：以下文件/目录在任何部署/清空/回滚操作中都不应被修改或删除
+# 证书目录（106证书/139证书/192证书）和启动模板由管理员手动维护，
+# 部署流程只负责镜像更新 mock_truck 和 simulation_launches。
+# ============================================================
+
+# bk 根目录下受保护的文件/目录名（精确匹配）
+BK_PROTECTED_NAMES = {
+    "106证书",
+    "139证书",
+    "192证书",
+    "start_docker_template.sh",
+}
+
+# 受保护的文件名模式（fnmatch 语法，在任意子目录下匹配）
+BK_PROTECTED_PATTERNS = ("*.pem",)
+
+# 允许部署/清空/回滚操作的子目录（白名单之外的子目录一律不动）
+BK_DEPLOYABLE_SUBDIRS = (
+    "mock_truck/config",
+    "mock_truck/launch",
+    "simulation_launches/config",
+    "simulation_launches/launch",
+    "mock_truck",
+    "simulation_launches",
+)
+
+
+def _is_bk_protected(name: str) -> bool:
+    """判断 bk 目录下的文件/目录名是否受白名单保护（不应被修改或删除）。
+
+    匹配规则：
+    1. 精确命中 BK_PROTECTED_NAMES（如 ``106证书``、``start_docker_template.sh``）
+    2. 通配命中 BK_PROTECTED_PATTERNS（如 ``*.pem``）
+    """
+    if name in BK_PROTECTED_NAMES:
+        return True
+    import fnmatch
+    for pat in BK_PROTECTED_PATTERNS:
+        if fnmatch.fnmatch(name, pat):
+            return True
+    return False
+
+
 # 单次操作保留的最近备份数量
 BK_BACKUP_KEEP = 5
 
@@ -2676,35 +2703,45 @@ def _backup_bk_dir(bk_dir: str, backups_dir: str, op_type: str) -> Optional[str]
 
 
 def _restore_bk_dir(bk_dir: str, backup_path: str) -> bool:
-    """从备份包恢复 Docker/bk 目录"""
+    """从备份包恢复 Docker/bk 目录
+
+    白名单保护：只回滚 ``mock_truck`` 和 ``simulation_launches`` 子目录，
+    证书目录（106证书/139证书/192证书）和 ``start_docker_template.sh`` 保持不动。
+    子目录内的 ``*.pem`` 文件同样受保护不被覆盖（证书由管理员单独维护）。
+    """
     if not os.path.isfile(backup_path):
         return False
     try:
-        # 清空当前 bk 目录
-        if os.path.isdir(bk_dir):
-            for item in os.listdir(bk_dir):
-                p = os.path.join(bk_dir, item)
-                if os.path.isfile(p) or os.path.islink(p):
-                    os.unlink(p)
-                elif os.path.isdir(p):
-                    shutil.rmtree(p)
-        else:
+        import tempfile
+        # 解压到临时目录，避免直接覆盖 bk_dir 中的受保护文件
+        with tempfile.TemporaryDirectory(prefix="bk_restore_") as tmp_dir:
+            with tarfile.open(backup_path, "r:gz") as tar:
+                tar.extractall(tmp_dir)
+            # tar 包内根目录为 bk，定位到实际内容目录
+            content_dir = os.path.join(tmp_dir, "bk")
+            if not os.path.isdir(content_dir):
+                content_dir = tmp_dir
+            # 只恢复 mock_truck 和 simulation_launches 子目录
             os.makedirs(bk_dir, exist_ok=True)
-        with tarfile.open(backup_path, "r:gz") as tar:
-            tar.extractall(bk_dir)
-        # tar 包内根目录为 bk，需要将其内容平铺到 bk_dir
-        nested = os.path.join(bk_dir, "bk")
-        if os.path.isdir(nested):
-            for item in os.listdir(nested):
-                src = os.path.join(nested, item)
-                dst = os.path.join(bk_dir, item)
-                if os.path.exists(dst):
-                    if os.path.isdir(dst):
-                        shutil.rmtree(dst)
-                    else:
-                        os.remove(dst)
-                shutil.move(src, dst)
-            os.rmdir(nested)
+            for sub in ("mock_truck", "simulation_launches"):
+                src_sub = os.path.join(content_dir, sub)
+                if not os.path.isdir(src_sub):
+                    continue
+                dst_sub = os.path.join(bk_dir, sub)
+                # 清空目标子目录（白名单：保留 *.pem 证书文件）
+                if os.path.isdir(dst_sub):
+                    SystemUtils.clean_directory(dst_sub, keep_patterns=BK_PROTECTED_PATTERNS)
+                else:
+                    os.makedirs(dst_sub, exist_ok=True)
+                # 从备份复制到 bk（白名单：跳过 *.pem）
+                for root, _dirs, files in os.walk(src_sub):
+                    rel = os.path.relpath(root, src_sub)
+                    dst_root = dst_sub if rel == "." else os.path.join(dst_sub, rel)
+                    os.makedirs(dst_root, exist_ok=True)
+                    for fname in files:
+                        if _is_bk_protected(fname):
+                            continue
+                        shutil.copy2(os.path.join(root, fname), os.path.join(dst_root, fname))
         return True
     except Exception as e:
         logger.error(f"恢复 bk 目录失败: {e}", exc_info=True)
@@ -2716,8 +2753,8 @@ def _copy_install_to_bk(host_install: str, bk_dir: str) -> Dict[str, Any]:
 
     返回 ``{"success": True, "copied": [...], "skipped": [...]}``。
 
-    v3.6 优化：复制 ``simulation_launches/config`` 目录时跳过 ``*.pem`` 证书文件，
-    避免把 cacert.pem / clientcert.pem / clientkey.pem 等敏感证书同步到 bk 目录。
+    白名单保护：命中 ``BK_PROTECTED_PATTERNS``（如 ``*.pem``）的文件一律跳过，
+    避免敏感凭证被同步到 bk 目录。部署只镜像 mock_truck 和 simulation_launches。
     """
     copied: List[str] = []
     skipped: List[str] = []
@@ -2736,8 +2773,8 @@ def _copy_install_to_bk(host_install: str, bk_dir: str) -> Dict[str, Any]:
                 for f in glob.glob(os.path.join(src_dir, m.get("glob", "*"))):
                     if os.path.isfile(f):
                         fname = os.path.basename(f)
-                        # 跳过证书文件（*.pem），避免敏感凭证被同步到 bk
-                        if fname.lower().endswith(".pem"):
+                        # 白名单：跳过受保护文件（*.pem 证书等）
+                        if _is_bk_protected(fname):
                             skipped.append(os.path.relpath(f, host_install))
                             continue
                         dst = os.path.join(dst_dir, fname)
@@ -2749,8 +2786,8 @@ def _copy_install_to_bk(host_install: str, bk_dir: str) -> Dict[str, Any]:
                 if not os.path.isfile(src):
                     skipped.append(m["src"])
                     continue
-                # 单文件映射也跳过 .pem 证书
-                if os.path.basename(src).lower().endswith(".pem"):
+                # 白名单：单文件映射也跳过受保护文件
+                if _is_bk_protected(os.path.basename(src)):
                     skipped.append(m["src"])
                     continue
                 os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -2790,8 +2827,8 @@ def _clean_bk_subdir(bk_dir: str, sub: str) -> Dict[str, Any]:
             cleaned.append(f"{t} (不存在)")
             continue
         try:
-            # 清空目录，但保留 *.pem 证书文件（部署流程不会重新复制证书）
-            ok, msg = SystemUtils.clean_directory(path, keep_patterns=("*.pem",))
+            # 白名单：清空目录时保留受保护文件（*.pem 证书等，部署不会重新复制证书）
+            ok, msg = SystemUtils.clean_directory(path, keep_patterns=BK_PROTECTED_PATTERNS)
             cleaned.append(f"{t} ({'清空' if ok else '失败'})")
         except Exception as e:
             cleaned.append(f"{t} (失败: {e})")
@@ -2874,8 +2911,8 @@ async def deploy_install_to_bk(data: Dict[str, Any], current_user: dict = Depend
                     if os.path.isdir(path):
                         for item in os.listdir(path):
                             p = os.path.join(path, item)
-                            # 清空时保留 *.pem 证书文件（部署不会重新复制证书）
-                            if item.lower().endswith(".pem"):
+                            # 白名单：保留受保护文件（*.pem 证书等，部署不会重新复制证书）
+                            if _is_bk_protected(item):
                                 continue
                             try:
                                 if os.path.isfile(p) or os.path.islink(p):
@@ -4093,7 +4130,7 @@ async def resource_leaks(current_user: dict = Depends(require_admin)):
 
 # ---------- 帮助文档 ----------
 HELP_CONTENT = {
-    "welcome": "## 欢迎页面\n\n这是 ROS2 Web Manager 的首页，显示系统概览和快速入口。\n\n- **ROS2 状态**: 显示 ROS2 环境是否可用\n- **Docker 状态**: 显示 Docker 服务是否连接\n- **安装目录**: 显示 ROS2 工作空间是否存在",
+    "welcome": "## 欢迎页面\n\n这是 Mock Truck 的首页，显示系统概览和快速入口。\n\n- **ROS2 状态**: 显示 ROS2 环境是否可用\n- **Docker 状态**: 显示 Docker 服务是否连接\n- **安装目录**: 显示 ROS2 工作空间是否存在",
     "docker": "## Docker 管理\n\n管理 Docker 容器的启动、停止、重启、删除等操作。\n\n1. **选中容器**: 点击「✅ 选中」选择一个运行中的容器，用于 ROS2 功能操作\n2. **日志查看**: 点击「📜 日志」查看容器实时日志\n3. **命令执行**: 点击「💻 命令」在容器内执行命令\n4. **资源调整**: 点击「⚙ 资源」调整容器 CPU 和内存限制\n5. **终端**: 点击「🖥 终端」打开交互式终端",
     "scripts": "## 脚本生成\n\n扫描 launch 文件并生成 Docker 启动脚本。\n\n1. **扫描 Launch 文件**: 点击扫描按钮查看可用的 launch 文件\n2. **配置参数**: 设置 launch 目录、脚本输出目录、日志目录、Docker 镜像等\n3. **生成脚本**: 点击「⚡ 生成 ROS2 脚本」创建启动脚本",
     "vehicle": "## 仿真车启动\n\n管理已生成的启动脚本，支持批量启动仿真车辆。\n\n1. **筛选脚本**: 使用筛选框快速查找脚本\n2. **批量操作**: 勾选多个脚本后批量启动\n3. **执行模式**: 选择顺序或并行执行",

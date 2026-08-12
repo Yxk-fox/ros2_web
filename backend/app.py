@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ROS2 Web 管理工具 —— 解耦后端入口
+Mock Truck 管理工具 —— 解耦后端入口
 
 架构分层：
 - core/        核心工具（配置、日志、安全、中间件、缓存、工具函数）
@@ -48,9 +48,9 @@ from core.middleware import SecurityHeadersMiddleware, NoCacheStaticMiddleware
 
 # ---------- 1. FastAPI 应用创建 ----------
 app = FastAPI(
-    title="ROS2 Web Manager API",
+    title="Mock Truck API",
     version="3.2-decoupled",
-    description="解耦版 ROS2 Web 管理后端 API",
+    description="解耦版 Mock Truck 管理后端 API",
     docs_url="/api/docs",
     redoc_url=None
 )
@@ -127,7 +127,7 @@ async def redoc_documentation():
     from fastapi.openapi.docs import get_redoc_html
     return get_redoc_html(
         openapi_url="/openapi.json",
-        title="ROS2 Web Manager API - ReDoc",
+        title="Mock Truck API - ReDoc",
         redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.1.5/bundles/redoc.standalone.js"
     )
 
@@ -177,7 +177,7 @@ if __name__ == "__main__":
         pass
 
     print("\n" + "="*50)
-    print("🚀 ROS2 Web 管理工具已启动（解耦版）！")
+    print("🚀 Mock Truck 管理工具已启动（解耦版）！")
     print(f"📌 访问地址：")
     for ip in sorted(ips):
         print(f"   http://{ip}:{PORT}/")

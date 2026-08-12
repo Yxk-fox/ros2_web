@@ -4,7 +4,7 @@
 @Time    :  2026/06/26 10:26:00
 @Author  :  Fox
 @Version :  3.5
-@Desc    :  ROS2 Web 管理工具 - 前端表单验证工具
+@Desc    :  Mock Truck 管理工具 - 前端表单验证工具
             包含：邮箱格式校验、密码强度校验等
 
             代码结构：

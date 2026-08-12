@@ -110,6 +110,10 @@ class ROS2ScriptGenerator:
         # 检测运行中容器实际占用的端口，反推索引
         used.update(cls._get_indices_from_running_containers())
 
+        # 检测宿主机进程实际占用的端口（如 TigerVNC、gnome-remote-desktop 等）
+        # 这些端口不会被 Docker 容器扫描发现，但会导致 docker -p 绑定失败
+        used.update(cls._get_indices_from_host_port_check())
+
         return used
 
     @classmethod
@@ -151,6 +155,35 @@ class ROS2ScriptGenerator:
                         used.add(host_port - cls.BASE_WEB_PORT)
         except Exception:
             pass
+        return used
+
+    @classmethod
+    def _get_indices_from_host_port_check(cls):
+        """实测宿主机端口可用性，反推被宿主机进程占用的索引
+
+        Docker 容器扫描只能发现 ``ros2_`` 前缀容器的端口映射，无法察觉
+        宿主机本机进程（如 TigerVNC、gnome-remote-desktop）占用的端口。
+        此方法对每个候选索引对应的 VNC/Web 端口执行 ``socket.bind`` 实测，
+        与 ``docker run -p 0.0.0.0:port`` 的绑定行为一致，能准确识别冲突。
+
+        被占用的端口对应的索引会被加入"已用"集合，分配器自动跳过。
+        """
+        used = set()
+        import socket
+        for idx in range(cls.GLOBAL_MAX):
+            for base in (cls.BASE_VNC_PORT, cls.BASE_WEB_PORT):
+                port = base + idx
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                try:
+                    # 与 docker -p 0.0.0.0:port 行为一致：绑定所有网卡
+                    sock.bind(("0.0.0.0", port))
+                except OSError:
+                    # 端口被宿主机进程或 Docker 代理占用，标记索引为已用
+                    used.add(idx)
+                    break
+                finally:
+                    sock.close()
         return used
 
     @classmethod

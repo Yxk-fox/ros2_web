@@ -7,7 +7,7 @@
 @Time    :  2026/07/21
 @Author  :  Fox
 @Version :  4.0-decoupled
-@Desc    :  ROS2 Web 管理工具 - 一键部署脚本（解耦优化版）
+@Desc    :  Mock Truck 管理工具 - 一键部署脚本（解耦优化版）
             包含：环境检测、依赖安装、服务部署、自启动配置
             优化：已安装环境自动跳过，支持 --skip-system 快速部署
 """
@@ -263,7 +263,7 @@ def deploy_systemd_service():
     python3_path = shutil.which("python3") or "/usr/bin/python3"
 
     service_content = f"""[Unit]
-Description=ROS2 Web Manager Service (Decoupled)
+Description=Mock Truck Service (Decoupled)
 After=network.target docker.service
 Requires=docker.service
 
@@ -430,7 +430,7 @@ def print_deploy_report():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ROS2 Web 管理工具 - 一键部署脚本")
+    parser = argparse.ArgumentParser(description="Mock Truck 管理工具 - 一键部署脚本")
     parser.add_argument("--skip-system", action="store_true",
                         help="跳过系统环境检查与安装（Python/Docker/Git），仅部署应用")
     parser.add_argument("--skip-deps", action="store_true",
@@ -440,7 +440,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 60)
-    print("  ROS2 Web 管理工具 - 一键部署脚本 v4.0-decoupled")
+    print("  Mock Truck 管理工具 - 一键部署脚本 v4.0-decoupled")
     print("=" * 60)
 
     if os.geteuid() != 0 and not args.only_deps:

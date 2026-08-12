@@ -69,17 +69,13 @@
   },
   "whitelist": {
     "default_prefixes": [
-      "ros2_"
+      "ros2_",
+      "test_"
     ]
   },
   "cloud_env": {
-<<<<<<< HEAD
-    "current_env": "139",
-    "current_ip": "139.196.75.44",
-=======
     "current_env": "106",
     "current_ip": "106.14.223.60",
->>>>>>> 26617438785a81afcc1056abc7ee93d8c6945ac4
     "ip_map": {
       "106": "106.14.223.60",
       "139": "139.196.75.44",
