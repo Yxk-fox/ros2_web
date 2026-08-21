@@ -514,3 +514,746 @@
 2026-08-12T09:55:39.319022 [honglan_wang] stop_all_ros2 : 1 containers (own)
 2026-08-12T09:55:56.240042 [admin] websocket_disconnected : WebSocket 断开
 2026-08-12T09:56:12.309780 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-12T10:09:46.933189 [admin] websocket_connected : WebSocket 连接
+2026-08-12T10:41:27.295107 [admin] websocket_disconnected : WebSocket 断开
+2026-08-12T11:01:28.988526 [admin] login_success : 登录成功, token有效7天
+2026-08-12T11:01:29.471969 [admin] websocket_connected : WebSocket 连接
+2026-08-12T11:02:25.603606 [admin] switch_cert : 切换到 139 证书 target=self
+2026-08-12T11:02:25.955440 [admin] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-12T11:02:50.394730 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-12T11:04:01.754320 [admin] websocket_connected : WebSocket 连接
+2026-08-12T11:09:27.825976 [admin] websocket_connected : WebSocket 连接
+2026-08-12T11:09:32.802710 [admin] stop_all_ros2 : 2 containers (all)
+2026-08-12T11:09:49.423315 [admin] websocket_disconnected : WebSocket 断开
+2026-08-12T11:09:59.293618 [admin] websocket_disconnected : WebSocket 断开
+2026-08-12T11:10:03.623287 [admin] websocket_disconnected : WebSocket 断开
+2026-08-12T11:30:25.017287 [admin] websocket_disconnected : WebSocket 断开
+2026-08-12T17:57:36.141538 [admin] websocket_connected : WebSocket 连接
+2026-08-12T17:58:46.574821 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T01:06:38.974207 [admin] websocket_connected : WebSocket 连接
+2026-08-13T01:07:05.899669 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-13T01:07:12.035103 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T01:07:45.015061 [honglan_wang] logout : 用户注销
+2026-08-13T01:07:47.269415 [admin] login_success : 登录成功, token有效7天
+2026-08-13T01:07:49.847450 [admin] websocket_connected : WebSocket 连接
+2026-08-13T01:07:55.651997 [admin] install_delete : target=self
+2026-08-13T01:08:15.160240 [admin] install_upload : size=100305590 target=self
+2026-08-13T01:08:19.579809 [admin] install_deploy : target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260813_090819_install_deploy.tar.gz copied=8 skipped=3
+2026-08-13T01:08:21.906377 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-13T01:08:36.375298 [admin] websocket_connected : WebSocket 连接
+2026-08-13T01:08:49.710367 [admin] clear_scripts : 清空 4 个脚本
+2026-08-13T01:08:51.257602 [admin] generate_scripts : 1 scripts
+2026-08-13T01:09:20.108377 [admin] batch_execute_scripts : 1 scripts, mode=并行
+2026-08-13T01:09:28.426179 [admin] stop_all_ros2 : 1 containers (all)
+2026-08-13T01:09:33.871161 [admin] switch_cert : 切换到 139 证书 target=self
+2026-08-13T01:09:34.547215 [admin] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-13T01:09:59.492747 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-13T01:10:43.181439 [admin] logout : 用户注销
+2026-08-13T01:10:45.554817 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-13T01:10:45.978281 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-13T01:10:55.172095 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T01:10:56.229633 [honglan_wang] batch_generate : cc002 -> cc002
+2026-08-13T01:11:03.856881 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-13T01:11:04.930010 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-13T01:11:14.643579 [honglan_wang] generate_scripts : 2 scripts
+2026-08-13T01:11:40.879912 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-13T01:18:56.700479 [admin] websocket_connected : WebSocket 连接
+2026-08-13T01:19:25.949663 [admin] stop_all_ros2 : 2 containers (all)
+2026-08-13T01:19:30.457253 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-13T01:19:56.251672 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-13T01:59:58.661896 [admin] websocket_connected : WebSocket 连接
+2026-08-13T02:16:40.634365 [admin] websocket_connected : WebSocket 连接
+2026-08-13T02:17:12.183298 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-13T02:17:39.532653 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-13T02:17:44.929098 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T02:24:25.766643 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T02:41:55.203329 [honglan_wang] stop_container : ros2_cc002
+2026-08-13T02:42:30.610594 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-13T02:42:47.659360 [admin] websocket_connected : WebSocket 连接
+2026-08-13T03:06:45.035777 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T03:33:19.218436 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-13T05:55:01.472880 [admin] stop_timer_traffic_light : 
+2026-08-13T06:02:03.921277 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-13T06:35:30.084126 [admin] websocket_connected : WebSocket 连接
+2026-08-13T06:35:55.618237 [admin] container_exec : ros2_simulation_launch -> ros2 topic echo /localization/localization_data --once
+2026-08-13T06:36:04.817585 [admin] list_topics : 容器 ros2_simulation_launch
+2026-08-13T06:36:11.557708 [admin] list_topics : 容器 ros2_simulation_launch
+2026-08-13T06:36:21.450994 [admin] topic_echo : /localization/localization_data
+2026-08-13T06:36:42.555277 [admin] update_truck_config : truck.yaml: {'start_x': -3401.954833984375, 'start_y': -2986.059326171875, 'start_yaw': -93.17821355863923}
+2026-08-13T06:37:21.578395 [admin] install_deploy : target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260813_143721_install_deploy.tar.gz copied=8 skipped=3
+2026-08-13T06:39:32.132198 [admin] batch_generate : tcp_01 -> tcp_01
+2026-08-13T06:51:53.913849 [admin] sync_folder : mock_truck target=self
+2026-08-13T06:51:54.268046 [admin] sync_folder : simulation_launches target=self
+2026-08-13T06:51:57.201399 [admin] switch_cert : 切换到 106 证书 target=self
+2026-08-13T06:51:57.970413 [admin] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-13T06:51:59.547199 [admin] switch_cert : 切换到 139 证书 target=self
+2026-08-13T06:52:00.273623 [admin] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-13T06:52:04.624626 [admin] generate_scripts : 2 scripts
+2026-08-13T06:52:30.620944 [admin] execute_script : start_docker_ros2_tcp_01.sh
+2026-08-13T06:53:04.323459 [admin] container_exec : ros2_tcp_01 -> ros2 topic echo /localization/localization_data --once
+2026-08-13T06:53:30.103648 [admin] container_exec : ros2_simulation_launch -> ros2 topic echo /localization/localization_data --once
+2026-08-13T06:53:56.450869 [admin] update_truck_config : truck.yaml: {'start_x': -3727.79931640625, 'start_y': -3279.614501953125, 'start_yaw': -1.0858030398824212}
+2026-08-13T06:54:01.122086 [admin] install_deploy : target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260813_145400_install_deploy.tar.gz copied=15 skipped=3
+2026-08-13T07:09:44.383318 [admin] batch_generate : tcp_02 -> tcp_02
+2026-08-13T07:10:05.100384 [admin] batch_generate : tcp_03 -> tcp_03
+2026-08-13T07:37:18.031912 [admin] websocket_connected : WebSocket 连接
+2026-08-13T07:54:34.610764 [admin] websocket_connected : WebSocket 连接
+2026-08-13T07:54:34.986259 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T08:29:56.208469 [honglan_wang] batch_generate : cc004 -> cc004
+2026-08-13T08:30:04.495104 [honglan_wang] generate_scripts : 3 scripts
+2026-08-13T08:30:12.333244 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-13T08:30:12.869123 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-13T08:30:38.369688 [honglan_wang] execute_script : start_docker_ros2_cc004.sh
+2026-08-13T08:38:58.477739 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T09:31:05.945462 [admin] websocket_connected : WebSocket 连接
+2026-08-13T09:46:12.507209 [admin] websocket_connected : WebSocket 连接
+2026-08-13T10:02:22.310930 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T10:08:17.529088 [admin] stop_timer_traffic_light : 
+2026-08-13T10:08:18.901100 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-13T10:13:12.143415 [admin] websocket_disconnected : WebSocket 断开
+2026-08-13T10:33:57.069486 [admin] websocket_connected : WebSocket 连接
+2026-08-13T10:50:57.845954 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T01:07:52.596411 [admin] stop_timer_traffic_light : 
+2026-08-14T01:07:54.020351 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-14T01:10:06.187363 [admin] stop_timer_traffic_light : 
+2026-08-14T01:10:07.680641 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-14T01:54:01.145806 [admin] stop_timer_traffic_light : 
+2026-08-14T01:58:58.016864 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-14T02:05:52.176708 [admin] stop_container : ros2_simulation_launch
+2026-08-14T02:06:19.719777 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-14T02:19:16.536404 [admin] stop_traffic_light : 
+2026-08-14T02:19:19.173337 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-14T02:19:30.184210 [admin] stop_traffic_light : 
+2026-08-14T02:19:31.383959 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-14T03:08:36.720733 [admin] websocket_connected : WebSocket 连接
+2026-08-14T03:08:46.882554 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T03:16:53.565120 [admin] sync_bags : 0 bags target=self
+2026-08-14T03:17:08.072237 [admin] sync_bags : 0 bags target=self
+2026-08-14T03:38:52.420660 [admin] logout : 用户注销
+2026-08-14T03:38:53.948705 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T03:38:56.789112 [ning.jiao@boonray.com] login_failed : 用户名或密码错误
+2026-08-14T03:39:21.115668 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T03:39:51.637743 [ke.yunxiao@boonray.com] register : 新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/ke_yunxiao
+2026-08-14T03:40:04.192574 [ke.yunxiao@boonray.com] login_success : 登录成功, token有效7天
+2026-08-14T03:40:04.688403 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T03:46:27.684914 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T03:46:34.052226 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T03:46:36.209068 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T03:46:58.823664 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T03:51:35.967457 [ke_yunxiao] install_upload : size=261820980 target=self
+2026-08-14T03:52:26.562178 [ke_yunxiao] install_deploy : target=self clean=False backup=/home/fox/robotruck_ros2/ke_yunxiao/Docker/bk/.bk_backups/bk_backup_20260814_115226_install_deploy.tar.gz copied=8 skipped=3
+2026-08-14T03:52:52.426914 [ke_yunxiao] generate_scripts : 1 scripts
+2026-08-14T03:53:02.154420 [ke_yunxiao] switch_cert : 切换到 106 证书 target=self
+2026-08-14T03:53:02.974963 [ke_yunxiao] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-14T03:53:27.723979 [ke_yunxiao] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-14T04:04:37.719278 [zun.liu@boonray.com] register : 新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/zun_liu
+2026-08-14T04:05:11.521116 [zun.liu@boonray.com] login_success : 登录成功, token有效1天
+2026-08-14T04:05:13.697580 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T04:05:55.924606 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T04:06:15.168163 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T04:09:58.310075 [admin] websocket_connected : WebSocket 连接
+2026-08-14T04:22:37.956804 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T04:31:48.086076 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T05:31:13.659166 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T05:31:14.038596 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T05:31:16.815981 [admin] websocket_connected : WebSocket 连接
+2026-08-14T05:31:26.421629 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T05:31:40.556581 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T05:32:41.992760 [admin] websocket_connected : WebSocket 连接
+2026-08-14T05:32:49.219539 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T05:44:37.807013 [ke_yunxiao] stop_all_ros2 : 1 containers (own)
+2026-08-14T05:46:02.501706 [ke_yunxiao] clear_scripts : 清空 3 个脚本
+2026-08-14T05:52:05.553778 [ke_yunxiao] generate_scripts : 1 scripts
+2026-08-14T05:52:08.238040 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T05:52:11.351654 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-14T05:52:12.414251 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T05:52:45.640184 [honglan_wang] install_upload : size=261820980 target=self
+2026-08-14T05:52:47.326095 [admin] clear_scripts : 清空 4 个脚本
+2026-08-14T05:52:48.627736 [admin] generate_scripts : 2 scripts
+2026-08-14T05:53:10.959555 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-14T05:56:15.126041 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T05:56:18.939775 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T05:56:23.111130 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T05:56:23.269805 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T05:56:28.590851 [admin] websocket_connected : WebSocket 连接
+2026-08-14T05:56:28.779011 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T05:56:29.721935 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T05:56:29.892126 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T05:57:35.965459 [admin] stop_container : ros2_simulation_launch
+2026-08-14T05:57:44.631642 [admin] clear_scripts : 清空 4 个脚本
+2026-08-14T05:57:46.553820 [admin] generate_scripts : 2 scripts
+2026-08-14T05:58:13.137857 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-14T05:58:16.178562 [ke_yunxiao] clear_scripts : 清空 3 个脚本
+2026-08-14T05:58:19.065571 [ke_yunxiao] generate_scripts : 1 scripts
+2026-08-14T05:58:42.779059 [ke_yunxiao] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-14T05:59:38.248091 [admin] logout : 用户注销
+2026-08-14T05:59:38.575668 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T05:59:42.439226 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-14T05:59:42.776875 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T05:59:51.154779 [honglan_wang] clear_scripts : 清空 5 个脚本
+2026-08-14T06:00:14.045905 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T06:00:56.972223 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T06:01:04.288164 [honglan_wang] logout : 用户注销
+2026-08-14T06:01:11.020892 [admin] login_success : 登录成功, token有效7天
+2026-08-14T06:01:11.374664 [admin] websocket_connected : WebSocket 连接
+2026-08-14T06:01:15.272297 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T06:01:21.899248 [admin] stop_container : ros2_admin_simulation_launch
+2026-08-14T06:01:46.226013 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-14T06:01:46.609749 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T06:02:25.504357 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T06:02:37.810748 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T06:02:40.030981 [honglan_wang] batch_generate : tb_v06 -> tb_v06
+2026-08-14T06:02:57.353256 [honglan_wang] batch_generate : tb_v09 -> tb_v09
+2026-08-14T06:03:03.270307 [honglan_wang] batch_generate : tb_v10 -> tb_v10
+2026-08-14T06:03:37.783713 [honglan_wang] batch_generate : tb_v08 -> tb_v08
+2026-08-14T06:03:44.096565 [honglan_wang] switch_cert : 切换到 106 证书 target=self
+2026-08-14T06:03:44.631200 [honglan_wang] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-14T06:05:32.137910 [honglan_wang] generate_scripts : 5 scripts
+2026-08-14T06:06:08.859872 [honglan_wang] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-14T06:06:33.005779 [honglan_wang] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-14T06:06:41.604385 [ke_yunxiao] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-14T06:08:48.034559 [ke_yunxiao] clear_scripts : 清空 3 个脚本
+2026-08-14T06:16:10.996831 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T06:16:28.884638 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T06:22:08.853249 [ke_yunxiao] batch_generate : s_g05 -> s_g05
+2026-08-14T06:22:12.307820 [ke_yunxiao] batch_generate : s_g03 -> s_g03
+2026-08-14T06:22:14.987969 [ke_yunxiao] batch_generate : s_g02 -> s_g02
+2026-08-14T06:22:19.681191 [ke_yunxiao] batch_generate : s_g01 -> s_g01
+2026-08-14T06:22:23.181665 [ke_yunxiao] batch_generate : s_g00 -> s_g00
+2026-08-14T06:22:29.973869 [ke_yunxiao] switch_cert : 切换到 106 证书 target=self
+2026-08-14T06:22:30.494241 [ke_yunxiao] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-14T06:22:40.599767 [ke_yunxiao] clear_scripts : 清空 0 个脚本
+2026-08-14T06:22:45.709199 [ke_yunxiao] clear_scripts : 清空 0 个脚本
+2026-08-14T06:23:31.434123 [ke_yunxiao] generate_scripts : 5 scripts
+2026-08-14T06:23:37.795450 [honglan_wang] start_timer_traffic_light : sn=js_light, host=106.14.223.60:1234
+2026-08-14T06:24:36.103050 [ke_yunxiao] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-14T06:24:58.094598 [ke_yunxiao] stop_container : ros2_ke_yunxiao_simulation_launch
+2026-08-14T06:25:30.917724 [honglan_wang] stop_timer_traffic_light : 
+2026-08-14T06:25:59.344380 [honglan_wang] start_timer_traffic_light : sn=js_light1, host=106.14.223.60:1234
+2026-08-14T06:27:13.930925 [ke_yunxiao] container_exec : ros2_ke_yunxiao_s_g02 -> ros2 topic echo /localization/localization_data --once
+2026-08-14T06:27:34.559381 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T06:28:06.826015 [ke_yunxiao] update_truck_config : trucks_g00.yaml: {'start_x': 8.584359169006348, 'start_y': -914.5095825195312, 'start_yaw': 128.9958588822517}
+2026-08-14T06:28:30.561808 [ke_yunxiao] container_exec : ros2_ke_yunxiao_s_g02 -> ros2 topic echo /localization/localization_data --once
+2026-08-14T06:29:00.000155 [ke_yunxiao] update_truck_config : trucks_g01.yaml: {'start_x': -25.774616241455078, 'start_y': -1034.1932373046875, 'start_yaw': 38.59020670282786}
+2026-08-14T06:29:23.688171 [ke_yunxiao] container_exec : ros2_ke_yunxiao_s_g02 -> ros2 topic echo /localization/localization_data --once
+2026-08-14T06:29:46.996676 [ke_yunxiao] update_truck_config : trucks_g02.yaml: {'start_x': -35.413700103759766, 'start_y': -880.2302856445312, 'start_yaw': -61.69483027193061}
+2026-08-14T06:30:20.450522 [ke_yunxiao] container_exec : ros2_ke_yunxiao_s_g02 -> ros2 topic echo /localization/localization_data --once
+2026-08-14T06:30:41.164812 [ke_yunxiao] update_truck_config : trucks_g03.yaml: {'start_x': 108.5306396484375, 'start_y': -885.6826782226562, 'start_yaw': -137.64347994663822}
+2026-08-14T06:30:50.687184 [ke_yunxiao] install_deploy : target=self clean=False backup=/home/fox/robotruck_ros2/ke_yunxiao/Docker/bk/.bk_backups/bk_backup_20260814_143050_install_deploy.tar.gz copied=43 skipped=3
+2026-08-14T06:30:56.394547 [ke_yunxiao] stop_all_ros2 : 5 containers (own)
+2026-08-14T06:31:25.000094 [ke_yunxiao] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-14T06:35:54.313932 [ke_yunxiao] stop_timer_traffic_light : 
+2026-08-14T06:35:56.607404 [ke_yunxiao] start_timer_traffic_light : sn=js_001, host=106.14.223.60:1234
+2026-08-14T06:39:39.926697 [honglan_wang] stop_timer_traffic_light : 
+2026-08-14T06:39:43.961414 [honglan_wang] start_timer_traffic_light : sn=js_light1, host=106.14.223.60:1234
+2026-08-14T06:48:17.507265 [ke_yunxiao] stop_timer_traffic_light : 
+2026-08-14T06:48:19.580131 [ke_yunxiao] start_timer_traffic_light : sn=js_001, host=106.14.223.60:1234
+2026-08-14T07:15:15.448908 [ke_yunxiao] stop_traffic_light : 
+2026-08-14T07:15:55.891519 [ke_yunxiao] start_traffic_light : sn=jt_hld_light, project_id=56955550355457, http=106.14.223.60:8900, mqtt=106.14.223.60:1883
+2026-08-14T07:39:53.623773 [admin] websocket_connected : WebSocket 连接
+2026-08-14T07:40:02.465357 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T07:46:12.148567 [admin] stop_container : ros2_admin_simulation_launch
+2026-08-14T07:46:42.886838 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T07:59:10.086941 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T07:59:42.222268 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T08:01:24.519336 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T08:11:56.417377 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T08:14:31.396523 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T08:14:31.758842 [admin] websocket_connected : WebSocket 连接
+2026-08-14T08:22:14.952819 [admin] logout : 用户注销
+2026-08-14T08:22:28.114049 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T08:22:42.569887 [ke_yunxiao@boonray.com] login_failed : 用户名或密码错误
+2026-08-14T08:23:27.804926 [ke_yunxiao@boonray.com] login_failed : 用户名或密码错误
+2026-08-14T08:23:40.922044 [ke_yunxiao] stop_all_ros2 : 5 containers (own)
+2026-08-14T08:23:47.454334 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T08:23:49.785245 [admin] login_success : 登录成功, token有效1天
+2026-08-14T08:23:52.216156 [admin] websocket_connected : WebSocket 连接
+2026-08-14T08:31:21.049527 [ke_yunxiao] switch_cert : 切换到 106 证书 target=self
+2026-08-14T08:31:23.468403 [ke_yunxiao] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-14T08:31:27.866449 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T08:31:33.418210 [ke_yunxiao] switch_cert : 切换到 139 证书 target=self
+2026-08-14T08:31:35.363325 [ke_yunxiao] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-14T08:31:40.469333 [ke_yunxiao] switch_cert : 切换到 106 证书 target=self
+2026-08-14T08:31:41.416826 [ke_yunxiao] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-14T08:31:55.702287 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T08:32:27.531232 [ke_yunxiao] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-14T08:36:22.702335 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T09:12:36.631269 [admin] stop_timer_traffic_light : 
+2026-08-14T09:31:46.882482 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T09:43:53.834950 [admin] stop_traffic_light : 
+2026-08-14T09:44:09.909385 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=106.14.223.60:8900, mqtt=106.14.223.60:1883
+2026-08-14T09:44:16.723474 [admin] stop_traffic_light : 
+2026-08-14T09:45:26.082749 [admin] start_traffic_light : sn=jt_hld_light, project_id=56955550355457, http=106.14.223.60:8900, mqtt=106.14.223.60:1883
+2026-08-14T09:46:40.639156 [admin] stop_traffic_light : 
+2026-08-14T09:47:03.952159 [admin] start_traffic_light : sn=jt_hld_light, project_id=56955550355457, http=106.14.223.60:8900, mqtt=106.14.223.60:1883
+2026-08-14T09:50:47.343131 [admin] set_traffic_mode : mode=2
+2026-08-14T09:50:50.962475 [admin] set_light_state : light_state=3, second_light_state=None
+2026-08-14T09:50:53.500149 [admin] set_light_state : light_state=1, second_light_state=None
+2026-08-14T09:50:55.392239 [admin] set_light_state : light_state=None, second_light_state=3
+2026-08-14T09:50:56.477404 [admin] set_light_state : light_state=None, second_light_state=2
+2026-08-14T09:50:58.596918 [admin] set_traffic_mode : mode=1
+2026-08-14T09:55:28.788073 [admin] stop_traffic_light : 
+2026-08-14T09:55:29.852119 [admin] stop_traffic_light : 
+2026-08-14T09:55:36.663737 [admin] start_traffic_light : sn=jt_hld_light, project_id=56955550355457, http=106.14.223.60:8900, mqtt=106.14.223.60:1883
+2026-08-14T09:57:15.000842 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T09:57:26.255610 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T09:57:35.080126 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T09:57:35.451443 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T09:58:40.629451 [zun.liu@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T09:58:42.387848 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T09:58:44.750550 [admin] websocket_connected : WebSocket 连接
+2026-08-14T09:58:48.971118 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-14T09:59:27.429475 [admin] websocket_connected : WebSocket 连接
+2026-08-14T09:59:34.222664 [admin] websocket_disconnected : WebSocket 断开
+2026-08-14T10:04:40.312861 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-14T10:52:36.882207 [zun.liu@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-15T11:03:50.521368 [admin] websocket_connected : WebSocket 连接
+2026-08-15T11:30:30.351640 [admin] websocket_disconnected : WebSocket 断开
+2026-08-15T13:54:01.938213 [admin] websocket_connected : WebSocket 连接
+2026-08-15T14:20:41.836299 [admin] websocket_disconnected : WebSocket 断开
+2026-08-15T23:01:39.062931 [admin] websocket_connected : WebSocket 连接
+2026-08-15T23:02:43.939433 [admin] websocket_connected : WebSocket 连接
+2026-08-15T23:03:10.200340 [admin] websocket_disconnected : WebSocket 断开
+2026-08-15T23:30:24.490953 [admin] websocket_disconnected : WebSocket 断开
+2026-08-15T23:30:46.404332 [admin] websocket_connected : WebSocket 连接
+2026-08-15T23:57:56.075620 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T01:17:36.437358 [admin] websocket_connected : WebSocket 连接
+2026-08-17T01:21:06.791586 [admin] websocket_connected : WebSocket 连接
+2026-08-17T01:21:09.175764 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T01:49:57.548899 [admin] login_success : 登录成功, token有效1天
+2026-08-17T01:49:58.432869 [admin] websocket_connected : WebSocket 连接
+2026-08-17T01:50:01.225956 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-17T01:50:05.175468 [admin] stop_traffic_light : 
+2026-08-17T01:50:07.531695 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T01:51:01.289515 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-17T01:51:23.382109 [admin] stop_traffic_light : 
+2026-08-17T02:14:25.680452 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T02:17:27.823066 [admin] websocket_connected : WebSocket 连接
+2026-08-17T02:17:45.483139 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T02:18:09.319090 [admin] switch_cert : 切换到 106 证书 target=self
+2026-08-17T02:18:09.955076 [admin] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-17T02:27:12.546142 [admin] stop_container : ros2_ke_yunxiao_s_g05
+2026-08-17T03:46:45.567787 [admin] websocket_connected : WebSocket 连接
+2026-08-17T03:48:16.189118 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T03:58:51.419432 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-17T05:48:47.840126 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-17T06:11:05.908450 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-17T06:11:06.846700 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-17T06:11:39.096459 [honglan_wang] install_upload : size=262635731 target=self
+2026-08-17T06:11:43.914902 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-17T06:11:59.695948 [honglan_wang] batch_generate : cc002 -> cc002
+2026-08-17T06:12:06.303571 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-17T06:12:08.021944 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-17T06:12:27.797619 [honglan_wang] clear_scripts : 清空 7 个脚本
+2026-08-17T06:12:30.619789 [honglan_wang] generate_scripts : 2 scripts
+2026-08-17T06:12:59.253873 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-17T06:22:09.948129 [honglan_wang] stop_container : ros2_honglan_wang_cc002
+2026-08-17T06:22:46.272474 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-17T07:06:10.784439 [admin] websocket_connected : WebSocket 连接
+2026-08-17T07:06:42.014714 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T08:22:43.769044 [admin] websocket_connected : WebSocket 连接
+2026-08-17T08:23:06.132238 [admin] websocket_disconnected : WebSocket 断开
+2026-08-17T08:47:58.781843 [admin] install_upload : size=100329160 target=self
+2026-08-18T01:03:59.489544 [admin] stop_container : ros2_ke_yunxiao_s_g00
+2026-08-18T01:04:00.906893 [admin] stop_container : ros2_ke_yunxiao_s_g01
+2026-08-18T01:04:02.187729 [admin] stop_container : ros2_ke_yunxiao_s_g02
+2026-08-18T01:04:05.981304 [admin] stop_container : ros2_ke_yunxiao_s_g03
+2026-08-18T01:04:43.814736 [admin] stop_container : ros2_honglan_wang_tb_v10
+2026-08-18T01:04:45.234872 [admin] stop_container : ros2_honglan_wang_tb_v06
+2026-08-18T01:04:46.764349 [admin] stop_container : ros2_honglan_wang_tb_v08
+2026-08-18T01:04:48.035700 [admin] stop_container : ros2_honglan_wang_tb_v09
+2026-08-18T02:14:07.194341 [admin] websocket_connected : WebSocket 连接
+2026-08-18T02:59:17.770982 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T03:52:23.000742 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-18T03:52:27.119975 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-18T03:52:34.587751 [honglan_wang] stop_container : ros2_honglan_wang_cc002
+2026-08-18T03:52:58.993294 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-18T03:54:30.087319 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-18T03:54:41.162818 [ke_yunxiao] switch_cert : 切换到 139 证书 target=self
+2026-08-18T03:54:41.631695 [ke_yunxiao] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-18T03:55:34.627235 [ke_yunxiao] execute_script : start_docker_ros2_s_g05.sh
+2026-08-18T03:56:37.868866 [ke_yunxiao] stop_container : ros2_ke_yunxiao_s_g05
+2026-08-18T03:56:38.602516 [ke_yunxiao] stop_container : ros2_ke_yunxiao_s_g05
+2026-08-18T03:56:48.958194 [ke_yunxiao] switch_cert : 切换到 106 证书 target=self
+2026-08-18T03:56:49.473068 [ke_yunxiao] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-18T03:56:51.983530 [ke_yunxiao] switch_cert : 切换到 139 证书 target=self
+2026-08-18T03:56:52.484086 [ke_yunxiao] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-18T03:57:18.572422 [ke_yunxiao] execute_script : start_docker_ros2_s_g05.sh
+2026-08-18T06:03:30.519820 [ke_yunxiao] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-18T06:14:26.366895 [honglan.wang@boonray.com] login_success : 登录成功, token有效1天
+2026-08-18T06:14:26.943224 [honglan.wang@boonray.com] websocket_connected : WebSocket 连接
+2026-08-18T06:14:31.782559 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-18T06:14:33.809573 [honglan_wang] stop_container : ros2_honglan_wang_cc002
+2026-08-18T06:14:38.831320 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-18T06:14:39.323386 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-18T06:15:02.435430 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-18T07:03:30.313050 [honglan_wang] batch_generate : tb_v08 -> tb_v08
+2026-08-18T07:03:39.313407 [honglan_wang] switch_cert : 切换到 106 证书 target=self
+2026-08-18T07:03:39.879217 [honglan_wang] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-18T07:03:46.320844 [honglan_wang] generate_scripts : 3 scripts
+2026-08-18T07:04:11.969431 [honglan_wang] execute_script : start_docker_ros2_tb_v08.sh
+2026-08-18T07:48:40.832239 [admin] websocket_connected : WebSocket 连接
+2026-08-18T07:49:28.348816 [admin] websocket_connected : WebSocket 连接
+2026-08-18T07:49:45.623544 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T08:17:07.446249 [honglan_wang] stop_container : ros2_honglan_wang_cc002
+2026-08-18T08:18:14.097807 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-18T08:20:05.567096 [admin] websocket_connected : WebSocket 连接
+2026-08-18T08:21:30.264050 [honglan_wang] stop_container : ros2_honglan_wang_cc002
+2026-08-18T08:21:35.775103 [honglan_wang] switch_cert : 切换到 139 证书 target=self
+2026-08-18T08:21:36.324726 [honglan_wang] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-18T08:22:00.637842 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-18T08:31:28.341539 [admin] websocket_connected : WebSocket 连接
+2026-08-18T08:31:51.866378 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T08:38:04.376487 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-18T08:38:09.088473 [ke_yunxiao] switch_cert : 切换到 139 证书 target=self
+2026-08-18T08:38:10.575368 [ke_yunxiao] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-18T08:38:38.202431 [ke_yunxiao] batch_execute_scripts : 4 scripts, mode=并行
+2026-08-18T08:42:13.717297 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T08:42:40.748712 [admin] login_success : 登录成功, token有效7天
+2026-08-18T08:42:40.928869 [admin] websocket_connected : WebSocket 连接
+2026-08-18T08:42:47.798235 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T08:58:16.806432 [admin] websocket_connected : WebSocket 连接
+2026-08-18T09:13:34.883193 [admin] websocket_connected : WebSocket 连接
+2026-08-18T09:13:48.002217 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T09:26:19.466556 [honglan_wang] stop_container : ros2_honglan_wang_cc002
+2026-08-18T09:26:43.903960 [honglan_wang] execute_script : start_docker_ros2_cc002.sh
+2026-08-18T09:31:02.815947 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T09:37:50.557047 [admin] websocket_disconnected : WebSocket 断开
+2026-08-18T11:14:32.766829 [admin] websocket_connected : WebSocket 连接
+2026-08-18T11:36:43.866683 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T02:13:59.095813 [ke_yunxiao] stop_all_ros2 : 5 containers (own)
+2026-08-19T02:14:04.077373 [admin] websocket_connected : WebSocket 连接
+2026-08-19T02:17:38.012549 [ke_yunxiao] stop_timer_traffic_light : 
+2026-08-19T02:18:22.716561 [ke_yunxiao] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-19T02:40:56.177768 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T03:07:20.408570 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-19T03:07:21.110042 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T03:11:17.666317 [admin] install_upload : size=100329160 target=self
+2026-08-19T03:11:44.134710 [admin] generate_scripts : 1 scripts
+2026-08-19T03:12:11.498485 [admin] switch_cert : 切换到 192 证书 target=self
+2026-08-19T03:12:30.259477 [admin] switch_cloud_ip : ip=192.168.9.252 target=self
+2026-08-19T03:13:18.216300 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-19T03:16:37.031452 [ke_yunxiao] logout : 用户注销
+2026-08-19T03:16:40.229806 [admin] login_success : 登录成功, token有效7天
+2026-08-19T03:16:42.820552 [admin] websocket_connected : WebSocket 连接
+2026-08-19T03:16:50.946774 [admin] stop_container : ros2_admin_simulation_launch
+2026-08-19T03:16:56.364970 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T03:17:20.724608 [admin] execute_script : start_docker_ros2_simulation_launch.sh
+2026-08-19T03:17:38.465487 [admin] websocket_connected : WebSocket 连接
+2026-08-19T03:17:49.284490 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T03:20:04.899640 [admin] websocket_connected : WebSocket 连接
+2026-08-19T03:20:05.292782 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T03:20:10.034252 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T03:20:11.412104 [admin] logout : 用户注销
+2026-08-19T03:20:13.537316 [ke.yunxiao@boonray.com] login_success : 登录成功, token有效1天
+2026-08-19T03:20:15.336871 [ke.yunxiao@boonray.com] login_success : 登录成功, token有效1天
+2026-08-19T03:20:20.707863 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-19T03:20:21.119229 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T03:20:27.747737 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-19T03:20:41.083611 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-19T03:21:08.817059 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T03:21:13.154516 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T05:33:15.904376 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-19T05:33:30.477556 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T06:18:01.711365 [admin] websocket_connected : WebSocket 连接
+2026-08-19T06:41:44.251535 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T07:26:10.602433 [admin] websocket_connected : WebSocket 连接
+2026-08-19T07:26:26.274711 [ke_yunxiao] stop_container : ros2_ke_yunxiao_s_g02
+2026-08-19T07:26:30.255209 [ke_yunxiao] switch_cert : 切换到 106 证书 target=self
+2026-08-19T07:26:31.336493 [ke_yunxiao] switch_cloud_ip : ip=106.14.223.60 target=self
+2026-08-19T07:26:56.478101 [ke_yunxiao] execute_script : start_docker_ros2_s_g02.sh
+2026-08-19T07:30:22.260319 [ke_yunxiao] stop_container : ros2_ke_yunxiao_s_g02
+2026-08-19T07:30:25.854225 [ke_yunxiao] switch_cert : 切换到 139 证书 target=self
+2026-08-19T07:30:28.290608 [ke_yunxiao] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-19T07:30:50.699442 [ke_yunxiao] execute_script : start_docker_ros2_s_g02.sh
+2026-08-19T07:38:16.905023 [ke_yunxiao] sync_bags : 1 bags target=self
+2026-08-19T07:38:25.909890 [ke_yunxiao] file_delete : dir rosbag2_2026_08_10-10_19_55 target=self
+2026-08-19T07:50:12.607129 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T07:52:40.370093 [ke_yunxiao] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-19T07:55:13.208722 [admin] websocket_connected : WebSocket 连接
+2026-08-19T07:55:28.566265 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T07:55:45.990024 [admin] batch_generate : hg_kqljt -> hg_kqljt
+2026-08-19T07:56:03.161717 [admin] batch_generate : syxy_csjwj -> syxy_csjwj
+2026-08-19T07:56:07.134776 [admin] batch_generate : mstn_mhyyt -> mstn_mhyyt
+2026-08-19T07:56:11.643867 [admin] batch_generate : tqdj_zhsqj -> tqdj_zhsqj
+2026-08-19T07:56:19.173573 [admin] batch_generate : afly_zm_hxlm -> afly_zm_hxlm
+2026-08-19T07:56:24.271108 [admin] batch_generate : zjcx_ba_zlcs -> zjcx_ba_zlcs
+2026-08-19T07:56:59.216330 [admin] bk_clean : sub=mock_truck/config target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260819_155658_bk_clean_mock_truck_config.tar.gz
+2026-08-19T07:57:01.887295 [admin] bk_clean : sub=mock_truck/launch target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260819_155701_bk_clean_mock_truck_launch.tar.gz
+2026-08-19T07:57:04.356369 [admin] bk_clean : sub=simulation_launches/launch target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260819_155703_bk_clean_simulation_launches_launch.tar.gz
+2026-08-19T07:57:10.511104 [admin] bk_clean : sub=simulation_launches/config target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260819_155708_bk_clean_simulation_launches_config.tar.gz
+2026-08-19T07:57:18.822686 [admin] bk_copy_from_install : target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260819_155715_bk_copy_from_install.tar.gz copied=8
+2026-08-19T07:57:23.224753 [admin] batch_generate : zjcx_ba_zlcs -> zjcx_ba_zlcs
+2026-08-19T07:57:31.566432 [admin] batch_generate : afly_zm_hxlm -> afly_zm_hxlm
+2026-08-19T07:57:36.939987 [admin] batch_generate : tqdj_zhsqj -> tqdj_zhsqj
+2026-08-19T07:57:44.298282 [admin] batch_generate : mstn_mhyyt -> mstn_mhyyt
+2026-08-19T07:57:51.000882 [admin] batch_generate : syxy_csjwj -> syxy_csjwj
+2026-08-19T07:57:57.330965 [admin] batch_generate : hg_kqljt -> hg_kqljt
+2026-08-19T07:58:13.760380 [admin] batch_generate : sgls_3311 -> sgls_3311
+2026-08-19T07:58:28.504166 [admin] sync_folder : mock_truck target=self
+2026-08-19T07:58:28.906060 [admin] sync_folder : simulation_launches target=self
+2026-08-19T07:59:15.353080 [admin] generate_scripts : 7 scripts
+2026-08-19T07:59:51.663216 [admin] switch_cert : 切换到 139 证书 target=self
+2026-08-19T07:59:55.470794 [admin] switch_cloud_ip : ip=139.196.75.44 target=self
+2026-08-19T08:01:03.112006 [admin] websocket_connected : WebSocket 连接
+2026-08-19T08:01:29.502529 [admin] websocket_connected : WebSocket 连接
+2026-08-19T08:02:01.694069 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T08:02:25.669354 [admin] container_exec : ros2_ke_yunxiao_s_g02 -> ros2 topic echo /localization/localization_data --once
+2026-08-19T08:14:09.087802 [admin] list_topics : 容器 ros2_ke_yunxiao_s_g02
+2026-08-19T08:14:19.471335 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:14:47.236738 [admin] update_truck_config : truckafly_zm_hxlm.yaml: {'start_x': -1351.4662120694975, 'start_y': -2448.3747566854163, 'start_yaw': -129.61536888794595}
+2026-08-19T08:14:54.378868 [admin] websocket_connected : WebSocket 连接
+2026-08-19T08:15:41.370100 [admin] execute_script : start_docker_ros2_afly_zm_hxlm.sh
+2026-08-19T08:17:09.619446 [admin] execute_script : start_docker_ros2_afly_zm_hxlm.sh
+2026-08-19T08:17:30.199636 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:17:52.385732 [admin] update_truck_config : truckhg_kqljt.yaml: {'start_x': -1281.138830432639, 'start_y': -2476.6988178804845, 'start_yaw': 178.37639545489162}
+2026-08-19T08:18:14.248831 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:18:21.732890 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:19:03.953670 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:19:36.532413 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:19:58.469016 [admin] update_truck_config : truckmstn_mhyyt.yaml: {'start_x': -1385.871324806743, 'start_y': -2519.401674392138, 'start_yaw': -121.83786464645613}
+2026-08-19T08:20:26.416064 [admin] execute_script : start_docker_ros2_hg_kqljt.sh
+2026-08-19T08:20:29.512821 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:20:55.777525 [admin] update_truck_config : trucksgls_3311.yaml: {'start_x': -1613.8336287641355, 'start_y': -2855.2840901618974, 'start_yaw': -129.09215228119464}
+2026-08-19T08:21:23.638780 [admin] batch_execute_scripts : 2 scripts, mode=并行
+2026-08-19T08:21:29.992273 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:32:48.512082 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:33:16.505567 [admin] update_truck_config : trucksyxy_csjwj.yaml: {'start_x': -2287.6900499591347, 'start_y': -2005.6425944960854, 'start_yaw': -100.42640810681041}
+2026-08-19T08:33:42.266168 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:34:05.508575 [admin] update_truck_config : trucktqdj_zhsqj.yaml: {'start_x': -2236.330020141951, 'start_y': -2420.275863440897, 'start_yaw': -40.066731776382824}
+2026-08-19T08:35:11.036159 [admin] topic_echo : /localization/localization_data
+2026-08-19T08:35:31.916441 [admin] update_truck_config : truckzjcx_ba_zlcs.yaml: {'start_x': -1555.488169125975, 'start_y': -2382.0906274992585, 'start_yaw': 25.177538200321578}
+2026-08-19T08:35:58.922883 [admin] batch_execute_scripts : 3 scripts, mode=并行
+2026-08-19T08:43:24.040674 [ke_yunxiao] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-19T09:05:32.063953 [admin] install_deploy : target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20260819_170525_install_deploy.tar.gz copied=57 skipped=3
+2026-08-19T09:33:11.431572 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-19T09:33:21.390040 [ke_yunxiao] stop_container : ros2_ke_yunxiao_s_g02
+2026-08-19T09:34:35.335170 [admin] stop_container : ros2_admin_tqdj_zhsqj
+2026-08-19T09:35:05.460543 [admin] execute_script : start_docker_ros2_tqdj_zhsqj.sh
+2026-08-19T09:35:19.764120 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T09:35:20.149530 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T10:01:08.351444 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T10:02:32.746971 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-19T10:02:33.116916 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T10:02:37.301873 [ke_yunxiao] logout : 用户注销
+2026-08-19T10:02:39.142135 [admin] login_success : 登录成功, token有效1天
+2026-08-19T10:02:41.022347 [admin] login_success : 登录成功, token有效1天
+2026-08-19T10:02:45.125515 [admin] websocket_connected : WebSocket 连接
+2026-08-19T10:02:47.499562 [admin] websocket_connected : WebSocket 连接
+2026-08-19T10:02:47.861798 [admin] websocket_disconnected : WebSocket 断开
+2026-08-19T10:02:52.030342 [admin] websocket_connected : WebSocket 连接
+2026-08-19T10:03:10.418421 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-19T10:03:24.302222 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T00:29:44.799608 [admin] stop_container : ros2_admin_tqdj_zhsqj
+2026-08-20T00:29:46.658289 [admin] stop_container : ros2_admin_zjcx_ba_zlcs
+2026-08-20T00:29:48.386717 [admin] stop_container : ros2_admin_syxy_csjwj
+2026-08-20T00:29:49.959816 [admin] stop_container : ros2_admin_mstn_mhyyt
+2026-08-20T00:29:51.491921 [admin] stop_container : ros2_admin_sgls_3311
+2026-08-20T00:29:53.038823 [admin] stop_container : ros2_admin_hg_kqljt
+2026-08-20T00:29:54.550940 [admin] stop_container : ros2_admin_afly_zm_hxlm
+2026-08-20T00:29:56.101514 [admin] stop_container : ros2_admin_simulation_launch
+2026-08-20T00:29:57.784547 [admin] stop_container : ros2_ke_yunxiao_s_g05
+2026-08-20T00:31:58.264769 [admin] stop_container : ros2_ke_yunxiao_s_g00
+2026-08-20T00:32:00.227907 [admin] stop_container : ros2_ke_yunxiao_s_g01
+2026-08-20T00:32:02.047486 [admin] stop_container : ros2_ke_yunxiao_s_g03
+2026-08-20T00:32:31.887383 [admin] batch_execute_scripts : 7 scripts, mode=并行
+2026-08-20T01:18:04.970165 [admin] stop_timer_traffic_light : 
+2026-08-20T01:18:06.977455 [admin] stop_traffic_light : 
+2026-08-20T01:18:07.643041 [admin] stop_traffic_light : 
+2026-08-20T01:18:08.484648 [admin] stop_traffic_light : 
+2026-08-20T01:18:09.866700 [admin] stop_timer_traffic_light : 
+2026-08-20T01:18:10.565428 [admin] stop_timer_traffic_light : 
+2026-08-20T01:18:11.274348 [admin] stop_timer_traffic_light : 
+2026-08-20T01:18:11.963007 [admin] stop_traffic_light : 
+2026-08-20T01:18:12.653671 [admin] stop_traffic_light : 
+2026-08-20T01:18:13.342564 [admin] stop_traffic_light : 
+2026-08-20T01:18:14.256629 [admin] stop_traffic_light : 
+2026-08-20T01:18:14.893852 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-20T01:23:28.503724 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-20T01:40:19.256898 [admin] logout : 用户注销
+2026-08-20T01:40:32.265808 [admin] login_success : 登录成功, token有效1天
+2026-08-20T01:40:34.142712 [admin] websocket_connected : WebSocket 连接
+2026-08-20T01:40:46.708179 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T01:41:07.498017 [admin] websocket_connected : WebSocket 连接
+2026-08-20T01:41:12.610389 [admin] logout : 用户注销
+2026-08-20T01:41:12.967027 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T01:41:39.358290 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T01:44:15.215950 [ke.yunxiao@boonray.com] login_failed : 用户名或密码错误
+2026-08-20T01:44:25.107460 [admin] websocket_connected : WebSocket 连接
+2026-08-20T01:44:46.727078 [ke.yunxiao@boonray.com] login_success : 登录成功, token有效7天
+2026-08-20T01:44:47.459626 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-20T01:45:44.908680 [ke_yunxiao] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-20T02:42:16.586555 [admin] stop_timer_traffic_light : 
+2026-08-20T02:42:18.402104 [admin] stop_traffic_light : 
+2026-08-20T02:42:48.595166 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T03:42:04.651358 [admin] login_success : 登录成功, token有效7天
+2026-08-20T03:42:05.394755 [admin] websocket_connected : WebSocket 连接
+2026-08-20T03:42:46.770595 [admin] stop_container : ros2_honglan_wang_cc002
+2026-08-20T03:42:49.115375 [admin] stop_container : ros2_honglan_wang_tb_v08
+2026-08-20T04:12:10.593861 [admin] login_success : 登录成功, token有效1天
+2026-08-20T04:12:12.283946 [admin] websocket_connected : WebSocket 连接
+2026-08-20T04:12:14.277236 [admin] websocket_connected : WebSocket 连接
+2026-08-20T04:12:18.131421 [admin] websocket_connected : WebSocket 连接
+2026-08-20T04:12:21.648594 [admin] stop_all_ros2 : 12 containers (all)
+2026-08-20T04:12:23.661088 [admin] stop_container : ros2_ke_yunxiao_s_g02
+2026-08-20T04:12:24.689141 [admin] stop_container : ros2_ke_yunxiao_s_g03
+2026-08-20T04:12:26.030998 [admin] stop_container : ros2_ke_yunxiao_s_g05
+2026-08-20T04:12:27.138820 [admin] stop_container : ros2_ke_yunxiao_s_g00
+2026-08-20T04:12:27.778204 [admin] stop_container : ros2_ke_yunxiao_s_g01
+2026-08-20T04:12:28.107017 [honglan.wang@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-20T04:12:28.775451 [admin] stop_container : ros2_admin_zjcx_ba_zlcs
+2026-08-20T04:12:29.438092 [admin] stop_container : ros2_admin_syxy_csjwj
+2026-08-20T04:12:30.455075 [admin] stop_container : ros2_admin_tqdj_zhsqj
+2026-08-20T04:12:31.148864 [admin] stop_container : ros2_admin_hg_kqljt
+2026-08-20T04:12:31.842771 [admin] stop_container : ros2_admin_afly_zm_hxlm
+2026-08-20T04:12:32.546952 [admin] stop_container : ros2_admin_mstn_mhyyt
+2026-08-20T04:12:33.920113 [admin] stop_container : ros2_admin_sgls_3311
+2026-08-20T04:12:49.490293 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T04:12:53.785880 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T04:21:17.106791 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T04:30:38.712469 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T04:30:47.736569 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T04:30:58.867737 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-20T04:33:27.928279 [admin] websocket_connected : WebSocket 连接
+2026-08-20T04:33:30.362570 [admin] websocket_connected : WebSocket 连接
+2026-08-20T04:46:42.154193 [admin] websocket_connected : WebSocket 连接
+2026-08-20T05:40:22.278659 [admin] websocket_connected : WebSocket 连接
+2026-08-20T05:48:21.683750 [admin] websocket_connected : WebSocket 连接
+2026-08-20T05:48:37.243727 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T05:56:57.381703 [admin] websocket_connected : WebSocket 连接
+2026-08-20T06:26:25.904988 [admin] batch_execute_scripts : 7 scripts, mode=并行
+2026-08-20T06:44:14.911606 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-20T06:54:09.748795 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T07:03:47.337719 [admin] websocket_connected : WebSocket 连接
+2026-08-20T07:43:25.713356 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T07:53:16.126859 [admin] websocket_connected : WebSocket 连接
+2026-08-20T08:31:07.525208 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T08:58:20.108262 [admin] stop_all_ros2 : 7 containers (all)
+2026-08-20T09:01:16.002136 [admin] batch_execute_scripts : 7 scripts, mode=并行
+2026-08-20T09:05:14.470203 [admin] stop_traffic_light : 
+2026-08-20T09:05:16.643703 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-20T13:06:32.966969 [admin] websocket_connected : WebSocket 连接
+2026-08-20T13:35:13.595194 [admin] websocket_disconnected : WebSocket 断开
+2026-08-20T14:42:03.631477 [admin] websocket_connected : WebSocket 连接
+2026-08-20T15:10:44.195310 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T00:56:59.120028 [admin] websocket_connected : WebSocket 连接
+2026-08-21T01:15:38.267657 [admin] login_success : 登录成功, token有效1天
+2026-08-21T01:15:39.516183 [admin] websocket_connected : WebSocket 连接
+2026-08-21T01:15:42.956691 [admin] stop_traffic_light : 
+2026-08-21T01:15:46.027516 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T01:15:52.010783 [admin] stop_all_ros2 : 7 containers (all)
+2026-08-21T01:21:47.687479 [admin] login_success : 登录成功, token有效7天
+2026-08-21T01:21:49.470234 [admin] websocket_connected : WebSocket 连接
+2026-08-21T01:22:26.819851 [admin] execute_script : start_docker_ros2_zjcx_ba_zlcs.sh
+2026-08-21T01:23:06.585979 [admin] stop_container : ros2_admin_zjcx_ba_zlcs
+2026-08-21T01:25:42.379661 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T01:40:09.510446 [admin] batch_execute_scripts : 7 scripts, mode=并行
+2026-08-21T01:43:33.775506 [admin] websocket_connected : WebSocket 连接
+2026-08-21T01:45:01.624574 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-21T01:48:54.011323 [admin] stop_traffic_light : 
+2026-08-21T01:48:56.721284 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-21T01:51:06.946410 [admin] stop_container : ros2_admin_zjcx_ba_zlcs
+2026-08-21T01:51:08.189277 [admin] stop_container : ros2_admin_tqdj_zhsqj
+2026-08-21T01:51:14.221714 [admin] stop_container : ros2_admin_syxy_csjwj
+2026-08-21T01:51:44.357003 [admin] batch_execute_scripts : 3 scripts, mode=并行
+2026-08-21T01:52:05.848278 [admin] stop_traffic_light : 
+2026-08-21T01:52:20.647541 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-21T01:53:50.480858 [admin] set_traffic_mode : mode=2
+2026-08-21T01:53:53.377920 [admin] set_light_state : light_state=3, second_light_state=None
+2026-08-21T01:53:54.812494 [admin] set_light_state : light_state=None, second_light_state=3
+2026-08-21T01:53:57.813475 [admin] set_light_state : light_state=None, second_light_state=1
+2026-08-21T01:53:58.910618 [admin] set_light_state : light_state=2, second_light_state=None
+2026-08-21T01:54:06.211686 [admin] set_traffic_mode : mode=1
+2026-08-21T01:54:29.029272 [admin] set_traffic_mode : mode=2
+2026-08-21T01:54:30.554305 [admin] set_light_state : light_state=3, second_light_state=None
+2026-08-21T01:54:31.702177 [admin] set_light_state : light_state=None, second_light_state=3
+2026-08-21T01:55:05.231666 [admin] set_traffic_mode : mode=1
+2026-08-21T01:55:16.816739 [admin] set_traffic_mode : mode=2
+2026-08-21T01:55:22.330195 [admin] stop_traffic_light : 
+2026-08-21T01:55:26.334619 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-21T02:12:55.551782 [admin] websocket_connected : WebSocket 连接
+2026-08-21T02:13:09.808599 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T02:19:46.193048 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-21T02:46:35.730681 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T03:08:50.803462 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-21T03:09:25.079737 [ke_yunxiao] batch_execute_scripts : 5 scripts, mode=并行
+2026-08-21T03:16:55.319541 [admin] websocket_connected : WebSocket 连接
+2026-08-21T03:38:05.284028 [admin] websocket_connected : WebSocket 连接
+2026-08-21T03:38:35.817288 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T03:41:31.251718 [ke_yunxiao] load_image : ros1_ubuntu20.04.tar
+2026-08-21T03:45:45.687188 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-21T03:45:55.569942 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-21T05:38:06.382498 [admin] websocket_connected : WebSocket 连接
+2026-08-21T06:23:31.309305 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-21T06:24:07.829293 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-21T06:24:38.767862 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-21T06:24:48.990146 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T06:24:49.667032 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T06:24:55.918849 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T06:24:58.332544 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T06:25:07.665188 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-21T06:25:10.041873 [admin] websocket_connected : WebSocket 连接
+2026-08-21T06:25:10.226596 [admin] websocket_connected : WebSocket 连接
+2026-08-21T06:25:12.471785 [admin] websocket_connected : WebSocket 连接
+2026-08-21T06:26:04.971020 [admin] websocket_connected : WebSocket 连接
+2026-08-21T06:26:13.649726 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:00:10.438606 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:00:20.752064 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:00:27.361042 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:00:45.512495 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:01:02.501301 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:01:23.153322 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:01:40.468582 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:01:55.788668 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:02:09.644310 [admin] stop_all_ros2 : 12 containers (all)
+2026-08-21T07:02:11.952949 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:06:24.220000 [ke_yunxiao] execute_script : start_docker_ros2_s_g03.sh
+2026-08-21T07:10:14.590986 [admin] extract_hdmap : container=ros2_ke_yunxiao_s_g03 sn=s_g03 target=admin
+2026-08-21T07:10:25.367269 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:10:31.979998 [admin] extract_hdmap : container=ros2_ke_yunxiao_s_g03 sn=s_g03 target=admin
+2026-08-21T07:10:42.998496 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:12:41.152305 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:12:58.475754 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:13:13.156432 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:13:13.534455 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:17:45.430455 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:19:01.320059 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:19:08.599266 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:19:33.602162 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:22:49.144527 [admin] execute_script : start_docker_ros2_afly_zm_hxlm.sh
+2026-08-21T07:24:02.523009 [admin] extract_hdmap : container=ros2_ke_yunxiao_s_g03 sn=s_g03 target=admin
+2026-08-21T07:24:18.125247 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:24:18.469030 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:41:35.486300 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:41:53.588586 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:42:32.661389 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:42:39.493730 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:49:58.415137 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:50:10.426772 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:50:13.389917 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:50:31.504382 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:55:02.446625 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:55:09.249753 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T07:56:37.388412 [admin] extract_hdmap : container=ros2_admin_afly_zm_hxlm sn=afly_zm_hxlm target=admin
+2026-08-21T07:56:44.550329 [admin] websocket_connected : WebSocket 连接
+2026-08-21T07:56:56.940886 [admin] extract_hdmap : container=ros2_admin_afly_zm_hxlm sn=afly_zm_hxlm target=admin
+2026-08-21T07:57:09.719956 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T08:00:50.724963 [admin] start_bag_record : container=ros2_admin_afly_zm_hxlm target=admin
+2026-08-21T08:02:35.027174 [admin] stop_bag_record : container=ros2_admin_afly_zm_hxlm target=admin
+2026-08-21T08:09:12.530736 [admin] start_timer_traffic_light : sn=js_light, host=139.196.75.44:1234
+2026-08-21T08:09:14.082507 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-21T08:18:57.082394 [admin] stop_traffic_light : 
+2026-08-21T08:18:59.560389 [admin] start_traffic_light : sn=hd_light, project_id=55722339745601, http=139.196.75.44:8900, mqtt=139.196.75.44:1883
+2026-08-21T08:25:21.410724 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T08:25:26.641634 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T08:25:31.164253 [ke.yunxiao@boonray.com] websocket_disconnected : WebSocket 断开
+2026-08-21T08:25:43.197311 [admin] websocket_connected : WebSocket 连接
+2026-08-21T08:25:44.145923 [ke.yunxiao@boonray.com] websocket_connected : WebSocket 连接
+2026-08-21T08:25:48.406114 [admin] websocket_connected : WebSocket 连接
+2026-08-21T08:26:16.938448 [admin] websocket_connected : WebSocket 连接
+2026-08-21T08:26:21.763966 [admin] websocket_disconnected : WebSocket 断开
+2026-08-21T08:26:28.591187 [admin] extract_hdmap : container=ros2_admin_afly_zm_hxlm sn=afly_zm_hxlm target=admin
+2026-08-21T08:26:52.171677 [admin] start_bag_record : container=ros2_admin_afly_zm_hxlm target=admin
+2026-08-21T08:27:09.550596 [admin] stop_bag_record : container=ros2_admin_afly_zm_hxlm target=admin
+2026-08-21T08:27:39.120909 [admin] websocket_connected : WebSocket 连接
+2026-08-21T08:28:04.975962 [admin] websocket_disconnected : WebSocket 断开

@@ -922,7 +922,7 @@ async def check_cloud_status():
 # ---------- ROS2 命令 ----------
 @router.post("/api/ros2/simulation/start")
 async def start_simulation(data: Dict[str, str], current_user: dict = Depends(require_permission('simulation'))):
-    """在容器中启动仿真"""
+    """在容器中启动Mock Truck仿真"""
     container_id = data.get("container_id")
     cmd = data.get("command")
     if not container_id:
@@ -937,9 +937,9 @@ async def start_simulation(data: Dict[str, str], current_user: dict = Depends(re
     rc, out, err = run_ros2_cmd_in_container(container_id, cmd_parts, timeout=60)
     db.add_audit_log(current_user["username"], "start_simulation", f"容器 {container_id}: {cmd}")
     if rc == 0:
-        await broadcast_log("info", f"仿真启动成功 (容器 {container_id}): {cmd}")
+        await broadcast_log("info", f"Mock Truck 仿真启动成功 (容器 {container_id}): {cmd}")
     else:
-        await broadcast_log("error", f"仿真启动失败 (容器 {container_id}): {err}")
+        await broadcast_log("error", f"Mock Truck 仿真启动失败 (容器 {container_id}): {err}")
     return {"success": rc == 0, "stdout": out, "stderr": err}
 
 @router.post("/api/ros2/cmd_vel")
@@ -2380,11 +2380,13 @@ async def generate_scripts(data: Dict[str, str], current_user: dict = Depends(re
         gen = ROS2ScriptGenerator(cfg, user_paths=workspace_paths, user_role=user_role)
         ids, port_warnings = gen.generate()
         db.add_audit_log(current_user["username"], "generate_scripts", f"{len(ids)} scripts")
+        # 容器名带 owner 段（与脚本生成器派生规则一致）
+        owner = ROS2ScriptGenerator._owner_from_host_ws(workspace_paths["host_ws"])
         return {
             "success": True,
             "warnings": port_warnings,
             "host_install": host_install,
-            "generated": [{"name": f"start_docker_ros2_{id}.sh", "container": f"ros2_{id}", "domain_id": "auto"} for id in ids]
+            "generated": [{"name": f"start_docker_ros2_{id}.sh", "container": f"ros2_{owner}_{id}", "domain_id": "auto"} for id in ids]
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -3383,7 +3385,9 @@ async def batch_execute_scripts(data: Dict[str, Any], current_user: dict = Depen
     for r in results:
         name = r.get("name", "")
         if r.get("success") and name.startswith("start_docker_ros2_") and name.endswith(".sh"):
-            container_name = "ros2_" + name[len("start_docker_ros2_"):-len(".sh")]
+            id_part = name[len("start_docker_ros2_"):-len(".sh")]
+            owner = ROS2ScriptGenerator._owner_from_host_ws(workspace_paths["host_ws"])
+            container_name = f"ros2_{owner}_{id_part}"
             rc_cid, cid_out, _ = DockerManager.run_cmd(
                 DOCKER_PREFIX.split() + ["docker", "ps", "-a", "--filter", f"name={container_name}", "--format", "{{.ID}}"]
             )
@@ -3411,10 +3415,12 @@ async def execute_script(data: Dict[str, str], current_user: dict = Depends(requ
     # 脚本执行成功后，根据脚本名登记容器归属
     if rc == 0:
         await broadcast_log("info", f"脚本 {script} 执行成功")
-        # 从脚本名提取容器名（start_docker_ros2_xxx.sh -> ros2_xxx）
+        # 从脚本名提取容器名（start_docker_ros2_xxx.sh -> ros2_{owner}_xxx）
         base = script
         if base.startswith("start_docker_ros2_") and base.endswith(".sh"):
-            container_name = "ros2_" + base[len("start_docker_ros2_"):-len(".sh")]
+            id_part = base[len("start_docker_ros2_"):-len(".sh")]
+            owner = ROS2ScriptGenerator._owner_from_host_ws(workspace_paths["host_ws"])
+            container_name = f"ros2_{owner}_{id_part}"
             # 反查容器 ID
             rc_cid, cid_out, _ = DockerManager.run_cmd(
                 DOCKER_PREFIX.split() + ["docker", "ps", "-a", "--filter", f"name={container_name}", "--format", "{{.ID}}"]
@@ -4990,6 +4996,15 @@ async def download_attachment_api(date_dir: str, user_id: str, filename: str,
 # ============================================================
 # 工单系统模块 END
 # ============================================================
+
+
+# ============================================================
+# 数据导出模块（新增功能，零侵入）
+# 与 api.py 顶部注释「后续可按业务领域进一步拆分」预期一致，
+# 落地为独立的 routers/data_export.py 路由文件
+# ============================================================
+from routers.data_export import router as data_export_router
+router.include_router(data_export_router)
 
 
 # 前端 SPA 路由处理 - 必须定义在所有 API 路由之后

@@ -48,6 +48,12 @@ v4.0-decoupled 主要更新：
     - 所有 v3.6 功能完整保留，API 兼容
     - 数据库初始化脚本不变
     - 前端资源不变
+  📦 数据导出（新增）
+    - 新增「数据导出」面板：提取地图（hdmap）、录制 ROS2 Bag（mcap格式）、Web 下载
+    - 独立文件实现：services/data_export_service.py + routers/data_export.py + js/panels/data_export.js
+    - 通过 MutationObserver 向容器列表动态注入按钮，不修改原有代码
+    - 用户隔离：bag/hdmap 文件仅落地到当前用户空间（~/robotruck_ros2/<user>/Docker/bags/）
+    - 专用下载接口 GET /api/data-export/bag/download，权限 data-export
 
 ================================================================================
                           解耦架构说明
@@ -78,9 +84,11 @@ v4.0-decoupled 主要更新：
 │   ├── script_generator.py # ROS2 脚本生成器（ROS2ScriptGenerator 类）
 │   ├── system_monitor.py   # 系统监控（SystemMonitor 类）
 │   ├── system_utils.py     # 系统工具（SystemUtils 类）
-│   └── traffic_light.py    # 红绿灯模拟器（TrafficLightSender / TimerTrafficLightSender）
+│   ├── traffic_light.py    # 红绿灯模拟器（TrafficLightSender / TimerTrafficLightSender）
+│   └── data_export_service.py # 数据导出服务（DataExportService：hdmap提取 + ros2 bag录制）
 └── routers/                # 接口层（路由定义）
-    ├── api.py              # 统一路由入口（当前包含所有路由，后续可按领域拆分）
+    ├── api.py              # 统一路由入口（包含通用路由，挂载子路由）
+    ├── data_export.py      # 数据导出路由（hdmap提取 + ros2 bag录制 + 下载）
     └── __init__.py         # 包标识
 
 前端目录结构（不变）：
@@ -91,7 +99,10 @@ v4.0-decoupled 主要更新：
 │   └── sj_style.css        # 全局样式
 └── js/
     ├── sj_script.js        # 前端业务逻辑
-    └── sj_validators.js    # 前端注册校验逻辑
+    ├── sj_validators.js    # 前端注册校验逻辑
+    └── panels/             # 面板模块（按功能拆分，通过 MutationObserver 注入）
+        ├── terminal.js     # 终端面板模块
+        └── data_export.js  # 数据导出模块（提取地图/录制Bag/下载Bags）
 
 其他目录（不变）：
 
@@ -281,6 +292,111 @@ v4.0-decoupled 主要更新：
 
     # 仅更新 Python 依赖
     sudo python3 deploy.py --skip-system --only-deps
+
+================================================================================
+                  部署平台支持与跨环境复用说明
+================================================================================
+
+【操作系统支持情况】
+
+  ✅ Ubuntu 20.04 / 22.04 / 24.04（推荐，原生支持）
+     - deploy.py 使用 apt 安装 Python / Docker / Git
+     - 使用 systemd 配置开机自启服务
+     - 全流程一键完成
+
+  ⚠️ 其他 Linux 发行版（CentOS / Debian / Rocky 等）
+     - Python 依赖安装、应用启动可正常使用
+     - 系统级软件安装（apt 命令）需手动改为对应包管理器（yum / dnf）
+     - systemd 服务配置通用，可正常使用
+     - 建议使用 --skip-system 跳过系统环境安装，手动准备 Python3/Docker/Git
+
+  ❌ Windows（不支持自动部署）
+     - deploy.py 依赖 apt / systemctl / usermod 等 Linux 专属命令，无法直接运行
+     - systemd 不存在于 Windows，无法配置开机自启服务
+     - 如需在 Windows 上运行，请按以下步骤手动部署：
+       1) 安装 Python 3.8+（https://www.python.org/downloads/）
+       2) 安装 Docker Desktop（https://www.docker.com/products/docker-desktop/）
+       3) 安装 Git（https://git-scm.com/download/win）
+       4) 执行依赖安装：
+            pip install -r redame\requirements.txt
+       5) 启动服务（不配置开机自启）：
+            cd backend
+            python app.py
+       6) 访问 http://127.0.0.1:8875
+     - Windows 下推荐使用任务计划程序或 NSSM 替代 systemd 实现开机自启
+
+【跨用户复用说明】
+
+  deploy.py 已支持跨用户部署，无需修改脚本即可在不同用户下使用：
+
+  - 用户名自动识别：通过 SUDO_USER / os.getlogin() 获取当前执行用户
+  - 项目路径自动识别：基于脚本所在目录推导，无需硬编码
+  - HOME 目录自动推导：systemd 服务文件中 PATH 包含 ~/.local/bin
+  - Python 解释器自动定位：使用 shutil.which("python3") 查找
+
+  在新用户下部署只需：
+    # 1. 切换到目标用户
+    su - <目标用户>
+
+    # 2. 拷贝项目到目标用户家目录
+    cp -r /home/fox/ros2_web ~/
+
+    # 3. 修改项目归属
+    chown -R <目标用户>:<目标用户> ~/ros2_web
+
+    # 4. 执行部署（需 sudo 权限）
+    cd ~/ros2_web
+    sudo python3 deploy.py
+
+  部署完成后，systemd 服务将以目标用户身份运行，
+  日志目录、数据目录归属也会自动正确。
+
+【跨服务器复用说明】
+
+  将项目迁移到新服务器时，需注意以下事项：
+
+  1. 环境前置条件：
+     - Ubuntu 20.04+（推荐）/ 其他 Linux（需手动准备环境）
+     - root 或 sudo 权限账号
+     - 可访问外网（用于 pip / apt 安装）或准备离线依赖包
+
+  2. 迁移步骤：
+     # 打包源项目（在原服务器执行）
+     cd ~
+     tar -czf ros2_web.tar.gz \
+       --exclude='ros2_web/log/*' \
+       --exclude='ros2_web/data/*.json' \
+       --exclude='ros2_web/__pycache__' \
+       --exclude='ros2_web/backend/__pycache__' \
+       ros2_web/
+
+     # 传输到新服务器
+     scp ros2_web.tar.gz <新服务器IP>:~/
+
+     # 在新服务器解压并部署
+     ssh <新服务器IP>
+     tar -xzf ros2_web.tar.gz
+     cd ros2_web
+     sudo python3 deploy.py
+
+  3. 部署后必做配置：
+     - 修改 backend/config.json 中的 jwt_secret（务必更换为随机字符串！）
+     - 检查并修改 cloud_env.current_ip / current_env（如云环境不同）
+     - 如使用 Supabase，确认 url / key 配置正确
+     - 修改默认管理员密码（首次登录后立即修改）
+     - 检查端口 8875 是否被占用：ss -tlnp | grep 8875
+
+  4. 离线环境部署：
+     - 在联网机器上执行 redame/download_deps.sh 生成离线包
+     - 将 ros2_offline_packages/ 和项目一起拷贝到目标服务器
+     - 安装依赖：pip3 install --no-index --find-links=./packages -r redame/requirements.txt
+     - 系统软件（Python/Docker/Git）需在目标服务器提前手动安装
+
+  5. Docker 镜像迁移：
+     - ROS2 仿真依赖的 Docker 镜像需单独迁移
+     - 导出：docker save -o ros2_image.tar <镜像名:标签>
+     - 传输：scp ros2_image.tar <新服务器>:~/
+     - 导入：docker load -i ros2_image.tar
 
 ================================================================================
                           开机自启（systemd）

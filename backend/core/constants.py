@@ -101,5 +101,6 @@ ALL_PANELS = [
     "images", "traffic", "advanced-fault", "tools", "monitor",
     "simulation", "topics", "nodes", "services", "actions",
     "advanced-extend",
-    "api-manager", "theme", "settings", "tickets"
+    "api-manager", "theme", "settings", "tickets",
+    "data-export"
 ]

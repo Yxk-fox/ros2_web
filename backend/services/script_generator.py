@@ -260,6 +260,21 @@ class ROS2ScriptGenerator:
             "web_port": cls.BASE_WEB_PORT + index,
         }
 
+    @staticmethod
+    def _owner_from_host_ws(host_ws):
+        """从宿主机工作空间路径推导容器名 owner 段
+
+        admin 全局路径 (~/robotruck_ros2) 返回 'admin'，
+        普通用户路径 (~/robotruck_ros2/ke_yunxiao) 返回末段 'ke_yunxiao'。
+        用于容器名派生，保证不同用户同名 launch 不会产生同名容器。
+        """
+        base = os.path.basename(os.path.normpath(host_ws))
+        if base == "robotruck_ros2":
+            return "admin"
+        # sanitize：仅保留字母数字下划线，避免容器名非法字符
+        safe = re.sub(r'[^a-zA-Z0-9_]', '_', base)
+        return safe or "user"
+
     # ================================================================
     # 模板替换
     # ================================================================
@@ -343,7 +358,9 @@ class ROS2ScriptGenerator:
     def _write_start_script(self, base, py_file, safe_base, vehicle_index):
         """基于模板生成单个启动脚本"""
         script_path = os.path.join(self.cfg["scripts_dir"], f"start_docker_ros2_{safe_base}.sh")
-        container_name = f"ros2_{safe_base}"
+        # 容器名带 owner 段，避免不同用户同名 launch 产生同名容器互相顶替
+        owner = self._owner_from_host_ws(self.cfg["host_ws"])
+        container_name = f"ros2_{owner}_{safe_base}"
 
         ports = self.calc_ports(vehicle_index)
         display_num = vehicle_index + 1
