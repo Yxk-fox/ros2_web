@@ -358348,3 +358348,4 @@ NameError: name '_maximize_rviz' is not defined
 2026-10-21 10:14:00,961 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
 2026-10-21 10:14:00,961 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
 2026-10-21 10:14:00,962 - ros2-web - DEBUG - websocket_general:416 - WebSocket ping 失败: Cannot call "send" once a close message has been sent.
+2026-10-21 10:22:25,318 - ros2-web - INFO - start_vnc_visualization:274 - [1b81227f3b5e] 容器内已有 Xvfb :3 运行，复用之

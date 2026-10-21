@@ -46106,3 +46106,4 @@ NameError: name '_maximize_rviz' is not defined
 2026-10-21 10:11:45,510 - ros2-web - INFO - save_config:133 - 配置已保存到: /home/fox/ros2_web/backend/config.json
 2026-10-21 10:11:45,657 - ros2-web - INFO - save_config:133 - 配置已保存到: /home/fox/ros2_web/backend/config.json
 2026-10-21 10:13:44,327 - ros2-web - INFO - start_vnc_visualization:274 - [1b81227f3b5e] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 10:22:25,318 - ros2-web - INFO - start_vnc_visualization:274 - [1b81227f3b5e] 容器内已有 Xvfb :3 运行，复用之
