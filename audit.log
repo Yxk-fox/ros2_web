@@ -747,3 +747,15 @@
 2026-10-21T02:14:00.962262 [admin] websocket_disconnected : WebSocket 断开
 2026-10-21T02:26:51.932601 [admin] stop_container : ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50
 2026-10-21T02:30:53.649535 [admin] batch_execute_scripts : 5 scripts, mode=并行
+2026-10-21T02:32:10.105318 [admin] stop_all_ros2 : 5 containers (all)
+2026-10-21T02:34:40.483647 [admin] batch_execute_scripts : 1 scripts, mode=并行
+2026-10-21T02:43:54.564366 [admin] websocket_connected : WebSocket 连接
+2026-10-21T02:43:56.804384 [admin] websocket_disconnected : WebSocket 断开
+2026-10-21T03:02:54.959735 [admin] websocket_disconnected : WebSocket 断开
+2026-10-21T03:02:57.444603 [admin] stop_container : ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50
+2026-10-21T03:02:59.274223 [admin] websocket_connected : WebSocket 连接
+2026-10-21T03:03:58.479155 [admin] install_version_note : target=admin, version=test_install20261021_x86_ros2_2.0, note=版本：rviz2显示正常，需要手动添加/guardian/
+2026-10-21T03:14:19.672006 [admin] websocket_disconnected : WebSocket 断开
+2026-10-21T03:15:05.963227 [admin] websocket_connected : WebSocket 连接
+2026-10-21T03:15:31.697738 [admin] batch_execute_scripts : 2 scripts, mode=并行
+2026-10-21T03:15:48.345655 [admin] websocket_disconnected : WebSocket 断开

@@ -11818,5 +11818,77 @@
     "username": "admin",
     "action": "batch_execute_scripts",
     "details": "5 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-21T02:32:10.105318",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "5 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-21T02:34:40.483647",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "1 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-21T02:43:54.564366",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T02:43:56.804384",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T03:02:54.959735",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T03:02:57.444603",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-21T03:02:59.274223",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T03:03:58.479155",
+    "username": "admin",
+    "action": "install_version_note",
+    "details": "target=admin, version=test_install20261021_x86_ros2_2.0, note=版本：rviz2显示正常，需要手动添加/guardian/"
+  },
+  {
+    "timestamp": "2026-10-21T03:14:19.672006",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T03:15:05.963227",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T03:15:31.697738",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "2 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-21T03:15:48.345655",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
   }
 ]

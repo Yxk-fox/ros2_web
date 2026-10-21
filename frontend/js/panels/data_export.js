@@ -63,6 +63,9 @@
 
         if (!isRos2) return;
 
+        // 两排布局：注入到第二排；兼容旧版单排布局
+        var target = row.querySelector('.action-row-extra[data-export-row="1"]') || actionButtons;
+
         var btnExtract = document.createElement('button');
         btnExtract.className = 'btn btn-sm btn-outline action-btn';
         btnExtract.innerHTML = '<span class="btn-icon">🗺️</span><span class="btn-text">提取地图</span>';
@@ -70,7 +73,6 @@
             _openHdmapModal(containerName);
             closeDropdowns && closeDropdowns();
         };
-        actionButtons.appendChild(btnExtract);
 
         var btnRecord = document.createElement('button');
         btnRecord.className = 'btn btn-sm btn-outline action-btn';
@@ -79,7 +81,6 @@
             _openBagRecordModal(containerName);
             closeDropdowns && closeDropdowns();
         };
-        actionButtons.appendChild(btnRecord);
 
         var btnDownload = document.createElement('button');
         btnDownload.className = 'btn btn-sm btn-outline action-btn';
@@ -88,7 +89,18 @@
             _openBagListModal(containerName);
             closeDropdowns && closeDropdowns();
         };
-        actionButtons.appendChild(btnDownload);
+
+        // 顺序：…删除、提取地图、录制Bag、下载Bags、下载日志
+        var logBtn = target.querySelector('[onclick^="downloadContainerLogs"]');
+        if (logBtn) {
+            target.insertBefore(btnExtract, logBtn);
+            target.insertBefore(btnRecord, logBtn);
+            target.insertBefore(btnDownload, logBtn);
+        } else {
+            target.appendChild(btnExtract);
+            target.appendChild(btnRecord);
+            target.appendChild(btnDownload);
+        }
 
         row.setAttribute(INJECTED_FLAG, 'true');
     }

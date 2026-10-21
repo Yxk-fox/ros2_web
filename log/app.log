@@ -358354,3 +358354,60 @@ NameError: name '_maximize_rviz' is not defined
 2026-10-21 10:31:15,728 - ros2-web - INFO - start_vnc_visualization:274 - [a804076e0e53] 容器内已有 Xvfb :8 运行，复用之
 2026-10-21 10:31:24,625 - ros2-web - INFO - start_vnc_visualization:274 - [d0ea2592fec6] 容器内已有 Xvfb :3 运行，复用之
 2026-10-21 10:31:26,869 - ros2-web - INFO - start_vnc_visualization:274 - [7c1436a14090] 容器内已有 Xvfb :5 运行，复用之
+2026-10-21 10:40:05,532 - ros2-web - INFO - list_hdmap_sn:54 - 列出SN列表: container=ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50, user=admin
+2026-10-21 10:43:54,803 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: 
+2026-10-21 10:43:54,811 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 10:43:56,593 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 10:43:56,803 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 10:43:56,804 - ros2-web - DEBUG - websocket_general:416 - WebSocket ping 失败: Cannot call "send" once a close message has been sent.
+2026-10-21 10:44:02,202 - ros2-web - INFO - start_vnc_visualization:274 - [bbbb50541310] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:02:54,959 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: 
+2026-10-21 11:02:54,959 - ros2-web - DEBUG - websocket_general:416 - WebSocket ping 失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:07,548 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: 
+2026-10-21 11:14:07,666 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:09,548 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:09,666 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:11,550 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:11,668 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:13,551 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:13,668 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:15,552 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:15,668 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:17,552 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:17,669 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:19,554 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:19,671 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:14:19,671 - ros2-web - DEBUG - websocket_general:416 - WebSocket ping 失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:07,565 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: 
+2026-10-21 11:15:08,015 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:09,565 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:10,016 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:11,566 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:12,018 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:31,894 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:31,895 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:33,895 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:33,896 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:35,896 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:35,897 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:37,897 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:37,898 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:39,898 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:39,899 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:41,023 - ros2-web - INFO - start_vnc_visualization:274 - [db4056c838d1] 容器内已有 Xvfb :4 运行，复用之
+2026-10-21 11:15:42,094 - ros2-web - INFO - start_vnc_visualization:274 - [9ce360c47dc8] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:15:42,341 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:42,341 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:44,341 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:44,342 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:46,343 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:46,344 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:48,344 - ros2-web - DEBUG - broadcast_traffic_light_status:378 - 广播红绿灯状态失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:15:48,345 - ros2-web - DEBUG - websocket_general:416 - WebSocket ping 失败: Cannot call "send" once a close message has been sent.
+2026-10-21 11:16:03,603 - ros2-web - INFO - start_vnc_visualization:274 - [db4056c838d1] 容器内已有 Xvfb :4 运行，复用之
+2026-10-21 11:16:05,090 - ros2-web - INFO - start_vnc_visualization:274 - [9ce360c47dc8] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:16:16,109 - ros2-web - INFO - start_vnc_visualization:274 - [db4056c838d1] 容器内已有 Xvfb :4 运行，复用之
+2026-10-21 11:16:17,095 - ros2-web - INFO - start_vnc_visualization:274 - [9ce360c47dc8] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:16:36,684 - ros2-web - INFO - list_hdmap_sn:54 - 列出SN列表: container=ros2_admin_test_install20261021_x86_ros2_2.0_fz_c51, user=admin
+2026-10-21 11:16:39,673 - ros2-web - DEBUG - get_bag_status:142 - 查询bag状态: container=ros2_admin_test_install20261021_x86_ros2_2.0_fz_c51, user=admin
+2026-10-21 11:16:41,788 - ros2-web - DEBUG - list_bag_files:153 - 列出bag文件: container=ros2_admin_test_install20261021_x86_ros2_2.0_fz_c51, user=admin

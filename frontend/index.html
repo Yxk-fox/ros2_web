@@ -658,10 +658,16 @@
                             <button class="btn btn-warning admin-only" onclick="stopAllRos2()">⏹ 停止全部 ROS2</button>
                             <button class="btn btn-outline admin-only" onclick="syncTime()">🕐 同步时间</button>
                         </div>
+                        <div class="batch-toolbar" id="batchToolbar" style="display:none;">
+                            <span>已选 <strong id="batchSelectedCount">0</strong> 个容器</span>
+                            <button class="btn btn-sm btn-primary" onclick="batchOpenVnc()" title="为所有选中的运行中容器批量打开 VNC 远程桌面">🖥️ 批量打开VNC</button>
+                            <button class="btn btn-sm btn-outline" onclick="clearContainerChecks()">✕ 取消选择</button>
+                        </div>
                         <div style="overflow-x:auto;overflow-y:visible;">
                             <table class="data-table">
                                 <thead>
                                     <tr>
+                                        <th class="container-check-col"><input type="checkbox" id="containerSelectAll" class="container-row-check" onclick="toggleSelectAllContainers(this)" title="全选/取消全选"></th>
                                         <th>名称</th>
                                         <th>容器运行状态</th>
                                         <th>运行时长</th>

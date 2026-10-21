@@ -37,7 +37,7 @@
         "test_install20261020_x86_ros2_6.0": "rviz2显示路径",
         "test_install20261019_x86_ros2_1.0": "rviz显示路径",
         "install_1020_4.0": "rviz显示路径文锐",
-        "test_install20261021_x86_ros2_2.0": "版本：rviz2显示正常"
+        "test_install20261021_x86_ros2_2.0": "版本：rviz2显示正常，需要手动添加/guardian/"
       },
       "previous_version": {
         "version": "test_install20261020_x86_ros2_6.0",

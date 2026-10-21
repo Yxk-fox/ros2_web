@@ -52,6 +52,166 @@ function deselectContainer() {
     showToast('已取消选中', 'info');
 }
 
+// ============================================================
+// 批量复选框选择（以容器名称为唯一键，跨刷新保持选中状态）
+// ============================================================
+var checkedContainerMap = {};
+
+/**
+ * 行复选框勾选状态变化。
+ */
+function onContainerCheckChange(cb) {
+    var name = cb.getAttribute('data-cname');
+    if (cb.checked) {
+        checkedContainerMap[name] = {
+            id: cb.getAttribute('data-cid'),
+            name: name,
+            running: cb.getAttribute('data-running') === '1'
+        };
+    } else {
+        delete checkedContainerMap[name];
+    }
+    syncSelectAllCheckbox();
+    updateBatchToolbar();
+}
+
+/**
+ * 全选/取消全选当前列表中的容器。
+ */
+function toggleSelectAllContainers(masterCb) {
+    var boxes = document.querySelectorAll('#containersTableBody input.container-row-check');
+    boxes.forEach(function(cb) {
+        cb.checked = masterCb.checked;
+        var name = cb.getAttribute('data-cname');
+        if (masterCb.checked) {
+            checkedContainerMap[name] = {
+                id: cb.getAttribute('data-cid'),
+                name: name,
+                running: cb.getAttribute('data-running') === '1'
+            };
+        } else {
+            delete checkedContainerMap[name];
+        }
+    });
+    updateBatchToolbar();
+}
+
+/**
+ * 根据当前行勾选状态同步全选框状态（支持半选）。
+ */
+function syncSelectAllCheckbox() {
+    var master = document.getElementById('containerSelectAll');
+    if (!master) return;
+    var boxes = document.querySelectorAll('#containersTableBody input.container-row-check');
+    if (boxes.length === 0) {
+        master.checked = false;
+        master.indeterminate = false;
+        return;
+    }
+    var checkedCount = 0;
+    boxes.forEach(function(cb) { if (cb.checked) checkedCount++; });
+    master.checked = (checkedCount === boxes.length);
+    master.indeterminate = (checkedCount > 0 && checkedCount < boxes.length);
+}
+
+/**
+ * 刷新后根据 checkedContainerMap 恢复行复选框选中状态。
+ */
+function restoreContainerChecks() {
+    var boxes = document.querySelectorAll('#containersTableBody input.container-row-check');
+    boxes.forEach(function(cb) {
+        var name = cb.getAttribute('data-cname');
+        if (checkedContainerMap[name]) {
+            cb.checked = true;
+            // 更新运行状态（容器状态可能已变化）
+            checkedContainerMap[name].running = cb.getAttribute('data-running') === '1';
+            checkedContainerMap[name].id = cb.getAttribute('data-cid');
+        }
+    });
+    // 清理已不存在的容器
+    var visibleNames = {};
+    boxes.forEach(function(cb) { visibleNames[cb.getAttribute('data-cname')] = true; });
+    Object.keys(checkedContainerMap).forEach(function(name) {
+        if (!visibleNames[name]) delete checkedContainerMap[name];
+    });
+    syncSelectAllCheckbox();
+    updateBatchToolbar();
+}
+
+/**
+ * 更新批量操作工具栏显示与计数。
+ */
+function updateBatchToolbar() {
+    var toolbar = document.getElementById('batchToolbar');
+    var countEl = document.getElementById('batchSelectedCount');
+    var count = Object.keys(checkedContainerMap).length;
+    if (countEl) countEl.textContent = count;
+    if (toolbar) toolbar.style.display = count > 0 ? 'flex' : 'none';
+}
+
+/**
+ * 取消所有勾选。
+ */
+function clearContainerChecks() {
+    checkedContainerMap = {};
+    var boxes = document.querySelectorAll('#containersTableBody input.container-row-check');
+    boxes.forEach(function(cb) { cb.checked = false; });
+    syncSelectAllCheckbox();
+    updateBatchToolbar();
+}
+
+/**
+ * 批量打开选中容器的 VNC 远程桌面（仅运行中容器）。
+ */
+function batchOpenVnc() {
+    var targets = Object.values(checkedContainerMap).filter(function(c) { return c.running && c.id; });
+    var total = Object.keys(checkedContainerMap).length;
+    if (targets.length === 0) {
+        showToast('没有可打开可视化的运行中容器（共选中 ' + total + ' 个）', 'warning');
+        return;
+    }
+    if (!confirm('将为 ' + targets.length + ' 个运行中容器批量打开 VNC 远程桌面，浏览器可能拦截多个弹窗，请允许本站点弹出窗口。是否继续？')) {
+        return;
+    }
+    showToast('正在批量打开 ' + targets.length + ' 个 VNC 桌面...', 'info');
+    targets.forEach(function(c, idx) {
+        setTimeout(function() {
+            startVisualization(c.id, 'vnc');
+        }, idx * 800);
+    });
+}
+
+/**
+ * 下载容器内 ROS2 日志（打包 roslogs 目录）。
+ */
+function downloadContainerLogs(id, name) {
+    showToast('正在打包日志: ' + name, 'info');
+    var token = localStorage.getItem('ros2_web_token') || '';
+    fetch('/api/docker/container/' + encodeURIComponent(name) + '/roslogs/download', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(resp) {
+        if (!resp.ok) {
+            return resp.json().then(function(d) { throw new Error(d.detail || ('下载失败 (' + resp.status + ')')); });
+        }
+        var disposition = resp.headers.get('Content-Disposition') || '';
+        var match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)/i);
+        var filename = match ? decodeURIComponent(match[1]) : (name + '_roslogs.tar.gz');
+        return resp.blob().then(function(blob) { return { blob: blob, filename: filename }; });
+    }).then(function(r) {
+        var url = URL.createObjectURL(r.blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = r.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('日志下载已开始: ' + r.filename, 'success');
+    }).catch(function(err) {
+        showToast('下载日志失败: ' + (err.message || err), 'error');
+    });
+}
+
 /**
  * 处理 updateContainerButtons 相关前端逻辑。
  */
@@ -953,46 +1113,49 @@ function loadContainers(all, filter) {
             var isRos2Container = c.is_ros2 === true ||
                 (c.image && (c.image.includes('ros2') || c.image.includes('humble') || c.image.includes('foxy')));
             
-            var baseActions = '';
-            var moreActions = '';
-            
-            // 启动/停止/重启按钮：拥有仿真车管理页面权限即可使用。（基础按钮）
+            // ★★★ 操作按钮两排布局 ★★★
+            // 第一排：停止、选中、日志、命令、资源、终端、Root
+            // 第二排：可视化、删除、提取地图、录制Bag、下载Bags、下载日志
+            var row1Actions = '';
+            var row2Actions = '';
+
+            // 启动/停止按钮（第一排）
             if (s.includes('up')) {
                 if (hasDockerPerm) {
-                    baseActions += '<button class="btn btn-sm btn-warning action-btn" onclick="stopContainer(\'' + escapeHtml(c.name) + '\')" title="停止容器"><span class="btn-icon">⏹</span><span class="btn-text">停止</span></button>';
+                    row1Actions += '<button class="btn btn-sm btn-warning action-btn" onclick="stopContainer(\'' + escapeHtml(c.name) + '\')" title="停止容器"><span class="btn-icon">⏹</span><span class="btn-text">停止</span></button>';
                 } else {
-                    baseActions += '<span class="btn btn-sm btn-disabled" title="无权限"><span class="btn-icon">⏹</span><span class="btn-text">停止</span></span>';
+                    row1Actions += '<span class="btn btn-sm btn-disabled" title="无权限"><span class="btn-icon">⏹</span><span class="btn-text">停止</span></span>';
                 }
             } else {
                 if (hasDockerPerm) {
-                    baseActions += '<button class="btn btn-sm btn-success action-btn" onclick="startContainer(\'' + escapeHtml(c.name) + '\')" title="启动容器"><span class="btn-icon">▶</span><span class="btn-text">启动</span></button>';
+                    row1Actions += '<button class="btn btn-sm btn-success action-btn" onclick="startContainer(\'' + escapeHtml(c.name) + '\')" title="启动容器"><span class="btn-icon">▶</span><span class="btn-text">启动</span></button>';
                 } else {
-                    baseActions += '<span class="btn btn-sm btn-disabled" title="无权限"><span class="btn-icon">▶</span><span class="btn-text">启动</span></span>';
+                    row1Actions += '<span class="btn btn-sm btn-disabled" title="无权限"><span class="btn-icon">▶</span><span class="btn-text">启动</span></span>';
                 }
             }
 
-            // ★★★ 选中按钮 - 所有用户可用（用于ROS2功能查看） ★★★（基础按钮）
-            baseActions += '<button class="btn btn-sm btn-outline action-btn" onclick="selectContainer(\'' + escapeHtml(c.name) + '\', \'' + escapeHtml(c.name) + '\')" title="选中容器"><span class="btn-icon">✅</span><span class="btn-text">选中</span></button>';
+            // ★★★ 选中按钮 - 所有用户可用（用于ROS2功能查看） ★★★（第一排）
+            row1Actions += '<button class="btn btn-sm btn-outline action-btn" onclick="selectContainer(\'' + escapeHtml(c.name) + '\', \'' + escapeHtml(c.name) + '\')" title="选中容器"><span class="btn-icon">✅</span><span class="btn-text">选中</span></button>';
 
-            // ★★★ 日志/命令/资源 - 所有用户可查看 ★★★（展开按钮）
-            moreActions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerLogs(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="查看日志"><span class="btn-icon">📜</span><span class="btn-text">日志</span></button>';
-            moreActions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerExec(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="执行命令"><span class="btn-icon">💻</span><span class="btn-text">命令</span></button>';
-            moreActions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerUpdate(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="资源配置"><span class="btn-icon">⚙</span><span class="btn-text">资源</span></button>';
-            
-            // ★★★ 终端 - 根据镜像类型决定是否需要source ros2环境 ★★★（展开按钮）
+            // ★★★ 日志/命令/资源（第一排）
+            row1Actions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerLogs(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="查看日志"><span class="btn-icon">📜</span><span class="btn-text">日志</span></button>';
+            row1Actions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerExec(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="执行命令"><span class="btn-icon">💻</span><span class="btn-text">命令</span></button>';
+            row1Actions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerUpdate(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="资源配置"><span class="btn-icon">⚙</span><span class="btn-text">资源</span></button>';
+
+            // ★★★ 终端/Root（第一排）- 根据镜像类型决定是否需要source ros2环境 ★★★
             if (isRos2Container) {
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'normal\')" title="普通终端（已source ROS2）"><span class="btn-icon">🖥</span><span class="btn-text">终端</span></button>';
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'root\')" title="Root终端（已source ROS2）"><span class="btn-icon">👑</span><span class="btn-text">Root</span></button>';
+                row1Actions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'normal\')" title="普通终端（已source ROS2）"><span class="btn-icon">🖥</span><span class="btn-text">终端</span></button>';
+                row1Actions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'root\')" title="Root终端（已source ROS2）"><span class="btn-icon">👑</span><span class="btn-text">Root</span></button>';
             } else {
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'normal\', false)" title="普通终端"><span class="btn-icon">🖥</span><span class="btn-text">终端</span></button>';
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'root\', false)" title="Root终端"><span class="btn-icon">👑</span><span class="btn-text">Root</span></button>';
+                row1Actions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'normal\', false)" title="普通终端"><span class="btn-icon">🖥</span><span class="btn-text">终端</span></button>';
+                row1Actions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'root\', false)" title="Root终端"><span class="btn-icon">👑</span><span class="btn-text">Root</span></button>';
             }
-            
-            // ★★★ 可视化方案 - 只对ROS2容器显示 ★★★（展开按钮）
+
+            // ★★★ 可视化方案（第二排）- 只对ROS2运行中容器显示 ★★★
             if (isRos2Container && s.includes('up')) {
                 var vizMenuItems = '';
                 var hasEnabledMethods = false;
-                
+
                 // 如果有配置数据，根据配置生成菜单
                 if (visualizationConfigData && visualizationConfigData.methods && visualizationConfigData.order) {
                     var methods = visualizationConfigData.methods;
@@ -1016,7 +1179,7 @@ function loadContainers(all, filter) {
                         }
                     });
                 }
-                
+
                 // 如果配置数据中没有启用的方法，或者没有配置数据，使用默认菜单
                 if (!hasEnabledMethods) {
                     vizMenuItems = `
@@ -1024,8 +1187,8 @@ function loadContainers(all, filter) {
                         <a href="#" class="dropdown-item" onclick="startVisualization('${c.id}', 'rviz_x11'); closeDropdowns();">🖼️ 原生 RVIZ (X11转发)</a>
                     `;
                 }
-                
-                moreActions += `
+
+                row2Actions += `
                     <div class="dropdown">
                         <button class="btn btn-sm btn-primary action-btn dropdown-toggle" onclick="toggleVisualizationMenu(this)" title="可视化"><span class="btn-icon">🖼</span><span class="btn-text">可视化</span><span class="btn-icon">▼</span></button>
                         <div class="dropdown-menu" style="display:none;">
@@ -1035,18 +1198,19 @@ function loadContainers(all, filter) {
                 `;
             }
 
-            // 删除按钮：拥有仿真车管理页面权限即可使用。（展开按钮）
+            // 删除按钮（第二排）
             if (hasDockerPerm) {
-                moreActions += '<button class="btn btn-sm btn-error action-btn" onclick="removeContainer(\'' + c.id + '\',\'' + escapeHtml(c.name) + '\')" title="删除容器"><span class="btn-icon">🗑</span><span class="btn-text">删除</span></button>';
+                row2Actions += '<button class="btn btn-sm btn-error action-btn" onclick="removeContainer(\'' + c.id + '\',\'' + escapeHtml(c.name) + '\')" title="删除容器"><span class="btn-icon">🗑</span><span class="btn-text">删除</span></button>';
             }
-            
-            // 构建最终的操作按钮HTML
-            var actions = '<div class="action-buttons">';
-            actions += baseActions;
-            if (moreActions) {
-                actions += moreActions;
-            }
-            actions += '</div>';
+
+            // 下载日志按钮（第二排，提取地图/录制Bag/下载Bags 由 data_export 模块注入到 extra 行）
+            row2Actions += '<button class="btn btn-sm btn-outline action-btn" onclick="downloadContainerLogs(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="下载ROS2日志文件"><span class="btn-icon">📥</span><span class="btn-text">下载日志</span></button>';
+
+            // 构建最终的操作按钮HTML（两排；data-export 模块的按钮注入到第二排 extra 容器）
+            var actions = '<div class="action-buttons two-rows">' +
+                '<div class="action-row">' + row1Actions + '</div>' +
+                '<div class="action-row action-row-extra" data-export-row="1">' + row2Actions + '</div>' +
+                '</div>';
 
             var isSelected = (selectedContainerId === c.name);
             var cloudIp = c.cloud_ip || '';
@@ -1073,6 +1237,7 @@ function loadContainers(all, filter) {
 
             // ★★★ 修复bug3：data-container-id 使用 name，避免id为空时无法匹配选中状态 ★★★
             html += '<tr data-container-id="' + escapeHtml(c.name) + '" class="' + (isSelected ? 'selected-container' : '') + '">' +
+                '<td class="container-check-col"><input type="checkbox" class="container-row-check" data-cid="' + escapeHtml(c.id) + '" data-cname="' + escapeHtml(c.name) + '" data-running="' + (s.includes('up') ? '1' : '0') + '" onchange="onContainerCheckChange(this)"></td>' +
                 '<td><strong>' + escapeHtml(c.name) +
                 '</strong><br><small style="opacity:0.6">' + c.id +
                 '</small></td>' +
@@ -1087,6 +1252,8 @@ function loadContainers(all, filter) {
         ensureContainerRuntimeTimer();
         updateContainerButtons();
         updateContainerSelectStatus();
+        // 恢复批量勾选状态（容器列表刷新后复选框会重建）
+        restoreContainerChecks();
     });
 }
 

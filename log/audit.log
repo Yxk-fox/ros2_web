@@ -46112,3 +46112,12 @@ NameError: name '_maximize_rviz' is not defined
 2026-10-21 10:31:15,728 - ros2-web - INFO - start_vnc_visualization:274 - [a804076e0e53] 容器内已有 Xvfb :8 运行，复用之
 2026-10-21 10:31:24,625 - ros2-web - INFO - start_vnc_visualization:274 - [d0ea2592fec6] 容器内已有 Xvfb :3 运行，复用之
 2026-10-21 10:31:26,869 - ros2-web - INFO - start_vnc_visualization:274 - [7c1436a14090] 容器内已有 Xvfb :5 运行，复用之
+2026-10-21 10:40:05,532 - ros2-web - INFO - list_hdmap_sn:54 - 列出SN列表: container=ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50, user=admin
+2026-10-21 10:44:02,202 - ros2-web - INFO - start_vnc_visualization:274 - [bbbb50541310] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:15:41,023 - ros2-web - INFO - start_vnc_visualization:274 - [db4056c838d1] 容器内已有 Xvfb :4 运行，复用之
+2026-10-21 11:15:42,094 - ros2-web - INFO - start_vnc_visualization:274 - [9ce360c47dc8] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:16:03,603 - ros2-web - INFO - start_vnc_visualization:274 - [db4056c838d1] 容器内已有 Xvfb :4 运行，复用之
+2026-10-21 11:16:05,090 - ros2-web - INFO - start_vnc_visualization:274 - [9ce360c47dc8] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:16:16,109 - ros2-web - INFO - start_vnc_visualization:274 - [db4056c838d1] 容器内已有 Xvfb :4 运行，复用之
+2026-10-21 11:16:17,095 - ros2-web - INFO - start_vnc_visualization:274 - [9ce360c47dc8] 容器内已有 Xvfb :3 运行，复用之
+2026-10-21 11:16:36,684 - ros2-web - INFO - list_hdmap_sn:54 - 列出SN列表: container=ros2_admin_test_install20261021_x86_ros2_2.0_fz_c51, user=admin

@@ -446,6 +446,48 @@ async def container_roslogs(id: str, tail: int = 200, current_user: dict = Depen
         "logs_dir": logs_dir,
     }
 
+@router.get("/api/docker/container/{id}/roslogs/download")
+async def download_container_roslogs(id: str, current_user: dict = Depends(require_permission('docker'))):
+    """打包下载容器对应的宿主机 ROS2 日志文件（tar.gz）。"""
+    rc, name_out, _ = DockerManager.run_cmd(
+        DockerManager._docker("inspect", "--format", "{{.Name}}", id)
+    )
+    container_name = (name_out or "").strip().lstrip("/") if rc == 0 else id
+
+    workspace_paths = get_user_workspace_paths(current_user)
+    logs_dir = workspace_paths["logs_dir"]
+    matched: List[str] = []
+    if os.path.isdir(logs_dir):
+        named_logs = glob.glob(os.path.join(logs_dir, f"{container_name}_*.log"))
+        named_logs += glob.glob(os.path.join(logs_dir, f"{container_name}.log"))
+        for f in named_logs:
+            if os.path.isfile(f) and f not in matched:
+                matched.append(f)
+
+    if not matched:
+        raise HTTPException(status_code=404, detail=f"未找到容器 {container_name} 对应的日志文件")
+
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", container_name)
+    archive_base = f"{safe_name}_roslogs"
+    tmp_dir = tempfile.mkdtemp(prefix="roslogs_dl_")
+    archive_path = os.path.join(tmp_dir, f"{archive_base}.tar.gz")
+    with tarfile.open(archive_path, "w:gz") as tar:
+        for f in matched:
+            tar.add(f, arcname=os.path.basename(f))
+
+    db.add_audit_log(current_user["username"], "container_roslogs_download", f"{container_name} files={len(matched)}")
+
+    def _cleanup_tmp() -> None:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    from starlette.background import BackgroundTask
+    return FileResponse(
+        archive_path,
+        media_type="application/gzip",
+        filename=f"{archive_base}.tar.gz",
+        background=BackgroundTask(_cleanup_tmp),
+    )
+
 @router.post("/api/docker/container/{id}/update")
 async def container_update(id: str, data: Dict[str, Any], current_user: dict = Depends(require_permission('docker'))):
     """更新容器资源限制"""
