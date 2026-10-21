@@ -38,11 +38,12 @@ else
     echo "✅ 已提交: $(git log -1 --format='%h %s')"
 fi
 
-# 4) 推送（被拒时先 rebase 远端变更再重试一次）
-if ! git push -u origin "$BRANCH"; then
+# 4) 推送（HTTP/1.1 规避 HTTP2 framing 网络错误；被拒时 autostash + rebase 后重试）
+if ! git -c http.version=HTTP/1.1 push -u origin "$BRANCH"; then
     echo "ℹ️ 直接推送失败，尝试拉取远端后重试..."
-    git pull --rebase origin "$BRANCH"
-    git push -u origin "$BRANCH"
+    # --autostash：后端服务持续写 log/data 文件，先自动贮藏未暂存变更再变基
+    git pull --rebase --autostash origin "$BRANCH"
+    git -c http.version=HTTP/1.1 push -u origin "$BRANCH"
 fi
 
 echo "✅ 推送完成: $(git remote get-url origin) @ $BRANCH"
