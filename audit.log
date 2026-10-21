@@ -746,3 +746,4 @@
 2026-10-21T02:13:56.895052 [admin] websocket_disconnected : WebSocket 断开
 2026-10-21T02:14:00.962262 [admin] websocket_disconnected : WebSocket 断开
 2026-10-21T02:26:51.932601 [admin] stop_container : ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50
+2026-10-21T02:30:53.649535 [admin] batch_execute_scripts : 5 scripts, mode=并行

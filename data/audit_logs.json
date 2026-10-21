@@ -11812,5 +11812,11 @@
     "username": "admin",
     "action": "stop_container",
     "details": "ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-21T02:30:53.649535",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "5 scripts, mode=并行"
   }
 ]
