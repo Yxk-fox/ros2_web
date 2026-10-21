@@ -21,7 +21,7 @@
             10. 节点管理（含筛选、Kill）
             11. 服务管理（含筛选、Kill）
             12. Action 管理
-            13. Docker 管理（含选中、日志、命令、资源、终端）
+            13. 仿真车管理（含选中、日志、命令、资源、终端）
             14. 脚本管理（含生成、列表、编辑、执行）
             15. 镜像管理
             16. 系统监控
@@ -59,6 +59,8 @@ var ros2ContainerRunning = false;
 var AUTH_TOKEN = localStorage.getItem('ros2_web_token') || null;
 var CURRENT_USER = null;
 var USER_ROLE = null;
+// v5.0 当前用户选择的 install 版本（null/'' = 未选择，使用旧版 install 目录）
+var CURRENT_VERSION = localStorage.getItem('ros2_web_version') || '';
 
 var ENV_IP_MAP = {
     '106': '106.14.223.60',
@@ -78,7 +80,7 @@ var subMenuMap = {
 
 // 一级菜单层级定义（section ID → 包含的子菜单面板）
 var menuHierarchy = {
-    'nav-section-containers': ['scripts', 'advanced-scripts', 'vehicle', 'docker', 'advanced-docker', 'images'],
+    'nav-section-containers': ['scripts', 'advanced-scripts', 'docker', 'advanced-docker', 'images'],
     'nav-section-toolbox': ['traffic', 'advanced-fault', 'tools'],
     'nav-section-ros2': ['simulation', 'topics', 'nodes', 'services', 'actions'],
     'nav-section-tickets': ['tickets'],
@@ -494,6 +496,35 @@ function updateUserInfo() {
         if (sysUserEl) sysUserEl.textContent = '未登录';
         if (sysRoleEl) sysRoleEl.textContent = '-';
     }
+    updateSidebarVersionBadge();
+}
+
+/**
+ * v5.0 更新侧边栏 install 版本徽章
+ * 展示规则：已选版本 → "🔖 xxx"；未选但有旧版 install/版本目录 → "🔖 旧版 install"；否则隐藏
+ *
+ * 版本信息缓存（由 checkInstallStatus 更新，供侧边栏徽章使用）
+ */
+var INSTALL_VERSION_INFO = { versions: [], legacy_available: false };
+// v5.1：缓存最近一次渲染的安装状态数据，供备注编辑后本地即时重渲染（避免整页重扫导致下拉框跳动）
+var _lastInstallRenderData = null;
+
+function updateSidebarVersionBadge() {
+    var badge = document.getElementById('sidebarVersionBadge');
+    if (!badge) return;
+    if (!CURRENT_USER) {
+        badge.style.display = 'none';
+        return;
+    }
+    if (CURRENT_VERSION) {
+        badge.textContent = '🔖 ' + CURRENT_VERSION;
+        badge.style.display = 'block';
+    } else if (INSTALL_VERSION_INFO.legacy_available || INSTALL_VERSION_INFO.versions.length > 0) {
+        badge.textContent = '🔖 旧版 install';
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
 }
 
 /**
@@ -680,6 +711,11 @@ function loadUserInfo() {
         if (data.success) {
             CURRENT_USER = data.username;
             USER_ROLE = data.role;
+            // v5.0：记录当前 install 版本选择
+            if (typeof data.current_version === 'string') {
+                CURRENT_VERSION = data.current_version;
+                localStorage.setItem('ros2_web_version', CURRENT_VERSION);
+            }
             localStorage.setItem('ros2_web_user', data.username);
             localStorage.setItem('ros2_web_role', data.role);
             updateUserInfo();
@@ -754,9 +790,8 @@ function switchPanel(panel) {
 
     var titles = {
         welcome: '👋 欢迎',
-        docker: '🐳 Docker 管理',
-        scripts: '📜 脚本生成',
-        vehicle: '🚛 仿真车启动',
+        docker: '🚛 仿真车管理',
+        scripts: '📜 脚本与启动',
         images: '💿 镜像管理',
         traffic: '🚦 红绿灯模拟',
         batch: '🚛 车辆配置生成',
@@ -815,9 +850,9 @@ function switchPanel(panel) {
     if (panel === 'services') loadServices();
     if (panel === 'actions') loadActions();
     if (panel === 'docker') loadContainers(false, 'ros2_');
-    if (panel === 'scripts') { loadLaunchFiles(); }
+    if (panel === 'scripts') { loadLaunchFiles(); initReportRangeBtns(); loadScripts(); }
     if (panel === 'images') loadImages();
-    if (panel === 'monitor') loadMonitor();
+    if (panel === 'monitor') { loadMonitor(); initTrendView(); loadTrend(); }
     if (panel === 'settings') {
         checkSystemStatus();
         var container = document.getElementById('systemLogContainer');
@@ -834,22 +869,14 @@ function switchPanel(panel) {
             loadUserList();
         }
     }
-    if (panel === 'traffic') { checkTrafficStatus(); checkTimerTrafficStatus(); startTrafficPanelMonitor(); }
+    if (panel === 'traffic') { checkTrafficStatus(); checkTimerTrafficStatus(); checkManualTimerTrafficStatus(); checkCrushingStatus(); startTrafficPanelMonitor(); renderTrafficDynamicPanels(); }
     if (panel === 'welcome') { updateWelcomeStatus(); checkInstallStatus(); }
-    if (panel === 'vehicle') {
-        loadScripts();
-        // ★★★ 按需加载仿真车配置列表（首次进入面板时加载） ★★★
-        if (typeof _truckConfigLoaded === 'undefined' || !_truckConfigLoaded) {
-            _truckConfigLoaded = true;
-            loadTruckConfigList();
-        }
-    }
     if (panel === 'scripts') loadDefaultPaths(true);
     if (panel === 'advanced-docker') { loadAdvContainers(); loadWhitelist(); loadCommitContainers(); }
     if (panel === 'advanced-scripts') loadScriptsForRetry();
     if (panel === 'api-manager') { loadApiMgrSettings(); }
 
-    if (panel === 'advanced-extend') { loadRemoteHosts(); loadPlugins(); loadApiSettings(); }
+    if (panel === 'advanced-extend') { loadRemoteHosts(); loadPlugins(); loadApiSettings(); loadMockToolsInfo(); }
     if (panel === 'advanced-fault') { 
         loadFaultContainers(); 
         clearFaultHistoryDisplay();
@@ -924,6 +951,14 @@ function _errMsg(d, fallback) {
 }
 
 function _parseErrorResponse(res, text) {
+    // v5.1：旧后端未注册新接口时，可能返回 404/405 或静态兜底的 HTML 页面
+    var looksLikeHtml = typeof text === 'string' && /^\s*<(!doctype|html|!--)/i.test(text);
+    if (looksLikeHtml || res.status === 404 || res.status === 405) {
+        return {
+            success: false,
+            error: '接口不可用（HTTP ' + res.status + '）。当前运行的后端为旧版本，请更新后端代码并重启服务后再试。'
+        };
+    }
     try {
         var json = JSON.parse(text);
         var err = json.detail || json.error || json.message;
@@ -953,6 +988,11 @@ function apiGet(path) {
         if (res.status === 401) {
             handleLogout();
             return { success: false, error: '未授权，请重新登录' };
+        }
+        // v5.1：旧后端未注册新路由时，静态文件兜底会返回 200 + HTML(index.html)
+        var ctype = res.headers.get('content-type') || '';
+        if (res.ok && ctype.indexOf('application/json') === -1) {
+            return { success: false, error: '后端接口不可用（返回了页面而非数据），请确认后端已更新并重启' };
         }
         if (!res.ok) {
             return res.text().then(function(text) {
@@ -1018,6 +1058,11 @@ function apiPost(path, body) {
         if (res.status === 401) {
             handleLogout();
             return { success: false, error: '未授权，请重新登录' };
+        }
+        // v5.1：旧后端未注册新路由时，可能返回 405 或 200 + HTML
+        var ctype = res.headers.get('content-type') || '';
+        if (res.ok && ctype.indexOf('application/json') === -1) {
+            return { success: false, error: '后端接口不可用（返回了页面而非数据），请确认后端已更新并重启' };
         }
         if (!res.ok) {
             return res.text().then(function(text) {
@@ -1117,13 +1162,25 @@ function showToast(msg, type) {
     toast.className = 'toast ' + type;
     toast.textContent = msg;
     container.appendChild(toast);
+
+    // v5.0：长错误（如数据库迁移 SQL 指引）延长展示时间并允许换行
+    var duration = 3000;
+    var len = (msg || '').length;
+    if (len > 120) duration = 15000;
+    else if (len > 60) duration = 8000;
+    if (len > 60) {
+        toast.style.maxWidth = '420px';
+        toast.style.whiteSpace = 'pre-wrap';
+        toast.style.wordBreak = 'break-all';
+        toast.style.textAlign = 'left';
+    }
     
     setTimeout(function() {
         toast.classList.add('removing');
         setTimeout(function() {
             if (toast.parentNode) toast.parentNode.removeChild(toast);
         }, 300);
-    }, 3000);
+    }, duration);
 }
 
 // ========== 预留扩展区域（第201-250行） ==========
@@ -1183,6 +1240,8 @@ function connectWebSocket() {
                     handleTrafficLightStatus(msg);
                 } else if (msg.type === 'ticket_event') {
                     handleTicketEvent(msg);
+                } else if (msg.type === 'alert') {
+                    handleAlertMessage(msg);
                 }
             } catch (e) { /* ignore */ }
         };
@@ -1218,8 +1277,11 @@ function connectWebSocket() {
 function hasPermission(panel) {
     // 管理员拥有所有权限
     if (window.userRole === 'admin') return true;
+    var perms = window.userPermissions || [];
+    // 「仿真车启动」已合并进「脚本与启动」，旧 vehicle 权限视为 scripts
+    if (panel === 'scripts') return perms.includes('scripts') || perms.includes('vehicle');
     // 普通用户检查权限列表
-    return (window.userPermissions || []).includes(panel);
+    return perms.includes(panel);
 }
 
 /**
@@ -1414,10 +1476,50 @@ function checkInstallStatus(forceRefresh) {
             container.innerHTML = '<p style="color:var(--text-secondary)">检测失败: ' + (data.error || '未知错误') + '</p>';
             return;
         }
-        renderInstallStatus(data);
-        updateToolsWorkspaceBar(data);
+        // v5.0：缓存版本信息并同步侧边栏徽章
+        if (typeof data.current_version === 'string' || data.current_version === null) {
+            CURRENT_VERSION = data.current_version || '';
+            localStorage.setItem('ros2_web_version', CURRENT_VERSION);
+        }
+        INSTALL_VERSION_INFO = {
+            versions: data.versions || [],
+            legacy_available: !!data.legacy_available
+        };
+        updateSidebarVersionBadge();
+        // v5.1：拉取版本元数据（备注/大小/时间/回滚信息）合并后再渲染
+        fetchVersionMetaThenRender(data);
     }).catch(function(err) {
         container.innerHTML = '<p style="color:var(--text-secondary)">检测失败</p>';
+    });
+}
+
+/**
+ * v5.1 拉取版本元数据（/api/install/versions：备注/大小/上传时间/回滚信息）并渲染安装状态
+ * 元数据接口失败时降级为仅用 status 数据渲染（保证老环境可用）
+ */
+function fetchVersionMetaThenRender(data) {
+    apiGet('/api/install/versions' + getTargetUserParam()).then(function(meta) {
+        if (meta && meta.success) {
+            var byName = {};
+            var mvs = meta.versions || [];
+            for (var i = 0; i < mvs.length; i++) byName[mvs[i].version] = mvs[i];
+            var merged = [];
+            var base = data.versions || [];
+            for (var j = 0; j < base.length; j++) {
+                var m = byName[base[j].version];
+                merged.push(m ? m : base[j]);
+            }
+            data.versions = merged;
+            data.version_notes = meta.version_notes || {};
+            data.previous_version = meta.previous_version || null;
+            // 同步缓存（供备注编辑回填默认值）
+            if (INSTALL_VERSION_INFO) INSTALL_VERSION_INFO.notes = data.version_notes;
+        }
+    }).catch(function() {
+        // 元数据接口不可用（如未执行 v5.1 迁移 SQL）——静默降级
+    }).finally(function() {
+        renderInstallStatus(data);
+        updateToolsWorkspaceBar(data);
     });
 }
 
@@ -1474,9 +1576,511 @@ function updateToolsWorkspaceBar(data) {
     renderDir(pLogs,    data.host_logs,    'logs',    '启动仿真车辆后自动生成');
 }
 
+/**
+ * v5.1 字节数格式化（1024 进制，保留 1 位小数）
+ */
+function formatBytes(n) {
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    if (n < 1024) return n + ' B';
+    var units = ['KB', 'MB', 'GB', 'TB'];
+    var v = n;
+    var i = -1;
+    do { v /= 1024; i++; } while (v >= 1024 && i < units.length - 1);
+    return v.toFixed(1) + ' ' + units[i];
+}
+
+/**
+ * v5.1 渲染版本切换区块（首页"安装目录管理"卡片顶部）
+ * - 展示当前生效版本徽章 + 一键回滚按钮（v5.1）
+ * - 下拉选择版本（含"旧版 install"回退项，仅旧目录存在时显示）
+ * - 版本列表含元数据：大小 / 上传时间 / 备注（v5.1）
+ * - 每个非当前版本可单独删除；备注可编辑
+ */
+function renderVersionSectionHtml(data) {
+    var versions = data.versions || [];
+    var legacyAvailable = !!data.legacy_available;
+    var currentVersion = data.current_version || '';
+    if (versions.length === 0 && !legacyAvailable) return '';
+
+    var C = {
+        box: 'border:1px solid var(--border,#e0e0e0);border-radius:10px;padding:14px 18px;margin-bottom:14px;background:var(--bg-secondary,#fafafa);',
+        row: 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;',
+        label: 'font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;',
+        sub: 'font-size:11px;color:var(--text-secondary,#888);',
+        nameCell: 'flex:1 1 240px;min-width:200px;display:flex;align-items:center;gap:6px;overflow:hidden;'
+    };
+
+    var html = '<div id="installVersionSectionBox" style="' + C.box + '">';
+
+    // ===== 第 1 行：当前版本徽章 + 回滚 =====
+    html += '<div style="' + C.row + '">';
+    html += '<span style="' + C.label + '">🔖 当前版本：</span>';
+    if (currentVersion) {
+        html += '<span style="font-size:12px;padding:3px 12px;border-radius:12px;background:#2c5aa0;color:#fff;font-weight:600;max-width:460px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + escapeHtml(currentVersion) + '">' + escapeHtml(currentVersion) + '</span>';
+    } else {
+        html += '<span style="font-size:12px;padding:3px 12px;border-radius:12px;background:#856404;color:#fff;font-weight:600;">旧版 install</span>';
+    }
+    // v5.1：一键回滚按钮（存在上一版本记录时显示）
+    var prev = data.previous_version;
+    if (prev && typeof prev.version === 'string' && prev.version !== currentVersion) {
+        var prevLabel = prev.version ? prev.version : '旧版 install';
+        html += '<button class="btn btn-sm btn-outline" style="padding:2px 10px;font-size:11px;white-space:nowrap;" onclick="rollbackInstallVersion()" title="回滚到切换前的版本">⏪ 回滚</button>';
+        html += '<span style="' + C.sub + 'white-space:nowrap;">上一版本：' + escapeHtml(prevLabel) + '</span>';
+    }
+    if (data.target_user) {
+        html += '<span style="' + C.sub + 'margin-left:auto;">用户: ' + escapeHtml(data.target_user) + '</span>';
+    }
+    html += '</div>';
+
+    // ===== 第 2 行：版本切换器 =====
+    html += '<div style="' + C.row + 'margin-top:10px;">';
+    html += '<select id="installVersionSelect" style="font-size:12px;padding:5px 10px;min-width:340px;max-width:480px;flex:1 1 340px;">';
+    var hasSelected = false;
+    for (var i = 0; i < versions.length; i++) {
+        var v = versions[i];
+        var sel = (v.version === currentVersion) ? ' selected' : '';
+        if (sel) hasSelected = true;
+        html += '<option value="' + escapeHtml(v.version) + '"' + sel + '>' + escapeHtml(v.version) + (v.has_setup_bash ? '' : '（缺setup.bash）') + '</option>';
+    }
+    if (legacyAvailable) {
+        var selLegacy = currentVersion ? '' : ' selected';
+        if (!currentVersion) hasSelected = true;
+        html += '<option value=""' + selLegacy + '>旧版 install（&lt;工作空间&gt;/install）</option>';
+    }
+    if (!hasSelected && !legacyAvailable && versions.length > 0) {
+        // 兜底：旧目录不存在且当前未选版本（如数据库被重置）时显示未选择项
+        html += '<option value="" selected>未选择（旧版 install 路径）</option>';
+    }
+    html += '</select>';
+    html += '<button class="btn btn-sm btn-primary" style="padding:5px 16px;white-space:nowrap;" onclick="switchInstallVersion()">🔄 切换版本</button>';
+    html += '</div>';
+    html += '<div style="font-size:11px;color:var(--text-secondary,#888);margin-top:5px;">切换后自动重新生成启动脚本（旧版本脚本保留，可多版本同时启动）</div>';
+
+    // ===== 第 3 块：版本列表（每条一张双行小卡片，信息不重叠） =====
+    if (versions.length > 0) {
+        html += '<div style="margin-top:12px;font-size:12px;font-weight:600;color:var(--text-primary);">已上传版本（' + versions.length + '）</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">';
+        for (var j = 0; j < versions.length; j++) {
+            var ver = versions[j];
+            var isActive = (ver.version === currentVersion);
+            var vVer = escapeHtml(ver.version);
+            var vVerJs = vVer.replace(/'/g, "\\'");
+            var cardBg = isActive ? 'background:#eef5ee;border-color:#b7dcb7;' : 'background:var(--bg-primary,#fff);';
+            html += '<div style="border:1px solid var(--border,#e8e8e8);border-radius:8px;padding:8px 12px;' + cardBg + '">';
+            // 行1：状态点 + 版本名（自适应截断）+ 右侧操作
+            html += '<div style="' + C.row + '">';
+            html += '<span style="' + (isActive ? 'color:#2d7d32;' : 'color:#999;') + 'font-size:13px;line-height:1;">' + (isActive ? '●' : '○') + '</span>';
+            html += '<div style="' + C.nameCell + '" title="' + vVer + '">'
+                 + '<span style="font-size:13px;' + (isActive ? 'font-weight:600;color:#2d7d32;' : 'color:var(--text-primary);') + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + vVer + '</span>'
+                 + '</div>';
+            if (isActive) {
+                html += '<span style="font-size:11px;color:#2d7d32;font-weight:600;white-space:nowrap;padding:2px 10px;background:#dff0df;border-radius:10px;">✓ 使用中</span>';
+            } else {
+                html += '<button class="btn btn-sm btn-danger" style="padding:2px 10px;font-size:11px;white-space:nowrap;" onclick="deleteInstallVersion(\'' + vVerJs + '\')">🗑️ 删除</button>';
+            }
+            html += '</div>';
+            // 行2：大小 / 时间 / 备注（独立一行，绝不与名称挤压）
+            html += '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:5px;padding-left:20px;">';
+            html += '<span style="' + C.sub + 'white-space:nowrap;">💾 ' + formatBytes(ver.size_bytes) + '</span>';
+            if (ver.mtime) {
+                html += '<span style="' + C.sub + 'white-space:nowrap;" title="版本目录修改时间">🕐 ' + formatTimestamp(ver.mtime * 1000) + '</span>';
+            }
+            // v5.1 备注（独立块展示全文，过长截断，悬浮看全文）
+            if (ver.note) {
+                var noteTitle = escapeHtml(ver.note).replace(/"/g, '&quot;');
+                html += '<span style="font-size:11px;color:#856404;background:#fff7e0;border-radius:4px;padding:1px 8px;max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + noteTitle + '">📝 ' + escapeHtml(ver.note) + '</span>';
+            }
+            html += '<button class="btn btn-sm btn-outline" style="padding:0 8px;font-size:11px;line-height:20px;" onclick="editVersionNote(\'' + vVerJs + '\')">' + (ver.note ? '✏️ 改备注' : '📝 加备注') + '</button>';
+            html += '</div>';
+            html += '</div>';
+        }
+        html += '</div>';
+    }
+
+    // ===== 第 4 块：备份目录管理（折叠区，默认收起） =====
+    html += '<div style="margin-top:12px;border-top:1px dashed var(--border,#ddd);padding-top:10px;">';
+    html += '<button class="btn btn-sm btn-outline" style="padding:3px 12px;font-size:11px;" onclick="toggleInstallBackups()">🗄️ 备份管理</button>';
+    html += '<div id="installBackupsPanel" style="display:none;margin-top:8px;"></div>';
+    html += '</div>';
+
+    html += '</div>';
+    return html;
+}
+
+/**
+ * v5.1 编辑版本备注（最长 500 字，空串清除备注）
+ * 保存成功后本地即时更新并仅局部重渲染版本区块（不重扫目录，避免下拉框跳回空版本/页面闪烁）
+ */
+function editVersionNote(version) {
+    if (!version) return;
+    var current = (INSTALL_VERSION_INFO && INSTALL_VERSION_INFO.notes && INSTALL_VERSION_INFO.notes[version]) || '';
+    var note = prompt('编辑版本备注（最长500字，清空则删除备注）：\n' + version, current);
+    if (note === null) return; // 用户取消
+    note = note.trim();
+    var body = { version: version, note: note };
+    if (currentTargetUser) body.target_user = currentTargetUser;
+    apiPost('/api/install/versions/note', body).then(function(d) {
+        if (d.success) {
+            showToast('备注已保存', 'success');
+            // 本地更新缓存数据
+            if (!INSTALL_VERSION_INFO.notes) INSTALL_VERSION_INFO.notes = {};
+            if (note) INSTALL_VERSION_INFO.notes[version] = note;
+            else delete INSTALL_VERSION_INFO.notes[version];
+            if (_lastInstallRenderData) {
+                var list = _lastInstallRenderData.versions || [];
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].version === version) list[i].note = note || '';
+                }
+                _lastInstallRenderData.version_notes = INSTALL_VERSION_INFO.notes;
+                rerenderVersionSectionLocal();
+            }
+        } else {
+            showToast(d.error || '备注保存失败', 'error');
+        }
+    }).catch(function(err) {
+        showToast('备注保存失败: ' + err.message, 'error');
+    });
+}
+
+/**
+ * v5.1 仅局部重渲染版本切换区块（保留目录树展开态、备份面板展开态，且下拉框不跳变）
+ */
+function rerenderVersionSectionLocal() {
+    if (!_lastInstallRenderData) return;
+    var box = document.getElementById('installVersionSectionBox');
+    if (!box) {
+        // 兜底：容器不存在时整体刷新
+        checkInstallStatus(false);
+        return;
+    }
+    var wasBackupsOpen = installBackupsVisible;
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = renderVersionSectionHtml(_lastInstallRenderData);
+    var fresh = wrapper.firstElementChild;
+    if (fresh && box.parentNode) {
+        box.parentNode.replaceChild(fresh, box);
+        if (wasBackupsOpen) {
+            installBackupsVisible = false;
+            toggleInstallBackups();
+        }
+    }
+}
+
+/**
+ * v5.1 一键回滚到上一版本（复用切换联动任务，带进度条）
+ */
+function rollbackInstallVersion() {
+    customConfirm('确定回滚到上一版本吗？\n\n回滚同样是版本切换：将自动重新生成启动脚本（旧版本脚本保留），运行中的容器不受影响。', function() {
+        var body = {};
+        if (currentTargetUser) body.target_user = currentTargetUser;
+        apiPost('/api/install/versions/rollback', body).then(function(d) {
+            if (!d.success) {
+                showToast(d.error || '回滚失败', 'error');
+                return;
+            }
+            if (d.task_id) {
+                showSwitchProgressOverlay();
+                startSwitchTaskPolling(d.task_id);
+            } else if (d.need_refresh === false) {
+                // 无需切换（如目标与当前一致）
+                showToast(d.message || '无需回滚', 'info');
+            } else {
+                // 旧后端同步模式
+                showToast((d.message || '回滚成功') + '，页面即将刷新…', 'success');
+                setTimeout(function() { location.reload(); }, 1000);
+            }
+        }).catch(function(err) {
+            showToast('回滚请求失败: ' + err.message, 'error');
+        });
+    });
+}
+
+// ============================================================
+// v5.1 备份目录可视化管理
+// ============================================================
+var installBackupsVisible = false;
+
+/**
+ * v5.1 展开/收起备份管理面板
+ */
+function toggleInstallBackups() {
+    installBackupsVisible = !installBackupsVisible;
+    var panel = document.getElementById('installBackupsPanel');
+    if (!panel) return;
+    if (installBackupsVisible) {
+        panel.style.display = 'block';
+        loadInstallBackups();
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+/**
+ * v5.1 加载备份目录列表（删除/替换版本时自动产生的 .deleted/.bak/.replaced.<时间戳> 目录）
+ */
+function loadInstallBackups() {
+    var panel = document.getElementById('installBackupsPanel');
+    if (!panel) return;
+    panel.innerHTML = '<div style="font-size:12px;color:var(--text-secondary);padding:4px 0;">加载中…</div>';
+    apiGet('/api/install/backups' + getTargetUserParam()).then(function(d) {
+        if (!d.success) {
+            panel.innerHTML = '<div style="font-size:12px;color:#dc3545;padding:4px 0;">加载失败: ' + escapeHtml(d.error || '') + '</div>';
+            return;
+        }
+        var backups = d.backups || [];
+        if (backups.length === 0) {
+            panel.innerHTML = '<div style="font-size:12px;color:var(--text-secondary);padding:4px 0;">暂无备份（删除或替换版本时自动产生）</div>';
+            return;
+        }
+        var typeLabel = { deleted: '删除备份', bak: '替换备份', replaced: '替换备份' };
+        var html = '<div style="display:flex;flex-direction:column;gap:4px;">';
+        for (var i = 0; i < backups.length; i++) {
+            var b = backups[i];
+            var entryJs = escapeHtml(b.entry).replace(/'/g, "\\'");
+            html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;">';
+            html += '<span style="font-size:10px;padding:1px 6px;border-radius:10px;background:#6c757d;color:#fff;">' + escapeHtml(typeLabel[b.type] || b.type) + '</span>';
+            html += '<span style="color:var(--text-primary);">' + escapeHtml(b.origin || b.entry) + '</span>';
+            html += '<span style="color:var(--text-secondary);font-size:11px;">' + formatBytes(b.size_bytes) + '</span>';
+            if (b.mtime) html += '<span style="color:var(--text-secondary);font-size:11px;">' + formatTimestamp(b.mtime * 1000) + '</span>';
+            html += '<button class="btn btn-sm btn-outline" style="padding:0 6px;font-size:11px;" onclick="restoreInstallBackup(\'' + entryJs + '\')">↩️ 恢复</button>';
+            html += '<button class="btn btn-sm btn-danger" style="padding:0 6px;font-size:11px;" onclick="deleteInstallBackup(\'' + entryJs + '\')">🗑️ 彻底删除</button>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<div style="font-size:11px;color:var(--text-secondary);margin-top:6px;">恢复 = 备份目录还原为可用版本（不自动切换）；彻底删除不可恢复</div>';
+        panel.innerHTML = html;
+    }).catch(function(err) {
+        panel.innerHTML = '<div style="font-size:12px;color:#dc3545;padding:4px 0;">加载失败: ' + escapeHtml(err.message) + '</div>';
+    });
+}
+
+/**
+ * v5.1 恢复备份目录为可用版本
+ */
+function restoreInstallBackup(entry) {
+    if (!entry) return;
+    customConfirm('确定将备份恢复为可用版本吗？\n\n' + entry + '\n\n恢复后不自动切换版本，如需使用请在版本列表中切换。', function() {
+        var body = { entry: entry };
+        if (currentTargetUser) body.target_user = currentTargetUser;
+        apiPost('/api/install/backups/restore', body).then(function(d) {
+            if (d.success) {
+                showToast(d.message || '备份已恢复', 'success');
+                checkInstallStatus(true);
+                loadInstallBackups();
+            } else {
+                showToast(d.error || '恢复失败', 'error');
+            }
+        }).catch(function(err) {
+            showToast('恢复失败: ' + err.message, 'error');
+        });
+    });
+}
+
+/**
+ * v5.1 彻底删除备份目录（不可恢复）
+ */
+function deleteInstallBackup(entry) {
+    if (!entry) return;
+    customConfirm('确定彻底删除该备份吗？此操作不可恢复！\n\n' + entry, function() {
+        var body = { entry: entry };
+        if (currentTargetUser) body.target_user = currentTargetUser;
+        apiPost('/api/install/backups/delete', body).then(function(d) {
+            if (d.success) {
+                showToast(d.message || '备份已删除', 'success');
+                loadInstallBackups();
+            } else {
+                showToast(d.error || '删除失败', 'error');
+            }
+        }).catch(function(err) {
+            showToast('删除失败: ' + err.message, 'error');
+        });
+    });
+}
+
+// ============================================================
+// v5.1 版本切换异步联动任务（进度条 + 轮询，完成后再刷新）
+// ============================================================
+var _switchTaskTimer = null;
+
+/**
+ * v5.1 切换 install 版本（异步联动：保存版本 + 重新生成启动脚本）
+ * 旧版本脚本/容器保留，多版本可同时启动。
+ * 兼容旧后端：无 task_id 的同步成功响应（need_refresh=true）也会自动刷新页面。
+ */
+function switchInstallVersion() {
+    var select = document.getElementById('installVersionSelect');
+    if (!select) return;
+    var version = select.value;
+    var label = version ? '版本 ' + version : '旧版 install 目录';
+
+    customConfirm('确定切换到' + label + '吗？\n\n切换后将自动重新生成启动脚本（约20~30秒，旧版本脚本保留，多版本可同时启动），完成后页面自动刷新。', function() {
+        var body = { version: version };
+        if (currentTargetUser) body.target_user = currentTargetUser;
+        apiPost('/api/install/versions/switch', body).then(function(d) {
+            if (!d.success) {
+                showToast(d.error || '切换失败', 'error');
+                return;
+            }
+            if (d.task_id) {
+                // v5.1：异步联动任务——进度条轮询，完成后刷新
+                showSwitchProgressOverlay();
+                startSwitchTaskPolling(d.task_id);
+            } else {
+                // 旧后端同步模式 或 目标与当前一致
+                if (d.need_refresh === false) {
+                    showToast(d.message || '当前已是该版本，无需切换', 'info');
+                } else {
+                    showToast((d.message || '切换成功') + '，页面即将刷新…', 'success');
+                    setTimeout(function() { location.reload(); }, 1000);
+                }
+            }
+        }).catch(function(err) {
+            showToast('切换请求失败: ' + err.message, 'error');
+        });
+    });
+}
+
+/**
+ * v5.1 显示切换进度覆盖层（进度条 + 状态文案，替代"一直转圈"）
+ */
+function showSwitchProgressOverlay() {
+    var old = document.getElementById('switchProgressOverlay');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var overlay = document.createElement('div');
+    overlay.id = 'switchProgressOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = ''
+        + '<div style="background:var(--bg-primary,#fff);border-radius:12px;padding:24px 28px;width:min(440px,90vw);box-shadow:0 8px 32px rgba(0,0,0,0.3);">'
+        + '<div style="font-weight:600;margin-bottom:6px;font-size:15px;">🔄 版本切换中</div>'
+        + '<div style="font-size:12px;color:var(--text-secondary,#666);margin-bottom:14px;">正在保存版本并重新生成启动脚本，完成后页面将自动刷新，请勿关闭…</div>'
+        + '<div style="background:var(--bg-secondary,#eee);border-radius:8px;height:14px;overflow:hidden;">'
+        + '<div id="switchProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#2c5aa0,#4a90d9);transition:width 0.4s ease;border-radius:8px;"></div>'
+        + '</div>'
+        + '<div id="switchProgressText" style="font-size:12px;color:var(--text-secondary,#666);margin-top:8px;min-height:18px;">正在启动切换任务…</div>'
+        + '<div id="switchProgressError" style="font-size:12px;color:#dc3545;margin-top:8px;display:none;"></div>'
+        + '<button id="switchProgressClose" class="btn btn-sm btn-outline" style="margin-top:10px;display:none;" onclick="closeSwitchProgressOverlay()">知道了</button>'
+        + '</div>';
+    document.body.appendChild(overlay);
+}
+
+/**
+ * v5.1 关闭切换进度覆盖层
+ */
+function closeSwitchProgressOverlay() {
+    var overlay = document.getElementById('switchProgressOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+/**
+ * v5.1 轮询切换任务进度，完成（成功/失败）后关闭覆盖层并刷新页面
+ * - 连续失败 8 次（约16秒）才判定接口不可用（容忍短暂网络抖动/重启）
+ * - 总时长 5 分钟兜底超时
+ * - 接口返回 HTML（旧后端无此路由）时按"后端同步已完成"处理，等待后刷新
+ */
+function startSwitchTaskPolling(taskId) {
+    if (_switchTaskTimer) { clearTimeout(_switchTaskTimer); _switchTaskTimer = null; }
+    var failCount = 0;
+    var startedAt = Date.now();
+    var MAX_FAIL = 8;
+    var MAX_MS = 5 * 60 * 1000;
+
+    function failOverlay(msg) {
+        var bar = document.getElementById('switchProgressBar');
+        var text = document.getElementById('switchProgressText');
+        var errBox = document.getElementById('switchProgressError');
+        var closeBtn = document.getElementById('switchProgressClose');
+        if (bar) bar.style.background = '#dc3545';
+        if (text) text.textContent = '切换任务查询中断';
+        if (errBox) { errBox.style.display = 'block'; errBox.textContent = msg; }
+        if (closeBtn) closeBtn.style.display = 'inline-block';
+    }
+
+    var poll = function() {
+        // 兜底超时
+        if (Date.now() - startedAt > MAX_MS) {
+            _switchTaskTimer = null;
+            failOverlay('任务执行超过 5 分钟，请稍后手动刷新页面查看结果');
+            return;
+        }
+        apiGet('/api/install/switch-task?task_id=' + encodeURIComponent(taskId)).then(function(d) {
+            // 旧后端返回 HTML 被 apiGet 转为错误对象 / 404 任务不存在：同步完成后直接刷新
+            if (!d || d.success === false) {
+                failCount++;
+                if (failCount >= MAX_FAIL) {
+                    _switchTaskTimer = null;
+                    // 后端版本不支持进度查询（旧后端切换是同步的，此时切换应已完成）——刷新看结果
+                    closeSwitchProgressOverlay();
+                    showToast('版本切换已处理，正在刷新页面…', 'info');
+                    setTimeout(function() { location.reload(); }, 300);
+                    return;
+                }
+                _switchTaskTimer = setTimeout(poll, 2000);
+                return;
+            }
+            failCount = 0;
+            var bar = document.getElementById('switchProgressBar');
+            var text = document.getElementById('switchProgressText');
+            if (bar && typeof d.percent === 'number') bar.style.width = Math.max(3, Math.min(99, d.percent)) + '%';
+            if (text && d.message) text.textContent = d.message;
+            if (d.finished) {
+                _switchTaskTimer = null;
+                if (d.status === 'done') {
+                    if (bar) bar.style.width = '100%';
+                    if (text) text.textContent = '✅ ' + (d.message || '切换完成，正在刷新…');
+                    showToast(d.message || '切换完成，页面即将刷新', 'success');
+                    setTimeout(function() { location.reload(); }, 900);
+                } else {
+                    failOverlay(d.error || d.message || '切换失败，请重试');
+                    showToast(d.error || d.message || '切换失败', 'error');
+                }
+                return;
+            }
+            _switchTaskTimer = setTimeout(poll, 1000);
+        }).catch(function() {
+            failCount++;
+            if (failCount >= MAX_FAIL) {
+                _switchTaskTimer = null;
+                closeSwitchProgressOverlay();
+                showToast('网络异常，版本可能已切换，请手动刷新页面确认', 'info');
+                return;
+            }
+            _switchTaskTimer = setTimeout(poll, 2000);
+        });
+    };
+    poll();
+}
+
+/**
+ * v5.0 删除指定版本目录（非当前生效版本）
+ */
+function deleteInstallVersion(version) {
+    if (!version) return;
+    customConfirm('确定删除版本 ' + version + ' 吗？\n\n删除后会自动备份（保留最近2个备份），如需恢复可联系管理员。', function() {
+        showToast('正在删除版本 ' + version + '...', 'info');
+        var url = appendTargetUser('/api/install/delete') ;
+        url += (url.indexOf('?') >= 0 ? '&' : '?') + 'version=' + encodeURIComponent(version);
+        apiPost(url, {}).then(function(d) {
+            if (d.success) {
+                showToast(d.message || '版本已删除', 'success');
+                setTimeout(function() { checkInstallStatus(true); }, 500);
+            } else {
+                showToast(d.error || '删除失败', 'error');
+            }
+        }).catch(function(err) {
+            showToast('删除请求失败: ' + err.message, 'error');
+        });
+    });
+}
+
 function renderInstallStatus(data) {
     var container = document.getElementById('installStatusContent');
     var html = '';
+
+    // v5.1：缓存最近渲染数据，供备注编辑后本地即时重渲染
+    _lastInstallRenderData = data;
+
+    // v5.0：版本切换区块（置于卡片顶部）
+    html += renderVersionSectionHtml(data);
 
     if (data.exists && data.has_setup_bash) {
         html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">';
@@ -1553,10 +2157,8 @@ function deleteInstall() {
     apiPost(appendTargetUser('/api/install/delete'), {}).then(function(d) {
         if (d.success) {
             showToast(d.message || '删除成功', 'success');
-            // 刷新状态
-            setTimeout(function() {
-                checkInstallStatus(true);
-            }, 500);
+            // v5.0：删除当前生效版本可能触发自动切换，刷新页面同步徽章与各面板状态
+            setTimeout(function() { location.reload(); }, 1200);
         } else {
             showToast(d.error || '删除失败', 'error');
         }
@@ -1611,11 +2213,25 @@ function handleInstallUpload(input) {
         try {
             var resp = JSON.parse(xhr.responseText);
             if (resp.success) {
-                showToast('安装包上传并解压成功' + (resp.target_user ? '（用户: ' + resp.target_user + '）' : ''), 'success');
-                checkInstallStatus(true);
+                // v5.0：上传即生成新版本并自动切换，提示版本名
+                var verMsg = resp.version ? '，版本: ' + resp.version : '';
+                var targetMsg = resp.target_user ? '（用户: ' + resp.target_user + '）' : '';
+                if (resp.auto_switched) {
+                    showToast('安装包上传成功' + verMsg + targetMsg, 'success');
+                } else {
+                    // 版本文件已生成，但 current_version 持久化失败（如数据库缺列）
+                    showToast(resp.message || ('安装包上传成功' + verMsg + targetMsg + '，但自动切换失败，请手动切换'), 'warning');
+                }
+                if (statusText) statusText.innerHTML = '<span style="color:#2d7d32;">✅ ' + (resp.message || '上传成功') + '</span>';
                 checkSystemStatus();
                 if (typeof Onboarding !== 'undefined' && Onboarding.notifyUploadComplete) {
                     setTimeout(function() { Onboarding.notifyUploadComplete(); }, 2000);
+                }
+                if (resp.auto_switched) {
+                    // 已自动切换到新版本，刷新页面使所有菜单在新版本下生效
+                    setTimeout(function() { location.reload(); }, 1500);
+                } else {
+                    checkInstallStatus(true);
                 }
             } else {
                 if (statusText) statusText.innerHTML = '<span style="color:#dc3545;">❌ ' + (resp.error || '上传失败') + '</span>';
@@ -2257,1372 +2873,6 @@ function sendActionGoal() {
 // ===========================================
 
 // ============================================================
-// 13. Docker 管理
-// ============================================================
-
-/**
- * 处理 selectContainer 相关前端逻辑。
- */
-function selectContainer(id, name) {
-    if (selectedContainerId === id) {
-        deselectContainer();
-        return;
-    }
-    apiGet('/api/docker/containers?all=false').then(function(data) {
-        if (data.success && data.containers) {
-            var found = false;
-            for (var i = 0; i < data.containers.length; i++) {
-                if ((data.containers[i].name === id || data.containers[i].name === name) && data.containers[i].state === 'running') {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                showToast('容器未运行或不存在', 'warning');
-                return;
-            }
-        }
-        if (selectedContainerId !== null) {
-            clearContainerHighlight();
-        }
-        selectedContainerId = id;
-        selectedContainerName = name;
-        currentContainerId = id;
-        updateRos2MenuItems(true);
-        updateContainerButtons();
-        updateContainerSelectStatus();
-        showToast('已选中容器: ' + name, 'success');
-    });
-}
-
-/**
- * 处理 deselectContainer 相关前端逻辑。
- */
-function deselectContainer() {
-    selectedContainerId = null;
-    selectedContainerName = null;
-    currentContainerId = null;
-    updateRos2MenuItems(false);
-    updateContainerButtons();
-    clearContainerHighlight();
-    updateContainerSelectStatus();
-    showToast('已取消选中', 'info');
-}
-
-/**
- * 处理 updateContainerButtons 相关前端逻辑。
- */
-function updateContainerButtons() {
-    var rows = document.querySelectorAll('#containersTableBody tr');
-    var hasSelected = (selectedContainerId !== null);
-    rows.forEach(function(row) {
-        var containerId = row.getAttribute('data-container-id');
-        var nameElem = row.querySelector('strong');
-        var name = nameElem ? nameElem.textContent : '';
-        var btns = row.querySelectorAll('button');
-        var selectBtn = null;
-        for (var i = 0; i < btns.length; i++) {
-            // 查找包含"选中"或"取消"文本的按钮（考虑到图标和文字连在一起的情况）
-            var text = btns[i].textContent.trim();
-            if (text.includes('选中') || text.includes('取消')) {
-                selectBtn = btns[i];
-                break;
-            }
-        }
-        if (!selectBtn) return;
-        var isCurrentSelected = (containerId === selectedContainerId && hasSelected);
-        if (isCurrentSelected) {
-            // 更新按钮为"取消"状态
-            selectBtn.innerHTML = '<span class="btn-icon">❌</span><span class="btn-text">取消</span>';
-            selectBtn.className = 'btn btn-sm btn-warning action-btn';
-            selectBtn.disabled = false;
-            selectBtn.style.opacity = '1';
-            selectBtn.style.cursor = 'pointer';
-            selectBtn.onclick = function() { deselectContainer(); };
-            row.classList.add('selected-container');
-        } else {
-            // 更新按钮为"选中"状态
-            selectBtn.innerHTML = '<span class="btn-icon">✅</span><span class="btn-text">选中</span>';
-            selectBtn.className = 'btn btn-sm btn-success action-btn';
-            if (hasSelected) {
-                // 如果已有选中的容器，其他按钮置灰
-                selectBtn.disabled = true;
-                selectBtn.style.opacity = '0.4';
-                selectBtn.style.cursor = 'not-allowed';
-                selectBtn.onclick = null;
-            } else {
-                selectBtn.disabled = false;
-                selectBtn.style.opacity = '1';
-                selectBtn.style.cursor = 'pointer';
-                selectBtn.onclick = function() {
-                    selectContainer(containerId, name);
-                };
-            }
-            row.classList.remove('selected-container');
-        }
-    });
-}
-
-/**
- * 处理 updateContainerSelectStatus 相关前端逻辑。
- */
-function updateContainerSelectStatus() {
-    var statusEl = document.getElementById('containerSelectStatus');
-    if (!statusEl) return;
-    if (selectedContainerId && selectedContainerName) {
-        statusEl.innerHTML = '✅ 已选中容器：<strong>' + escapeHtml(selectedContainerName) + '</strong>';
-    } else {
-        statusEl.innerHTML = '⚠️ 未选中容器，ROS2 功能不可用';
-    }
-}
-
-/**
- * 处理 clearContainerHighlight 相关前端逻辑。
- */
-function clearContainerHighlight() {
-    var rows = document.querySelectorAll('#containersTableBody tr');
-    for (var i = 0; i < rows.length; i++) {
-        rows[i].classList.remove('selected-container');
-    }
-}
-
-/**
- * 处理 updateRos2MenuItems 相关前端逻辑。
- */
-function updateRos2MenuItems(enabled) {
-    var targetPanels = ['simulation', 'topics', 'nodes', 'services', 'actions'];
-    var allItems = document.querySelectorAll('.sidebar-nav .nav-item');
-    for (var i = 0; i < allItems.length; i++) {
-        var panel = allItems[i].getAttribute('data-panel');
-        if (targetPanels.indexOf(panel) !== -1) {
-            if (enabled) {
-                allItems[i].classList.remove('disabled');
-                allItems[i].style.pointerEvents = 'auto';
-                allItems[i].style.opacity = '1';
-            } else {
-                allItems[i].classList.add('disabled');
-                allItems[i].style.pointerEvents = 'none';
-                allItems[i].style.opacity = '0.4';
-            }
-        }
-    }
-}
-
-// ============================================================
-// 审计日志管理功能（仅管理员）
-// ============================================================
-
-/**
- * 加载审计日志列表
- */
-function loadAuditLogs() {
-    var container = document.getElementById('auditLogsContainer');
-    if (!container) return;
-    container.innerHTML = '<div style="opacity:0.5; text-align:center; padding:20px;">加载中...</div>';
-    apiGet('/api/admin/audit-logs?limit=100').then(function(data) {
-        if (!data.success) {
-            container.innerHTML = '<div style="color:var(--error);">加载失败: ' + escapeHtml(data.error || '') + '</div>';
-            return;
-        }
-        var logs = data.logs || [];
-        if (logs.length === 0) {
-            container.innerHTML = '<div style="opacity:0.5; text-align:center; padding:20px;">暂无审计日志</div>';
-            return;
-        }
-        var html = '<div style="max-height:400px;overflow-y:auto;">';
-        html += '<table class="data-table" style="font-size:12px;">';
-        html += '<thead><tr><th style="width:140px;">时间</th><th style="width:100px;">用户</th><th style="width:120px;">操作</th><th>详情</th></tr></thead><tbody>';
-        logs.reverse().forEach(function(log) {
-            var time = log.timestamp ? formatTimestamp(log.timestamp) : '-';
-            html += '<tr>';
-            html += '<td style="color:var(--text-secondary);">' + time + '</td>';
-            html += '<td><span class="tag tag-info">' + escapeHtml(log.username || '-') + '</span></td>';
-            html += '<td><span class="tag tag-running">' + escapeHtml(log.action || '-') + '</span></td>';
-            html += '<td style="max-width:300px;word-break:break-all;">' + escapeHtml(log.details || '-') + '</td>';
-            html += '</tr>';
-        });
-        html += '</tbody></table>';
-        html += '<div style="margin-top:8px;font-size:11px;color:var(--text-muted);text-align:right;">共 ' + logs.length + ' 条记录</div>';
-        html += '</div>';
-        container.innerHTML = html;
-    });
-}
-
-/**
- * 格式化时间戳
- */
-function formatTimestamp(timestamp) {
-    try {
-        var date = new Date(timestamp);
-        return date.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-    } catch (e) {
-        return timestamp;
-    }
-}
-
-/**
- * 清空所有审计日志
- */
-function clearAllAuditLogs() {
-    customConfirm('确定要清空所有审计日志吗？此操作不可恢复！', function() {
-        return;
-    });
-    apiDelete('/api/admin/audit-logs').then(function(data) {
-        if (data.success) {
-            showToast(data.message || '清空成功', 'success');
-            loadAuditLogs();
-        } else {
-            showToast('清空失败: ' + (data.error || ''), 'error');
-        }
-    });
-}
-
-/**
- * 显示保留最近日志弹窗
- */
-function showKeepRecentModal() {
-    var modal = document.getElementById('keepRecentModal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-}
-
-/**
- * 关闭保留最近日志弹窗
- */
-function closeKeepRecentModal() {
-    var modal = document.getElementById('keepRecentModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-/**
- * 确认保留最近日志
- */
-function confirmKeepRecent() {
-    var count = parseInt(document.getElementById('keepRecentCount').value) || 100;
-    if (count < 1) {
-        showToast('保留数量至少为1', 'warning');
-        return;
-    }
-    apiDelete('/api/admin/audit-logs', { keep_recent: count }).then(function(data) {
-        if (data.success) {
-            showToast(data.message || '操作成功', 'success');
-            closeKeepRecentModal();
-            loadAuditLogs();
-        } else {
-            showToast('操作失败: ' + (data.error || ''), 'error');
-        }
-    });
-}
-
-// ============================================================
-// 可视化方案配置管理
-// ============================================================
-
-// 当前可视化配置数据
-var visualizationConfigData = null;
-
-/**
- * 预加载可视化配置数据（页面初始化时调用）
- */
-function preloadVisualizationConfig() {
-    apiGet('/api/visualization/methods').then(function(data) {
-        if (data.success) {
-            visualizationConfigData = data;
-        }
-    }).catch(function(err) {
-        console.warn('预加载可视化配置失败:', err);
-    });
-}
-
-/**
- * 显示可视化方案配置弹窗
- */
-function showVisualizationConfigModal() {
-    var modal = document.getElementById('visualizationConfigModal');
-    if (!modal) return;
-    
-    modal.style.display = 'block';
-    loadVisualizationConfigForModal();
-}
-
-/**
- * 关闭可视化方案配置弹窗
- */
-function closeVisualizationConfigModal() {
-    var modal = document.getElementById('visualizationConfigModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-/**
- * 加载可视化方案配置（用于弹窗）
- */
-function loadVisualizationConfigForModal() {
-    var methodsContainer = document.getElementById('visualizationMethodsContainer');
-    var orderContainer = document.getElementById('visualizationOrderContainer');
-    
-    if (!methodsContainer || !orderContainer) return;
-    
-    methodsContainer.innerHTML = '<div style="opacity:0.5; text-align:center; padding:20px;">加载中...</div>';
-    orderContainer.innerHTML = '<div style="opacity:0.5; text-align:center; padding:20px;">加载中...</div>';
-    
-    apiGet('/api/visualization/methods').then(function(data) {
-        if (!data.success) {
-            methodsContainer.innerHTML = '<div style="color:var(--error);">加载失败: ' + escapeHtml(data.error || '') + '</div>';
-            orderContainer.innerHTML = '';
-            return;
-        }
-        
-        visualizationConfigData = data;
-        var methods = data.methods || {};
-        var defaultMethod = data.default_method || 'vnc';
-        var order = data.order || ['vnc', 'rviz_x11'];
-        
-        // 渲染可视化方案显示部分（参考镜像分组配置样式）
-        var methodsHtml = '';
-        order.forEach(function(key) {
-            var method = methods[key];
-            if (!method) return;
-            
-            var isDefault = key === defaultMethod;
-            var isEnabled = method.enabled;
-            
-            methodsHtml += `
-                <label class="checkbox-label">
-                    <input type="checkbox" id="viz-${key}" ${isEnabled ? 'checked' : ''} 
-                           data-key="${key}" data-default="${isDefault ? 'true' : 'false'}">
-                    <span>${method.name} ${isDefault ? '(默认)' : ''}</span>
-                </label>
-            `;
-        });
-        methodsContainer.innerHTML = methodsHtml;
-        
-        // 渲染方案排序部分（参考镜像分组配置样式）
-        var orderHtml = '';
-        order.forEach(function(key, index) {
-            var method = methods[key];
-            if (!method) return;
-            
-            orderHtml += `
-                <div class="sort-item">
-                    <span class="sort-order">${index + 1}</span>
-                    <select id="viz-sort-${index}" class="form-select" data-original="${key}">
-                        ${order.map(function(k) {
-                            var m = methods[k];
-                            return m ? `<option value="${k}" ${k === key ? 'selected' : ''}>${m.name}</option>` : '';
-                        }).join('')}
-                    </select>
-                </div>
-            `;
-        });
-        orderContainer.innerHTML = orderHtml;
-    }).catch(function(err) {
-        console.error('加载可视化配置失败:', err);
-        methodsContainer.innerHTML = '<div style="color:var(--error);">网络错误，无法加载配置</div>';
-        orderContainer.innerHTML = '';
-    });
-}
-
-/**
- * 保存可视化方案配置
- */
-function saveVisualizationConfig() {
-    if (!visualizationConfigData) {
-        showToast('配置数据未加载', 'warning');
-        return;
-    }
-    
-    var methods = visualizationConfigData.methods || {};
-    var order = visualizationConfigData.order || ['vnc', 'rviz_x11'];
-    
-    // 获取启用状态
-    var enabledMethods = {};
-    order.forEach(function(key) {
-        var checkbox = document.getElementById('viz-' + key);
-        if (checkbox) {
-            enabledMethods[key] = checkbox.checked;
-        }
-    });
-    
-    // 获取排序
-    var newOrder = [];
-    order.forEach(function(_, index) {
-        var select = document.getElementById('viz-sort-' + index);
-        if (select) {
-            newOrder.push(select.value);
-        }
-    });
-    
-    // 验证排序是否包含所有选项
-    var isValidOrder = order.length === newOrder.length && 
-                       order.every(function(k) { return newOrder.includes(k); });
-    
-    if (!isValidOrder) {
-        showToast('排序配置无效，请确保每个方案都被选中', 'error');
-        return;
-    }
-    
-    // 保存配置
-    var promises = [];
-    
-    // 保存启用状态
-    Object.keys(enabledMethods).forEach(function(key) {
-        promises.push(apiPost(`/api/visualization/method/${key}`, { enabled: enabledMethods[key] }));
-    });
-    
-    // 保存排序
-    promises.push(apiPost('/api/visualization/order', { order: newOrder }));
-    
-    Promise.all(promises).then(function(results) {
-        var allSuccess = results.every(function(r) { return r.success; });
-        if (allSuccess) {
-            showToast('配置已保存', 'success');
-            closeVisualizationConfigModal();
-        } else {
-            showToast('部分配置保存失败', 'warning');
-        }
-    }).catch(function(err) {
-        console.error('保存配置失败:', err);
-        showToast('保存失败: ' + err.message, 'error');
-    });
-}
-
-/**
- * 加载可视化方案配置（旧方法，兼容原有调用）
- */
-function loadVisualizationMethods() {
-    // 旧方法已迁移到弹窗中，此处保留为空或调用新方法
-}
-
-/**
- * 设置默认可视化方案
- */
-function setDefaultVisualization(method) {
-    apiPost('/api/visualization/set-default', { method: method }).then(function(data) {
-        if (data.success) {
-            showToast(data.message || '设置成功', 'success');
-        } else {
-            showToast('设置失败: ' + (data.error || ''), 'error');
-            // 恢复原来的选择
-            loadVisualizationMethods();
-        }
-    }).catch(function(err) {
-        showToast('网络错误', 'error');
-        loadVisualizationMethods();
-    });
-}
-
-/**
- * 启动容器可视化
- */
-function startVisualization(containerId, method) {
-    var url = `/api/docker/container/${containerId}/visualize`;
-    if (method) {
-        url += `?method=${method}`;
-    }
-    
-    showToast('正在启动可视化...', 'info');
-    
-    // 先打开一个窗口，避免被浏览器弹窗拦截，并显示加载动画
-    var newWindow = window.open('', '_blank');
-    if (newWindow) {
-        var loadingHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在加载可视化...</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .loading-container {
-            text-align: center;
-            color: white;
-        }
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .loading-text {
-            font-size: 20px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        .loading-subtext {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        .dots::after {
-            content: '';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-        @keyframes dots {
-            0%, 20% { content: ''; }
-            40% { content: '.'; }
-            60% { content: '..'; }
-            80%, 100% { content: '...'; }
-        }
-    </style>
-</head>
-<body>
-    <div class="loading-container">
-        <div class="spinner"></div>
-        <div class="loading-text">正在启动可视化<span class="dots"></span></div>
-        <div class="loading-subtext">VNC / RViz 正在连接中，请稍候</div>
-    </div>
-</body>
-</html>`;
-        newWindow.document.write(loadingHtml);
-        newWindow.document.close();
-    }
-    
-    apiPost(url, {}).then(function(data) {
-        if (data.success) {
-            showToast(data.message || '可视化已启动', 'success');
-            if (data.url) {
-                if (newWindow) {
-                    newWindow.location.href = data.url;
-                } else {
-                    // 如果弹窗被拦截，提示用户手动点击
-                    showToast('请点击此链接打开可视化: <a href="' + data.url + '" target="_blank" style="color:#fff;text-decoration:underline;">' + data.url + '</a>', 'success', 10000);
-                    // 备用方案：创建临时链接并点击
-                    var link = document.createElement('a');
-                    link.href = data.url;
-                    link.target = '_blank';
-                    link.rel = 'noopener noreferrer';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            }
-        } else {
-            if (newWindow) {
-                // 显示错误信息在窗口中
-                try {
-                    var errorHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>启动失败</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .error-container {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            max-width: 400px;
-        }
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        .error-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #dc3545;
-            margin-bottom: 12px;
-        }
-        .error-message {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.6;
-        }
-        .close-btn {
-            margin-top: 24px;
-            padding: 8px 24px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .close-btn:hover {
-            background: #c82333;
-        }
-    </style>
-</head>
-<body>
-    <div class="error-container">
-        <div class="error-icon">❌</div>
-        <div class="error-title">可视化启动失败</div>
-        <div class="error-message">${data.error || data.message || '未知错误'}</div>
-        <button class="close-btn" onclick="window.close()">关闭窗口</button>
-    </div>
-</body>
-</html>`;
-                    newWindow.document.write(errorHtml);
-                    newWindow.document.close();
-                } catch(e) {
-                    newWindow.close();
-                }
-            }
-            showToast('启动失败: ' + (data.error || data.message || '未知错误'), 'error');
-        }
-    }).catch(function(err) {
-        if (newWindow) {
-            try {
-                var errorHtml = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>网络错误</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .error-container {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            max-width: 400px;
-        }
-        .error-icon { font-size: 48px; margin-bottom: 16px; }
-        .error-title { font-size: 20px; font-weight: 600; color: #dc3545; margin-bottom: 12px; }
-        .error-message { font-size: 14px; color: #666; line-height: 1.6; }
-        .close-btn {
-            margin-top: 24px; padding: 8px 24px; background: #dc3545; color: white;
-            border: none; border-radius: 6px; cursor: pointer; font-size: 14px;
-        }
-        .close-btn:hover { background: #c82333; }
-    </style>
-</head>
-<body>
-    <div class="error-container">
-        <div class="error-icon">⚠️</div>
-        <div class="error-title">网络错误</div>
-        <div class="error-message">${err.message || '无法连接到服务器，请检查网络后重试'}</div>
-        <button class="close-btn" onclick="window.close()">关闭窗口</button>
-    </div>
-</body>
-</html>`;
-                newWindow.document.write(errorHtml);
-                newWindow.document.close();
-            } catch(e) {
-                newWindow.close();
-            }
-        }
-        showToast('网络错误: ' + err.message, 'error');
-    });
-}
-
-/**
- * 切换可视化菜单显示/隐藏
- */
-function toggleVisualizationMenu(btn) {
-    var menu = btn.parentElement.querySelector('.dropdown-menu');
-    if (menu) {
-        if (menu.style.display === 'none' || menu.style.display === '') {
-            // 计算按钮位置并设置菜单位置（fixed定位）
-            var rect = btn.getBoundingClientRect();
-            menu.style.position = 'fixed';
-            menu.style.zIndex = '99999';
-            menu.style.left = rect.left + 'px';
-            menu.style.top = (rect.bottom + 4) + 'px';
-            menu.style.display = 'block';
-        } else {
-            menu.style.display = 'none';
-        }
-    }
-    // 点击其他地方时关闭菜单
-    document.addEventListener('click', closeDropdownsOnce);
-}
-
-/**
- * 关闭所有下拉菜单
- */
-function closeDropdowns() {
-    var menus = document.querySelectorAll('.dropdown-menu');
-    menus.forEach(function(menu) {
-        menu.style.display = 'none';
-    });
-}
-
-/**
- * 单次关闭下拉菜单（用于事件监听）
- */
-function closeDropdownsOnce(e) {
-    if (!e.target.closest('.dropdown')) {
-        closeDropdowns();
-    }
-    document.removeEventListener('click', closeDropdownsOnce);
-}
-
-// ============================================================
-// 用户权限管理
-// ============================================================
-
-/**
- * 加载当前用户权限并渲染菜单
- */
-function loadUserPermissions() {
-    if (!AUTH_TOKEN) return;
-    apiGet('/api/auth/permissions').then(function(data) {
-        if (data.success) {
-            window.userPermissions = data.permissions || [];
-            window.userRole = data.role || 'user';
-            // 保存权限到 localStorage，供页面刷新时预渲染使用
-            localStorage.setItem('ros2_web_permissions', JSON.stringify(window.userPermissions));
-            localStorage.setItem('ros2_web_role', window.userRole);
-            renderMenuByPermissions();
-            updateAdminOnlyControls();
-            // ★★★ 权限渲染后重新应用增强面板隐藏设置 ★★★
-            initSubMenuVisibility();
-            if (currentPanel) updateSubMenuVisibility(currentPanel);
-            // 更新用户管理卡片显示
-            var userMgmtCard = document.getElementById('userManagementCard');
-            if (userMgmtCard) {
-                userMgmtCard.style.display = (window.userRole === 'admin') ? 'block' : 'none';
-                if (window.userRole === 'admin') {
-                    loadUserList();
-                }
-            }
-            // 更新审计日志管理卡片显示
-            var auditLogsCard = document.getElementById('auditLogsCard');
-            if (auditLogsCard) {
-                auditLogsCard.style.display = (window.userRole === 'admin') ? 'block' : 'none';
-                if (window.userRole === 'admin') {
-                    loadAuditLogs();
-                }
-            }
-            // ★★★ 权限加载完成后刷新快速开始区域，确保配置的面板正确显示 ★★★
-            renderQuickStart();
-            // v3.6: 加载管理员专属工作空间切换器（仅管理员调用，避免普通用户触发 403）
-            if (window.userRole === 'admin') {
-                loadWorkspaceUsers();
-            }
-        }
-    }).catch(function(err) {
-        console.warn('加载权限失败:', err);
-        // 默认只显示首页
-        window.userPermissions = ['welcome'];
-        window.userRole = 'user';
-        renderMenuByPermissions();
-        updateAdminOnlyControls();
-        // ★★★ 权限加载失败也刷新快速开始区域 ★★★
-        renderQuickStart();
-        // v3.6: 普通用户隐藏切换器
-        var sel = document.getElementById('workspaceUserSelect');
-        if (sel) sel.style.display = 'none';
-    });
-}
-
-/**
- * 根据权限渲染侧边栏菜单
- */
-function renderMenuByPermissions() {
-    var allItems = document.querySelectorAll('.sidebar-nav .nav-item');
-    var perms = window.userPermissions || [];
-    var role = window.userRole || 'user';
-    allItems.forEach(function(item) {
-        var panel = item.dataset.panel;
-        if (!panel) return;
-        if (role === 'admin') {
-            item.style.display = 'flex';
-            return;
-        }
-        // 普通用户首页始终显示
-        if (panel === 'welcome') { item.style.display = 'flex'; return; }
-        if (perms.includes(panel)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-    // 处理子菜单
-    document.querySelectorAll('.nav-item.nav-sub').forEach(function(sub) {
-        var parentPanel = null;
-        for (var key in subMenuMap) {
-            if (subMenuMap[key] === sub.dataset.panel) {
-                parentPanel = key;
-                break;
-            }
-        }
-        if (parentPanel) {
-            var parentItem = document.querySelector('.nav-item[data-panel="' + parentPanel + '"]');
-            if (parentItem && parentItem.style.display === 'none') {
-                sub.style.display = 'none';
-            }
-        }
-    });
-    // ★★★ 处理一级菜单显隐 ★★★
-    for (var sectionId in menuHierarchy) {
-        if (!menuHierarchy.hasOwnProperty(sectionId)) continue;
-        var section = document.getElementById(sectionId);
-        if (!section) continue;
-        if (role === 'admin') {
-            // 管理员显示所有分组
-            section.style.display = '';
-        } else {
-            // 普通用户：父级菜单仅在其下任一子菜单有权限时显示
-            var childPanels = menuHierarchy[sectionId];
-            var hasVisibleChild = false;
-            for (var i = 0; i < childPanels.length; i++) {
-                var childItem = document.querySelector('.nav-item[data-panel="' + childPanels[i] + '"]');
-                if (childItem && childItem.style.display !== 'none') {
-                    hasVisibleChild = true;
-                    break;
-                }
-            }
-            section.style.display = hasVisibleChild ? '' : 'none';
-        }
-    }
-    // ★★★ 渲染后立即应用增强面板隐藏设置 ★★★
-    initSubMenuVisibility();
-    if (currentPanel) updateSubMenuVisibility(currentPanel);
-}
-
-/**
- * 仿真车运行时长管理（前端实现）
- * - 启动时间由后端权威返回（Docker State.StartedAt），不依赖客户端时钟或 localStorage
- * - 每个容器独立计时，互不干扰；容器停止后后端不再返回 started_at，前端显示“—”自动归零
- * - 每秒刷新可见容器的运行时长显示
- */
-var containerRuntimeTimer = null;
-
-// 格式化运行时长（毫秒 -> HH:MM:SS）
-function formatDuration(ms) {
-    if (!ms || ms < 0) return '00:00:00';
-    var totalSec = Math.floor(ms / 1000);
-    var h = Math.floor(totalSec / 3600);
-    var m = Math.floor((totalSec % 3600) / 60);
-    var s = totalSec % 60;
-    function pad(n) { return (n < 10 ? '0' : '') + n; }
-    return pad(h) + ':' + pad(m) + ':' + pad(s);
-}
-
-// 每秒刷新所有可见运行容器的运行时长（data-start-time 为容器真实启动时间戳）
-function refreshContainerRuntimes() {
-    var cells = document.querySelectorAll('#containersTableBody .runtime-duration[data-start-time]');
-    for (var i = 0; i < cells.length; i++) {
-        var start = parseInt(cells[i].getAttribute('data-start-time'), 10);
-        if (start) {
-            cells[i].textContent = formatDuration(Date.now() - start);
-        }
-    }
-}
-
-function ensureContainerRuntimeTimer() {
-    if (containerRuntimeTimer) return;
-    containerRuntimeTimer = setInterval(refreshContainerRuntimes, 1000);
-}
-
-/**
- * 加载容器列表（含权限控制）
- */
-function loadContainers(all, filter) {
-    if (all === undefined || all === null) all = true;
-    if (filter === undefined || filter === null) filter = '';
-    var tbody = document.getElementById('containersTableBody');
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;"><div class="skeleton skeleton-block" style="height:40px;"></div></td></tr>';
-    var url = '/api/docker/containers?all=' + all;
-    if (filter) url += '&filter_image=' + encodeURIComponent(filter);
-
-    apiGet(url).then(function(data) {
-        if (!data.success) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--error)">失败: ' +
-                escapeHtml(data.error || '') + '</td></tr>';
-            updateContainerButtons();
-            updateContainerSelectStatus();
-            return;
-        }
-        if (!data.containers || !data.containers.length) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;opacity:0.5">没有容器</td></tr>';
-            updateContainerButtons();
-            updateContainerSelectStatus();
-            return;
-        }
-        // 缓存容器列表，供新手引导 checkExecuteStarted() 检测使用
-        window.lastContainerList = data.containers;
-
-        // ★★★ 判断是否为管理员 ★★★
-        // var isAdmin = (window.userRole === 'admin');
-        var hasDockerPerm = hasPermission('docker');
-
-        var html = '';
-        for (var i = 0; i < data.containers.length; i++) {
-            var c = data.containers[i];
-            var s = c.status.toLowerCase();
-            var statusTag = '';
-            if (s.includes('up')) statusTag = '<span class="tag tag-running">运行中</span>';
-            else if (s.includes('exited')) statusTag = '<span class="tag tag-stopped">已停止</span>';
-            else if (s.includes('paused')) statusTag = '<span class="tag tag-paused">已暂停</span>';
-            else statusTag = '<span class="tag">' + escapeHtml(c.status) + '</span>';
-
-            var isRos2Container = c.image && (c.image.includes('ros2') || c.image.includes('humble') || c.image.includes('foxy'));
-            
-            var baseActions = '';
-            var moreActions = '';
-            
-            // 启动/停止/重启按钮：拥有 Docker 管理页面权限即可使用。（基础按钮）
-            if (s.includes('up')) {
-                if (hasDockerPerm) {
-                    baseActions += '<button class="btn btn-sm btn-warning action-btn" onclick="stopContainer(\'' + escapeHtml(c.name) + '\')" title="停止容器"><span class="btn-icon">⏹</span><span class="btn-text">停止</span></button>';
-                } else {
-                    baseActions += '<span class="btn btn-sm btn-disabled" title="无权限"><span class="btn-icon">⏹</span><span class="btn-text">停止</span></span>';
-                }
-            } else {
-                if (hasDockerPerm) {
-                    baseActions += '<button class="btn btn-sm btn-success action-btn" onclick="startContainer(\'' + escapeHtml(c.name) + '\')" title="启动容器"><span class="btn-icon">▶</span><span class="btn-text">启动</span></button>';
-                } else {
-                    baseActions += '<span class="btn btn-sm btn-disabled" title="无权限"><span class="btn-icon">▶</span><span class="btn-text">启动</span></span>';
-                }
-            }
-
-            // ★★★ 选中按钮 - 所有用户可用（用于ROS2功能查看） ★★★（基础按钮）
-            baseActions += '<button class="btn btn-sm btn-outline action-btn" onclick="selectContainer(\'' + escapeHtml(c.name) + '\', \'' + escapeHtml(c.name) + '\')" title="选中容器"><span class="btn-icon">✅</span><span class="btn-text">选中</span></button>';
-
-            // ★★★ 日志/命令/资源 - 所有用户可查看 ★★★（展开按钮）
-            moreActions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerLogs(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="查看日志"><span class="btn-icon">📜</span><span class="btn-text">日志</span></button>';
-            moreActions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerExec(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="执行命令"><span class="btn-icon">💻</span><span class="btn-text">命令</span></button>';
-            moreActions += '<button class="btn btn-sm btn-outline action-btn" onclick="viewContainerUpdate(\'' + escapeHtml(c.name) + '\',\'' + escapeHtml(c.name) + '\')" title="资源配置"><span class="btn-icon">⚙</span><span class="btn-text">资源</span></button>';
-            
-            // ★★★ 终端 - 根据镜像类型决定是否需要source ros2环境 ★★★（展开按钮）
-            if (isRos2Container) {
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'normal\')" title="普通终端（已source ROS2）"><span class="btn-icon">🖥</span><span class="btn-text">终端</span></button>';
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'root\')" title="Root终端（已source ROS2）"><span class="btn-icon">👑</span><span class="btn-text">Root</span></button>';
-            } else {
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'normal\', false)" title="普通终端"><span class="btn-icon">🖥</span><span class="btn-text">终端</span></button>';
-                moreActions += '<button class="btn btn-sm btn-info action-btn" onclick="openTerminal(\'' + escapeHtml(c.name) + '\',\'root\', false)" title="Root终端"><span class="btn-icon">👑</span><span class="btn-text">Root</span></button>';
-            }
-            
-            // ★★★ 可视化方案 - 只对ROS2容器显示 ★★★（展开按钮）
-            if (isRos2Container && s.includes('up')) {
-                var vizMenuItems = '';
-                var hasEnabledMethods = false;
-                
-                // 如果有配置数据，根据配置生成菜单
-                if (visualizationConfigData && visualizationConfigData.methods && visualizationConfigData.order) {
-                    var methods = visualizationConfigData.methods;
-                    var order = visualizationConfigData.order;
-                    order.forEach(function(key) {
-                        // v3.6: Foxglove 已注释，仅保留 vnc 和 rviz_x11
-                        if (key === 'foxglove') return;
-                        var method = methods[key];
-                        if (method && method.enabled) {
-                            hasEnabledMethods = true;
-                            var icon = '🖼️';
-                            var func = '';
-                            if (key === 'vnc') {
-                                icon = '🖥️';
-                                func = `startVisualization('${c.id}', 'vnc')`;
-                            } else if (key === 'rviz_x11') {
-                                icon = '🖼️';
-                                func = `startVisualization('${c.id}', 'rviz_x11')`;
-                            }
-                            vizMenuItems += `<a href="#" class="dropdown-item" onclick="${func}; closeDropdowns();">${icon} ${method.name}</a>`;
-                        }
-                    });
-                }
-                
-                // 如果配置数据中没有启用的方法，或者没有配置数据，使用默认菜单
-                if (!hasEnabledMethods) {
-                    vizMenuItems = `
-                        <a href="#" class="dropdown-item" onclick="startVisualization('${c.id}', 'vnc'); closeDropdowns();">🖥️ VNC 远程桌面</a>
-                        <a href="#" class="dropdown-item" onclick="startVisualization('${c.id}', 'rviz_x11'); closeDropdowns();">🖼️ 原生 RVIZ (X11转发)</a>
-                    `;
-                }
-                
-                moreActions += `
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-primary action-btn dropdown-toggle" onclick="toggleVisualizationMenu(this)" title="可视化"><span class="btn-icon">🖼</span><span class="btn-text">可视化</span><span class="btn-icon">▼</span></button>
-                        <div class="dropdown-menu" style="display:none;">
-                            ${vizMenuItems}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // 删除按钮：拥有 Docker 管理页面权限即可使用。（展开按钮）
-            if (hasDockerPerm) {
-                moreActions += '<button class="btn btn-sm btn-error action-btn" onclick="removeContainer(\'' + c.id + '\',\'' + escapeHtml(c.name) + '\')" title="删除容器"><span class="btn-icon">🗑</span><span class="btn-text">删除</span></button>';
-            }
-            
-            // 构建最终的操作按钮HTML
-            var actions = '<div class="action-buttons">';
-            actions += baseActions;
-            if (moreActions) {
-                actions += '<div class="more-actions-container">';
-                actions += '<button class="btn btn-sm btn-outline action-btn more-btn" onclick="toggleMoreActions(this)" title="更多操作"><span class="btn-icon">⬇</span><span class="btn-text">更多</span></button>';
-                actions += '<div class="more-actions" style="display:none;">' + moreActions + '</div>';
-                actions += '</div>';
-            }
-            actions += '</div>';
-
-            var isSelected = (selectedContainerId === c.name);
-            var cloudIp = c.cloud_ip || '';
-            var cloudStatusTag;
-            if (cloudIp) {
-                cloudStatusTag = '<a href="http://' + cloudIp + ':9201/#/mine_monitor?display=2d" target="_blank" style="color:#3b82f6;text-decoration:underline;font-weight:bold;">🌐 ' + cloudIp + '</a>';
-            } else if (isRos2Container) {
-                cloudStatusTag = '<span style="color:#9ca3af;font-weight:bold;">❓ 未知</span>';
-            } else {
-                // 非 ROS2 容器无云平台连接概念
-                cloudStatusTag = '<span style="color:var(--text-secondary)">—</span>';
-            }
-
-            // ★★★ 运行时长：以后端返回的容器真实启动时间（started_at）为准
-            // 容器停止后后端不返回 started_at，前端显示“—”自动归零；每个容器独立计时
-            var runtimeTag;
-            if (s.includes('up') && c.started_at) {
-                var startTime = Date.parse(c.started_at);
-                if (isNaN(startTime)) startTime = Date.now();
-                runtimeTag = '<span class="runtime-duration" data-start-time="' + startTime + '" style="font-variant-numeric:tabular-nums;color:#10b981;font-weight:bold;">' + formatDuration(Date.now() - startTime) + '</span>';
-            } else {
-                runtimeTag = '<span style="color:var(--text-secondary)">—</span>';
-            }
-
-            // ★★★ 修复bug3：data-container-id 使用 name，避免id为空时无法匹配选中状态 ★★★
-            html += '<tr data-container-id="' + escapeHtml(c.name) + '" class="' + (isSelected ? 'selected-container' : '') + '">' +
-                '<td><strong>' + escapeHtml(c.name) +
-                '</strong><br><small style="opacity:0.6">' + c.id +
-                '</small></td>' +
-                '<td>' + escapeHtml(c.image) + '</td>' +
-                '<td>' + statusTag + '</td>' +
-                '<td>' + runtimeTag + '</td>' +
-                '<td>' + cloudStatusTag + '</td>' +
-                '<td>' + actions + '</td>' +
-                '</tr>';
-        }
-        tbody.innerHTML = html;
-        // 启动每秒刷新定时器，实时更新运行时长
-        ensureContainerRuntimeTimer();
-        updateContainerButtons();
-        updateContainerSelectStatus();
-    });
-}
-
-/**
- * 处理 startContainer 相关前端逻辑。
- */
-function startContainer(id) {
-    apiPost('/api/docker/container/' + id + '/start').then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-        if (d.success) loadContainers();
-    });
-}
-
-/**
- * 处理 stopContainer 相关前端逻辑。
- */
-function stopContainer(id) {
-    showToast('⏳ 正在停止容器...', 'info');
-    apiPost('/api/docker/container/' + id + '/stop').then(function(d) {
-        if (d.success) {
-            showToast('✅ 容器已停止', 'success');
-            loadContainers(false, 'ros2_');
-        } else {
-            showToast('❌ 停止失败: ' + (d.error || d.message || '未知错误'), 'error');
-        }
-    }).catch(function(err) {
-        showToast('❌ 网络错误: ' + err.message, 'error');
-    });
-}
-
-// 当前展开的容器more-actions ID
-var expandedContainerId = null;
-
-/**
- * 切换更多操作按钮的展开/收起状态
- */
-function toggleMoreActions(btn) {
-    var container = btn.parentElement;
-    var moreActions = container.querySelector('.more-actions');
-    var icon = btn.querySelector('.btn-icon');
-    var text = btn.querySelector('.btn-text');
-    
-    // 获取当前按钮所在的行，用于标识唯一的容器
-    var row = btn.closest('tr');
-    var currentContainerId = row ? row.getAttribute('data-container-id') : null;
-    
-    if (moreActions.style.display === 'none' || moreActions.style.display === '') {
-        // 展开操作
-        moreActions.style.display = 'flex';
-        icon.textContent = '⬆';
-        text.textContent = '收起';
-        
-        // 记录当前展开的容器ID
-        expandedContainerId = currentContainerId;
-        
-        // 禁用其他所有"更多"按钮
-        disableOtherMoreButtons(currentContainerId);
-    } else {
-        // 收起操作
-        moreActions.style.display = 'none';
-        icon.textContent = '⬇';
-        text.textContent = '更多';
-        
-        // 清除展开状态
-        expandedContainerId = null;
-        
-        // 启用所有"更多"按钮
-        enableAllMoreButtons();
-    }
-}
-
-/**
- * 禁用除当前容器外的所有"更多"按钮
- */
-function disableOtherMoreButtons(excludeContainerId) {
-    var allMoreButtons = document.querySelectorAll('.more-btn');
-    allMoreButtons.forEach(function(btn) {
-        var row = btn.closest('tr');
-        var containerId = row ? row.getAttribute('data-container-id') : null;
-        if (containerId !== excludeContainerId) {
-            btn.disabled = true;
-            btn.classList.add('btn-disabled');
-            btn.style.opacity = '0.5';
-            btn.style.cursor = 'not-allowed';
-        }
-    });
-}
-
-/**
- * 启用所有"更多"按钮
- */
-function enableAllMoreButtons() {
-    var allMoreButtons = document.querySelectorAll('.more-btn');
-    allMoreButtons.forEach(function(btn) {
-        btn.disabled = false;
-        btn.classList.remove('btn-disabled');
-        btn.style.opacity = '1';
-        btn.style.cursor = 'pointer';
-    });
-}
-
-/**
- * 处理 restartContainer 相关前端逻辑。
- */
-function restartContainer(id) {
-    apiPost('/api/docker/container/' + id + '/restart').then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-        if (d.success) loadContainers();
-    });
-}
-
-/**
- * 处理 removeContainer 相关前端逻辑。
- */
-function removeContainer(id, name) {
-    customConfirm('确定删除 ' + name + '？', function() {
-    });
-    apiDelete('/api/docker/container/' + id + '?force=true').then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-        if (d.success) loadContainers();
-    });
-}
-
-/**
- * 处理 viewContainerLogs 相关前端逻辑。
- */
-function viewContainerLogs(id, name) {
-    if (!id) {
-        if (selectedContainerId) { id = selectedContainerId; name = selectedContainerName; }
-        else { showToast('请先选中一个容器', 'warning'); return; }
-    }
-    currentContainerId = id;
-    document.getElementById('containerLogCard').style.display = 'block';
-    document.getElementById('containerLogName').textContent = name;
-    loadContainerLogs();
-}
-
-// v3.6: 当前日志查看模式（docker / ros2），默认 docker
-var containerLogMode = 'docker';
-
-/**
- * 处理 loadContainerLogs 相关前端逻辑。
- * v3.6: type 参数支持 'docker'（容器 stdout/stderr）或 'ros2'（ROS2 节点日志）。
- */
-function loadContainerLogs(type) {
-    if (!currentContainerId) return;
-    if (type) containerLogMode = type;
-    var mode = containerLogMode || 'docker';
-    var container = document.getElementById('containerLogContent');
-    container.innerHTML = '<span class="loading"></span> 加载' + (mode === 'ros2' ? ' ROS2 ' : ' Docker ') + '日志中...';
-
-    var url;
-    if (mode === 'ros2') {
-        // bug3 修复：读取容器对应 ROS2 日志文件
-        url = '/api/docker/container/' + currentContainerId + '/roslogs?tail=200';
-    } else {
-        url = '/api/docker/container/' + currentContainerId + '/logs?tail=200';
-    }
-    apiGet(url).then(function(d) {
-        var text = d.logs || d.error || '无日志';
-        if (mode === 'ros2' && d.log_file) {
-            text = '📄 日志文件: ' + d.log_file + '\n' + '='.repeat(60) + '\n' + text;
-        }
-        container.textContent = text;
-        container.scrollTop = container.scrollHeight;
-    });
-}
-
-/**
- * 处理 viewContainerExec 相关前端逻辑。
- */
-function viewContainerExec(id, name) {
-    if (!id) {
-        if (selectedContainerId) { id = selectedContainerId; name = selectedContainerName; }
-        else { showToast('请先选中一个容器', 'warning'); return; }
-    }
-    currentContainerId = id;
-    document.getElementById('containerExecCard').style.display = 'block';
-    document.getElementById('containerExecName').textContent = name;
-    document.getElementById('containerExecResult').textContent = '';
-    document.getElementById('containerExecCmd').value = '';
-}
-
-/**
- * 处理 execContainerCmd 相关前端逻辑。
- */
-function execContainerCmd() {
-    if (!currentContainerId) { showToast('请先选择容器', 'warning'); return; }
-    var cmd = document.getElementById('containerExecCmd').value.trim();
-    if (!cmd) { showToast('请输入命令', 'warning'); return; }
-    if (cmd.includes('ros2 topic echo') && !cmd.includes('--once') && !cmd.includes('--head')) {
-        showToast('⚠️ ros2 topic echo 需要添加 --once 或 --head 参数，否则会持续输出', 'warning');
-    }
-    var resultEl = document.getElementById('containerExecResult');
-    resultEl.textContent = '⏳ 执行中...';
-    apiPost('/api/docker/container/' + currentContainerId + '/exec', { command: cmd }).then(function(d) {
-        var output = '';
-        if (d.stdout) output += d.stdout;
-        if (d.stderr) output += '\n' + d.stderr;
-        resultEl.textContent = output || '✅ 执行成功（无输出）';
-        if (!d.success) { showToast('执行失败: ' + (d.error || '请检查命令'), 'error'); }
-    }).catch(function(err) {
-        resultEl.textContent = '❌ 请求失败: ' + err.message;
-    });
-}
-
-/**
- * 处理 refreshContainerExec 相关前端逻辑。
- */
-function refreshContainerExec() {
-    if (!currentContainerId) { showToast('请先选择容器', 'warning'); return; }
-    document.getElementById('containerExecResult').textContent = '';
-    document.getElementById('containerExecCmd').value = '';
-    showToast('已清空，请输入新命令', 'info');
-}
-
-/**
- * 处理 viewContainerUpdate 相关前端逻辑。
- */
-function viewContainerUpdate(id, name) {
-    if (!id) {
-        if (selectedContainerId) { id = selectedContainerId; name = selectedContainerName; }
-        else { showToast('请先选中一个容器', 'warning'); return; }
-    }
-    currentContainerId = id;
-    document.getElementById('containerUpdateCard').style.display = 'block';
-    document.getElementById('containerUpdateName').textContent = name;
-}
-
-/**
- * 处理 refreshContainerUpdate 相关前端逻辑。
- */
-function refreshContainerUpdate() {
-    if (!currentContainerId) return;
-    var name = document.getElementById('containerUpdateName').textContent;
-    viewContainerUpdate(currentContainerId, name);
-}
-
-/**
- * 处理 updateContainerRes 相关前端逻辑。
- */
-function updateContainerRes() {
-    if (!currentContainerId) return;
-    var cpus = parseFloat(document.getElementById('containerCpus').value) || null;
-    var mem = parseFloat(document.getElementById('containerMem').value) || null;
-    apiPost('/api/docker/container/' + currentContainerId + '/update', { cpus: cpus, memory_gb: mem })
-        .then(function(d) { showToast(d.message || d.error, d.success ? 'success' : 'error'); });
-}
-
-/**
- * 处理 stopAllRos2 相关前端逻辑。
- */
-function stopAllRos2() {
-    if (!hasPermission('docker')) {
-        showToast('您没有 Docker 管理的操作权限', 'warning');
-        return;
-    }
-    customConfirm('确定停止所有 ROS2 容器？', function() {
-        showToast('⏳ 正在停止所有ROS2容器...', 'info');
-        apiPost('/api/docker/stop-all-ros2').then(function(d) {
-            if (d.success) {
-                showToast('✅ 已停止所有ROS2容器', 'success');
-                loadContainers(false, 'ros2_');
-            } else {
-                showToast('❌ 停止失败: ' + (d.detail || d.error || d.message || '未知错误'), 'error');
-            }
-        });
-    });
-}
-
-/**
- * 处理 syncTime 相关前端逻辑。
- */
-function syncTime() {
-    if (!hasPermission('docker')) {
-        showToast('您没有 Docker 管理的操作权限', 'warning');
-        return;
-    }
-    apiPost('/api/docker/sync-time').then(function(d) {
-        showToast(d.success ? '时间同步完成' : ('同步失败: ' + (d.detail || d.error || d.message || '未知错误')), d.success ? 'success' : 'error');
-    });
-}
-
-// ========== 预留扩展区域（第601-650行） ==========
-// 预留用于未来扩展，如容器批量操作、编排等
-// ===========================================
-
-// ============================================================
 // 14. 脚本管理
 // ============================================================
 
@@ -3780,10 +3030,6 @@ function generateScripts() {
                 }
                 html += '</div>';
             }
-            for (var i = 0; i < d.generated.length; i++) {
-                var g = d.generated[i];
-                html += '<div style="font-size:12px;margin:2px 0">📄 ' + escapeHtml(g.name) + ' → 容器: ' + escapeHtml(g.container) + ' (DOMAIN_ID=' + g.domain_id + ')</div>';
-            }
             div.innerHTML = html;
             loadScripts();
             // 通知引导系统脚本生成完成
@@ -3894,6 +3140,10 @@ function toggleCard(cardId, saveConfig = true) {
         // 展开帮助文档配置卡片时自动加载内容
         if (cardId === 'settings-help') {
             loadHelpContent();
+        }
+        // 展开告警中心时清除未读徽章
+        if (cardId === 'monitor-alerts') {
+            markAlertsSeen();
         }
     }
     
@@ -4198,10 +3448,9 @@ var helpPagesCache = [];
 function loadHelpPages() {
     var defaultPages = [
         {"id": "welcome", "name": "🏠 首页"},
-        {"id": "scripts", "name": "📜 脚本生成"},
+        {"id": "scripts", "name": "📜 脚本与启动"},
         {"id": "advanced-scripts", "name": "📜 脚本执行增强"},
-        {"id": "vehicle", "name": "🚛 仿真车启动"},
-        {"id": "docker", "name": "🐳 Docker 管理"},
+        {"id": "docker", "name": "🚛 仿真车管理"},
         {"id": "advanced-docker", "name": "🐳 容器管理增强"},
         {"id": "images", "name": "💿 镜像管理"},
         {"id": "traffic", "name": "🚦 红绿灯模拟"},
@@ -4245,8 +3494,8 @@ function loadHelpPages() {
         if (tabsContainer) {
             tabsContainer.innerHTML = '';
             var tabNameMap = {
-                'welcome': '首页', 'scripts': '脚本生成', 'advanced-scripts': '脚本增强',
-                'vehicle': '仿真车启动', 'docker': 'Docker', 'advanced-docker': '容器增强',
+                'welcome': '首页', 'scripts': '脚本与启动', 'advanced-scripts': '脚本增强',
+                'docker': '仿真车管理', 'advanced-docker': '容器增强',
                 'images': '镜像管理', 'traffic': '红绿灯', 'advanced-fault': '故障注入',
                 'tools': '其他工具', 'simulation': '仿真控制',
                 'topics': '话题查看', 'nodes': '节点管理', 'services': '服务管理',
@@ -4309,7 +3558,6 @@ function toggleHelpPanel() {
 function syncHelpTabWithCurrentPanel() {
     var panelToTabMap = {
         'panel-scripts': 'scripts',
-        'panel-vehicle': 'vehicle',
         'panel-docker': 'docker',
         'panel-images': 'images',
         'panel-traffic': 'traffic',
@@ -4431,11 +3679,9 @@ function loadHelpContent(panelId) {
  */
 function getDefaultHelpContent(panelId) {
     var defaults = {
-        'scripts': '## 脚本生成\n\n生成 ROS2 启动脚本，用于启动仿真车辆。\n\n### 操作流程\n\n1. **扫描 Launch 文件**\n   - 点击「扫描 Launch 文件」按钮\n   - 系统自动查找工作空间中的所有 .launch.py 文件\n   - 扫描完成后显示找到的文件列表\n\n2. **配置生成参数**\n   - 设置「脚本输出目录」: 生成的启动脚本存放位置\n   - 设置「日志目录」: 容器运行时日志输出位置\n   - 设置「宿主机 IP」: 可选，用于网络配置\n   - 设置「Docker 镜像」: 选择要使用的基础镜像\n\n3. **生成脚本**\n   - 点击「生成 ROS2 脚本」按钮\n   - 系统自动创建启动脚本\n   - 生成成功后显示脚本数量\n\n### 注意事项\n\n- 修改路径后需要重新生成脚本\n- 生成的脚本包含自动重启和日志管理功能\n- 建议在生成前确认路径存在且有写入权限',
-        
-        'vehicle': '## 仿真车启动\n\n管理已生成的启动脚本，支持批量启动仿真车辆。\n\n### 操作流程\n\n#### 一、脚本列表操作\n\n1. **筛选脚本**\n   - 在搜索框中输入关键词\n   - 实时过滤显示匹配的脚本\n\n2. **预览脚本内容**\n   - 点击脚本名称前的预览按钮\n   - 弹窗显示脚本完整内容\n\n3. **执行脚本**\n   - 点击「执行」按钮单独运行一个脚本\n   - 脚本执行后显示运行状态\n\n#### 二、批量操作\n\n1. **选择脚本**\n   - 勾选脚本前的复选框\n   - 使用「全选」按钮选中所有脚本\n\n2. **选择执行模式**\n   - **顺序执行**: 脚本按顺序依次启动，一个完成后启动下一个\n   - **并行执行**: 所有选中脚本同时启动\n\n3. **批量启动**\n   - 点击「批量启动」按钮\n   - 查看执行进度和结果\n\n#### 三、带重试执行（高级功能）\n\n1. **加载脚本列表**\n   - 点击「刷新」按钮加载当前脚本\n\n2. **批量执行（带重试）**\n   - 勾选需要执行的脚本\n   - 选择执行模式\n   - 点击「批量执行（带重试）」\n   - 系统会自动重试失败的脚本\n\n### 使用提示\n\n- 首次启动建议使用顺序执行，便于排查问题\n- 并行执行适用于已验证过的稳定脚本\n- 执行结果会显示每个脚本的启动状态\n- 红色表示启动失败，绿色表示成功',
-        
-        'docker': '## Docker 管理\n\n管理 Docker 容器的运行状态。\n\n### 操作流程\n\n1. **查看容器列表**\n   - 进入页面自动加载容器列表\n   - 显示容器名称、状态、镜像等信息\n\n2. **容器操作**\n   - **启动**: 启动已停止的容器\n   - **停止**: 停止运行中的容器\n   - **重启**: 重启容器\n   - **删除**: 删除不需要的容器\n\n3. **查看日志**\n   - 点击日志按钮查看容器日志\n   - 支持实时日志查看\n\n### 使用提示\n\n- 绿色指示灯表示容器运行中\n- 灰色指示灯表示容器已停止\n- 删除容器会永久移除容器及其数据',
+        'scripts': '## 脚本与启动\n\n生成 ROS2 启动脚本，并管理已生成的脚本以启动仿真车辆。\n\n### 操作流程\n\n#### 一、扫描与生成脚本\n\n1. **扫描 Launch 文件**\n   - 点击「扫描 Launch 文件」按钮\n   - 系统自动查找工作空间中的所有 .launch.py 文件\n   - 扫描完成后显示找到的文件列表\n\n2. **配置生成参数**\n   - 设置「脚本输出目录」: 生成的启动脚本存放位置\n   - 设置「日志目录」: 容器运行时日志输出位置\n   - 设置「宿主机 IP」: 可选，用于网络配置\n   - 设置「Docker 镜像」: 选择要使用的基础镜像\n\n3. **生成脚本**\n   - 点击「⚡ 生成 ROS2 脚本」按钮\n   - 系统自动创建启动脚本\n   - 生成成功后显示脚本数量\n\n#### 二、启动车辆\n\n1. **筛选脚本**\n   - 在搜索框中输入关键词\n   - 实时过滤显示匹配的脚本\n\n2. **预览脚本内容**\n   - 点击脚本名称前的预览按钮\n   - 弹窗显示脚本完整内容\n\n3. **执行脚本**\n   - 点击「执行」按钮单独运行一个脚本\n   - 脚本执行后显示运行状态\n\n4. **批量启动**\n   - 勾选脚本前的复选框，或使用「全选」按钮\n   - 选择执行模式：**顺序执行**（依次启动）或**并行执行**（同时启动）\n   - 点击「批量启动」按钮，查看执行进度和结果\n\n### 注意事项\n\n- 修改路径后需要重新生成脚本\n- 生成的脚本包含自动重启和日志管理功能\n- 建议在生成前确认路径存在且有写入权限\n- 首次启动建议使用顺序执行，便于排查问题\n- 并行执行适用于已验证过的稳定脚本\n- 红色表示启动失败，绿色表示成功',
+
+        'docker': '## 仿真车管理\n\n管理仿真车（Docker 容器）的运行状态。\n\n### 操作流程\n\n1. **查看容器列表**\n   - 进入页面自动加载容器列表\n   - 显示容器名称、状态、镜像等信息\n\n2. **容器操作**\n   - **启动**: 启动已停止的容器\n   - **停止**: 停止运行中的容器\n   - **重启**: 重启容器\n   - **删除**: 删除不需要的容器\n\n3. **查看日志**\n   - 点击日志按钮查看容器日志\n   - 支持实时日志查看\n\n### 使用提示\n\n- 绿色指示灯表示容器运行中\n- 灰色指示灯表示容器已停止\n- 删除容器会永久移除容器及其数据',
         
         'images': '## 镜像管理\n\n管理 Docker 镜像。\n\n### 操作流程\n\n1. **查看镜像列表**\n   - 显示所有本地镜像\n   - 包含镜像名称、标签、大小等信息\n\n2. **镜像操作**\n   - **拉取**: 从远程仓库拉取镜像\n   - **删除**: 删除本地镜像\n   - **查看详情**: 显示镜像详细信息\n\n### 使用提示\n\n- 删除镜像前请确保没有容器使用该镜像\n- 建议定期清理不再使用的镜像以节省空间',
         
@@ -4465,9 +3711,9 @@ function getDefaultHelpContent(panelId) {
         
         'check': '## 系统自检\n\n检查系统环境和配置。\n\n### 功能说明\n\n1. **开始检查**: 点击按钮执行系统检查\n2. **查看结果**: 检查完成后显示各项状态\n3. **修复建议**: 根据检查结果提供修复建议\n\n### 检查项\n\n- ROS2 环境配置\n- Docker 服务状态\n- 网络连接\n- 目录权限',
         
-        'welcome': '## 欢迎页面\n\n欢迎使用 Mock Truck 管理工具。\n\n### 功能概览\n\n- 📜 **脚本生成**: 生成 ROS2 启动脚本\n- 🚛 **仿真车启动**: 管理和启动仿真车辆\n- 🐳 **Docker 管理**: 管理 Docker 容器\n- 💿 **镜像管理**: 管理 Docker 镜像\n- 🚦 **红绿灯模拟**: 模拟交通信号灯\n- 💥 **故障注入**: 模拟系统故障\n- 🛠️ **其他工具**: 系统维护工具\n- 🎮 **仿真控制**: 控制仿真环境\n- 📡 **话题查看**: 查看 ROS2 话题\n- 🔷 **节点管理**: 管理 ROS2 节点\n- 🔧 **服务管理**: 管理 ROS2 服务\n- ⚡ **Action 管理**: 管理 ROS2 Action\n- 📊 **系统监控**: 监控系统资源\n- ⚙️ **系统设置**: 配置系统参数\n\n### 使用提示\n\n- 使用左侧导航菜单切换功能模块\n- 点击右下角帮助按钮查看当前页面帮助\n- 系统设置中可配置界面偏好和帮助文档',
+        'welcome': '## 欢迎页面\n\n欢迎使用 Mock Truck 管理工具。\n\n### 功能概览\n\n- 📜 **脚本与启动**: 生成 ROS2 启动脚本并启动仿真车辆\n- 🚛 **仿真车管理**: 管理 Docker 容器（仿真车）\n- 💿 **镜像管理**: 管理 Docker 镜像\n- 🚦 **红绿灯模拟**: 模拟交通信号灯\n- 💥 **故障注入**: 模拟系统故障\n- 🛠️ **其他工具**: 系统维护工具\n- 🎮 **仿真控制**: 控制仿真环境\n- 📡 **话题查看**: 查看 ROS2 话题\n- 🔷 **节点管理**: 管理 ROS2 节点\n- 🔧 **服务管理**: 管理 ROS2 服务\n- ⚡ **Action 管理**: 管理 ROS2 Action\n- 📊 **系统监控**: 监控系统资源\n- ⚙️ **系统设置**: 配置系统参数\n\n### 使用提示\n\n- 使用左侧导航菜单切换功能模块\n- 点击右下角帮助按钮查看当前页面帮助\n- 系统设置中可配置界面偏好和帮助文档',
         
-        'advanced-scripts': '## 脚本执行增强\n\n高级脚本执行功能。\n\n### 功能说明\n\n1. **脚本执行增强**\n   - 支持脚本执行状态跟踪\n   - 显示执行进度和结果\n   - 支持执行日志查看\n\n### 使用提示\n\n- 需要先在脚本生成页面生成脚本\n- 执行增强功能需要管理员权限',
+        'advanced-scripts': '## 脚本执行增强\n\n高级脚本执行功能。\n\n### 功能说明\n\n1. **脚本执行增强**\n   - 支持脚本执行状态跟踪\n   - 显示执行进度和结果\n   - 支持执行日志查看\n\n### 使用提示\n\n- 需要先在脚本与启动页面生成脚本\n- 执行增强功能需要管理员权限',
         
         'api-manager': '## REST API 管理\n\n管理系统 REST API 服务，配置端口、认证，并提供 API 文档入口。\n\n### 功能说明\n\n1. **API 配置**\n   - API 端口: 设置 API 服务监听端口（默认 8875）\n   - 认证 Token: 设置访问令牌，留空表示无需认证\n   - 启用/禁用: 控制 API 服务开关\n   - 需要认证: 开启后所有 API 请求需携带 Token\n\n2. **API 文档入口**\n   - 📖 **Swagger UI**: 交互式 API 文档，支持在线测试\n   - 📄 **ReDoc**: 美观的文档展示界面\n   - 点击按钮即可在新窗口打开文档\n\n3. **认证方式**\n   如果启用了 Token 认证，调用 API 时需在请求头中添加：\n   ```\n   Authorization: Bearer YOUR_TOKEN\n   ```\n\n4. **连接测试**\n   点击「🔍 测试连接」可检测 API 服务是否正常响应，显示响应时间、接口数量等信息。',
         
@@ -4778,7 +4024,7 @@ function deleteScript(name) {
  */
 function removeGpuFromScripts() {
     if (!hasPermission('scripts')) {
-        showToast('您没有脚本生成的操作权限', 'warning');
+        showToast('您没有脚本与启动的操作权限', 'warning');
         return;
     }
     customConfirm('确定移除所有脚本中的 GPU 参数？', function() {
@@ -5008,50 +4254,114 @@ function onImageFileSelect(input) {
 }
 
 /**
+ * 显示/隐藏镜像导入进度条
+ * show: 是否显示；percent: 进度百分比；text: 状态文字
+ */
+function setImageImportProgress(show, percent, text) {
+    var bar = document.getElementById('imageImportProgress');
+    var fill = document.getElementById('imageImportProgressFill');
+    var status = document.getElementById('imageImportStatus');
+    if (!bar || !fill || !status) return;
+    if (show) {
+        bar.style.display = 'block';
+        status.style.display = 'block';
+        fill.style.width = percent + '%';
+        status.textContent = text || '';
+    } else {
+        bar.style.display = 'none';
+        status.style.display = 'none';
+        fill.style.width = '0%';
+        status.textContent = '';
+    }
+}
+
+/**
+ * 镜像导入收尾：提示结果、恢复按钮、清理状态
+ */
+function finishImageImport(d) {
+    var ok = d && d.success;
+    var errMsg = (d && (d.error || d.message)) || '未知错误';
+    showToast(ok ? '导入成功' : '失败: ' + errMsg, ok ? 'success' : 'error');
+    setImageImportProgress(false, 0, '');
+    var btn = document.getElementById('loadImageBtn');
+    if (btn) { btn.disabled = false; }
+    selectedImageFile = null;
+    document.getElementById('imageTarPath').value = '';
+    if (ok) loadImages();
+}
+
+/**
+ * 恢复导入按钮与进度条初始状态（出错时调用）
+ */
+function resetImageImport() {
+    setImageImportProgress(false, 0, '');
+    var btn = document.getElementById('loadImageBtn');
+    if (btn) { btn.disabled = false; }
+}
+
+/**
  * 处理 loadImage 相关前端逻辑。
+ * 文件上传使用 XHR 以显示上传进度；导入中禁用按钮，结束必有结果提示。
  */
 function loadImage() {
     var path = document.getElementById('imageTarPath').value.trim();
     if (!path) { showToast('请输入文件路径', 'warning'); return; }
-    showToast('正在导入...', 'info');
 
-    // 如果有选择的文件，通过 FormData 上传
+    var btn = document.getElementById('loadImageBtn');
+    if (btn) { btn.disabled = true; }
+
+    // 选择了本地文件且未手动修改路径时，通过 FormData 上传（带进度）
     // 注意：FormData 上传时不能手动设置 Content-Type，浏览器需自动生成 multipart boundary
-    if (selectedImageFile) {
+    if (selectedImageFile && path === selectedImageFile.name) {
         var formData = new FormData();
         formData.append('file', selectedImageFile);
-        var uploadHeaders = {};
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', API_BASE + '/api/docker/images/load');
         if (AUTH_TOKEN) {
-            uploadHeaders['Authorization'] = 'Bearer ' + AUTH_TOKEN;
+            xhr.setRequestHeader('Authorization', 'Bearer ' + AUTH_TOKEN);
         }
-        fetch(API_BASE + '/api/docker/images/load', {
-            method: 'POST',
-            headers: uploadHeaders,
-            body: formData
-        })
-        .then(function(res) {
-            if (res.status === 401) {
-                handleLogout();
-                return { success: false, error: '未授权，请重新登录' };
+        xhr.responseType = 'json';
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                var pct = Math.min(99, Math.round(e.loaded * 100 / e.total));
+                setImageImportProgress(true, pct, '📤 上传中 ' + pct + '%（' + selectedImageFile.name + '）');
             }
-            return res.json().catch(function() { return { success: false, error: '解析响应失败' }; });
-        })
-        .then(function(d) {
-            showToast(d.success ? '导入成功' : '失败: ' + (d.error || d.message || ''), d.success ? 'success' : 'error');
-            if (d.success) loadImages();
-            selectedImageFile = null;
-            document.getElementById('imageTarPath').value = '';
-        })
-        .catch(function(err) {
-            showToast('请求失败: ' + err.message, 'error');
-        });
+        };
+        xhr.upload.onload = function() {
+            setImageImportProgress(true, 100, '⚙️ 上传完成，服务器正在导入镜像，大镜像可能需要几分钟，请耐心等待...');
+        };
+        xhr.onload = function() {
+            if (xhr.status === 401) {
+                showToast('未授权，请重新登录', 'error');
+                handleLogout();
+                return;
+            }
+            var d = xhr.response;
+            if (!d) {
+                try { d = JSON.parse(xhr.responseText); } catch (e) { d = { success: false, error: '解析响应失败（HTTP ' + xhr.status + '）' }; }
+            }
+            finishImageImport(d);
+        };
+        xhr.onerror = function() {
+            showToast('请求失败: 网络错误或连接中断', 'error');
+            resetImageImport();
+        };
+        xhr.ontimeout = function() {
+            showToast('请求超时，请重试', 'error');
+            resetImageImport();
+        };
+        setImageImportProgress(true, 0, '📤 准备上传（' + selectedImageFile.name + '）...');
+        xhr.send(formData);
         return;
     }
 
-    // 兼容本地路径方式
+    // 兼容本地路径方式（服务器本地 tar 文件，无上传阶段，直接进入导入等待）
+    setImageImportProgress(true, 100, '⚙️ 服务器正在导入镜像，大镜像可能需要几分钟，请耐心等待...');
     apiPost('/api/docker/images/load', { path: path }).then(function(d) {
-        showToast(d.success ? '导入成功' : '失败: ' + (d.error || ''), d.success ? 'success' : 'error');
-        if (d.success) loadImages();
+        finishImageImport(d);
+    }).catch(function(err) {
+        showToast('请求失败: ' + (err && err.message ? err.message : '网络错误'), 'error');
+        resetImageImport();
     });
 }
 
@@ -5070,1020 +4380,6 @@ function removeImage(name) {
 // ========== 预留扩展区域（第701-750行） ==========
 // 预留用于未来扩展，如镜像构建、推送等
 // ===========================================
-
-// ============================================================
-// 16. 系统监控
-// ============================================================
-
-/**
- * 处理 loadMonitor 相关前端逻辑。
- */
-function loadMonitor() {
-    apiGet('/api/system/monitor').then(function(d) {
-        if (!d.success) { showToast('监控加载失败: ' + (d.error || '未知错误'), 'error'); return; }
-        var grid = document.getElementById('monitorGrid');
-        var cpuClass = d.cpu.total > 80 ? 'fill-error' : (d.cpu.total > 50 ? 'fill-warning' : 'fill-success');
-        var memClass = d.memory.percent > 80 ? 'fill-error' : (d.memory.percent > 50 ? 'fill-warning' : 'fill-success');
-        grid.innerHTML =
-            '<div class="monitor-item"><div class="label">CPU 使用率</div><div class="value">' + d.cpu.total.toFixed(1) + '%</div><div class="progress-bar"><div class="fill ' + cpuClass + '" style="width:' + d.cpu.total + '%"></div></div></div>' +
-            '<div class="monitor-item"><div class="label">内存</div><div class="value">' + d.memory.percent.toFixed(1) + '%</div><div class="progress-bar"><div class="fill ' + memClass + '" style="width:' + d.memory.percent + '%"></div></div><div style="font-size:12px;margin-top:4px">' + d.memory.used_mb + 'MB / ' + d.memory.total_mb + 'MB</div></div>' +
-            '<div class="monitor-item"><div class="label">Swap</div><div class="value">' + d.swap.percent.toFixed(1) + '%</div><div style="font-size:12px">' + d.swap.used_mb + 'MB / ' + d.swap.total_mb + 'MB</div></div>' +
-            '<div class="monitor-item"><div class="label">平均负载</div><div class="value">' + d.cpu.load_avg.map(function(v) { return v.toFixed(2); }).join(' / ') + '</div><div style="font-size:12px">核心数: ' + d.cpu.cores + '</div></div>';
-        var gpuDiv = document.getElementById('gpuInfo');
-        if (d.gpu && d.gpu.length) {
-            var gpuHtml = '';
-            for (var i = 0; i < d.gpu.length; i++) {
-                var g = d.gpu[i];
-                gpuHtml += '<div style="margin-bottom:8px;padding:8px;background:var(--accent-light);border-radius:var(--radius)"><strong>GPU ' + g.index + ': ' + escapeHtml(g.name) + '</strong><br>利用率: ' + g.utilization + '% | 显存: ' + g.mem_used + 'MiB / ' + g.mem_total + 'MiB | 温度: ' + g.temperature + '°C | 功耗: ' + g.power + 'W</div>';
-            }
-            gpuDiv.innerHTML = gpuHtml;
-        } else {
-            gpuDiv.innerHTML = '<p style="opacity:0.5">无 GPU 或 nvidia-smi 不可用</p>';
-        }
-        var pbody = document.getElementById('processesTableBody');
-        var pHtml = '';
-        for (var j = 0; j < d.processes.length; j++) {
-            var p = d.processes[j];
-            pHtml += '<tr><td>' + p.pid + '</td><td>' + escapeHtml(p.user) + '</td><td>' + p.cpu + '</td><td>' + p.mem + '</td><td style="font-size:11px">' + escapeHtml(p.command) + '</td></tr>';
-        }
-        pbody.innerHTML = pHtml;
-    });
-}
-
-/**
- * 处理 toggleAutoRefresh 相关前端逻辑。
- */
-function toggleAutoRefresh() {
-    monitorAutoRefresh = !monitorAutoRefresh;
-    var btn = document.getElementById('autoRefreshBtn');
-    if (monitorAutoRefresh) {
-        btn.textContent = '⏸ 停止刷新';
-        loadMonitor();
-        monitorTimer = setInterval(loadMonitor, 3000);
-    } else {
-        btn.textContent = '⏯ 自动刷新';
-        if (monitorTimer) { clearInterval(monitorTimer); monitorTimer = null; }
-    }
-}
-
-// ========== 预留扩展区域（第751-800行） ==========
-// 预留用于未来扩展，如监控图表、告警规则等
-// ===========================================
-
-// ============================================================
-// 17. 其他工具
-// ============================================================
-
-/**
- * 切换 apt 软件源。
- */
-function changeSource(source) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    customConfirm('确定切换至 ' + source + ' 源？', function() {
-    });
-    showToast('正在切换...', 'info');
-    apiPost('/api/system/apt-source', { source: source }).then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-    });
-}
-
-/**
- * 安装软件包。
- */
-function installPkg(pkg) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    if (!pkg) { showToast('请输入软件包名', 'warning'); return; }
-    customConfirm('确定安装 ' + pkg + '？', function() {
-    });
-    showToast('正在安装...', 'info');
-    apiPost('/api/system/install', { package: pkg }).then(function(d) {
-        showToast(d.success ? '安装成功' : '失败: ' + (d.error || ''), d.success ? 'success' : 'error');
-    });
-}
-
-/**
- * 卸载软件包。
- */
-function uninstallPkg(pkg) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    if (!pkg) { showToast('请输入软件包名', 'warning'); return; }
-    customConfirm('确定卸载 ' + pkg + '？', function() {
-    });
-    showToast('正在卸载...', 'info');
-    apiPost('/api/system/uninstall', { package: pkg }).then(function(d) {
-        showToast(d.success ? '卸载成功' : '失败: ' + (d.error || ''), d.success ? 'success' : 'error');
-    });
-}
-
-/**
- * 同步文件夹。
- */
-function syncFolder(type) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    customConfirm('确定同步 ' + type + (currentTargetUser ? '（目标用户: ' + currentTargetUser + '）' : '') + '？', function() {
-        showToast('正在同步...', 'info');
-        apiPost('/api/system/sync', { type: type, target_user: currentTargetUser || null }).then(function(d) {
-            showToast(d.message || d.error, d.success ? 'success' : 'error');
-        });
-    });
-}
-
-/**
- * 清理目录。
- */
-function cleanDir(type) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    var tip = '确定清空 ' + type + ' 目录？此操作不可撤销！';
-    if (currentTargetUser) tip += '\n\n目标用户: ' + currentTargetUser;
-    customConfirm(tip, function() {
-        showToast('正在清理...', 'info');
-        var body = { type: type };
-        if (currentTargetUser) body.target_user = currentTargetUser;
-        apiPost('/api/system/clean', body).then(function(d) {
-            var msg = d && d.success ? (d.message || '已清理') : _errMsg(d, '清理失败');
-            showToast(msg, d && d.success ? 'success' : 'error');
-            if (d && d.success) checkInstallStatus(true);
-        });
-    });
-}
-
-/**
- * 处理 saveFtpServer 相关前端逻辑。
- */
-function saveFtpServer() {
-    var ip = document.getElementById('ftpServerInput').value.trim();
-    localStorage.setItem('ftpServer', ip);
-    alert('已保存 FTP 服务器 IP：' + ip);
-}
-
-/**
- * 处理 getFtpServer 相关前端逻辑。
- */
-function getFtpServer() {
-    return localStorage.getItem('ftpServer') || '192.168.9.150';
-}
-
-/**
- * 处理 openFolder 相关前端逻辑。
- * v3.6：改为打开 Web 文件管理器（不再依赖 FTP/Nautilus）。
- */
-function openFolder(type) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    openFileManager(type, '');
-}
-
-// ============================================================
-// v3.6 Web 文件管理器（在浏览器内浏览/下载/上传/删除/新建目录）
-// ============================================================
-var _fmState = { folderType: '', subpath: '', targetUser: null };
-
-function openFileManager(folderType, subpath) {
-    var modal = document.getElementById('fileManagerModal');
-    if (!modal) return;
-    _fmState.folderType = folderType;
-    _fmState.subpath = subpath || '';
-    _fmState.targetUser = currentTargetUser || null;
-
-    var titleEl = document.getElementById('fileManagerTitle');
-    var labelMap = { bags: 'Bag 数据', logs: '日志', install: 'Install', bk: 'bk 目录', scripts: 'Scripts' };
-    var label = labelMap[folderType] || folderType;
-    var tu = _fmState.targetUser;
-    if (titleEl) {
-        titleEl.textContent = '📁 文件管理 - ' + label + (tu ? '（👤 ' + tu + '）' : '');
-    }
-
-    modal.style.display = 'flex';
-
-    if (folderType === 'bags') {
-        var listEl = document.getElementById('fileManagerList');
-        if (listEl) {
-            listEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);">' +
-                               '<div style="font-size:32px;margin-bottom:8px;">⏳</div>' +
-                               '<div>正在同步容器中的Bag数据，请稍候...</div>' +
-                               '</div>';
-        }
-        var body = {};
-        if (currentTargetUser) body.target_user = currentTargetUser;
-        apiPost('/api/files/sync-bags', body).then(function(d) {
-            if (d && d.success) {
-                if (d.synced_count > 0) {
-                    showToast('✓ ' + d.message, 'success');
-                }
-                loadFileList();
-            } else {
-                showToast('Bag同步提示: ' + (d && (d.error || d.message) || '完成'), 'info');
-                loadFileList();
-            }
-        }).catch(function(e) {
-            showToast('Bag同步失败: ' + e.message, 'warning');
-            loadFileList();
-        });
-    } else {
-        loadFileList();
-    }
-}
-
-function closeFileManager() {
-    var modal = document.getElementById('fileManagerModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function loadFileList() {
-    var listEl = document.getElementById('fileManagerList');
-    var breadcrumbEl = document.getElementById('fileManagerBreadcrumb');
-    if (!listEl) return;
-    listEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);">加载中...</div>';
-
-    var params = 'folder_type=' + encodeURIComponent(_fmState.folderType) +
-                 '&subpath=' + encodeURIComponent(_fmState.subpath || '');
-    if (_fmState.targetUser) params += '&target_user=' + encodeURIComponent(_fmState.targetUser);
-
-    apiGet('/api/files/list?' + params).then(function(d) {
-        if (!d.success) {
-            listEl.innerHTML = '<div style="color:#dc3545;text-align:center;padding:16px;">加载失败</div>';
-            return;
-        }
-        if (!d.exists) {
-            listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);">' +
-                               '<div style="font-size:36px;margin-bottom:8px;">📂</div>' +
-                               '<div>目录不存在</div>' +
-                               '<div style="font-size:12px;margin-top:4px;">' + escapeHtml(d.path) + '</div>' +
-                               '<div style="font-size:12px;margin-top:8px;color:#b8550a;">💡 ' + getFileTypeHint(_fmState.folderType) + '</div>' +
-                               '</div>';
-            if (breadcrumbEl) breadcrumbEl.innerHTML = '';
-            return;
-        }
-
-        // 面包屑
-        if (breadcrumbEl) {
-            var bc = '<a href="javascript:void(0)" onclick="fmGoTo(\'\')" style="color:#2c5aa0;">' + (_fmState.folderType) + '</a>';
-            if (d.rel) {
-                var parts = d.rel.split('/');
-                var acc = '';
-                for (var i = 0; i < parts.length; i++) {
-                    acc = (acc ? acc + '/' : '') + parts[i];
-                    bc += ' / <a href="javascript:void(0)" onclick="fmGoTo(\'' + escapeHtml(acc) + '\')" style="color:#2c5aa0;">' + escapeHtml(parts[i]) + '</a>';
-                }
-            }
-            breadcrumbEl.innerHTML = bc;
-        }
-
-        // 文件列表
-        var items = d.items || [];
-        if (items.length === 0) {
-            listEl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);">（空目录）</div>';
-            return;
-        }
-        var html = '<table class="data-table"><thead><tr>' +
-                   '<th style="width:40px;"></th><th>名称</th><th>大小</th><th>修改时间</th><th style="width:160px;">操作</th>' +
-                   '</tr></thead><tbody>';
-        // 父目录返回
-        if (d.parent !== null && d.parent !== undefined) {
-            html += '<tr><td>📁</td><td colspan="4"><a href="javascript:void(0)" onclick="fmGoTo(\'' + escapeHtml(d.parent || '') + '\')" style="color:#2c5aa0;">.. （上级目录）</a></td></tr>';
-        }
-        for (var j = 0; j < items.length; j++) {
-            var it = items[j];
-            var icon = it.is_dir ? '📁' : fmFileIcon(it.name);
-            var sz = it.is_dir ? '-' : formatSize(it.size);
-            var mt = new Date(it.mtime * 1000).toLocaleString('zh-CN', {hour12:false}).replace(/\//g, '-');
-            var sub = (d.rel ? d.rel + '/' : '') + it.name;
-            var safeSub = escapeHtml(sub);
-            html += '<tr>';
-            if (it.is_dir) {
-                html += '<td>' + icon + '</td>';
-                html += '<td><a href="javascript:void(0)" onclick="fmGoTo(\'' + safeSub + '\')" style="color:#2c5aa0;">' + escapeHtml(it.name) + '</a></td>';
-            } else {
-                html += '<td>' + icon + '</td>';
-                html += '<td>' + escapeHtml(it.name) + '</td>';
-            }
-            html += '<td style="color:var(--text-muted);">' + sz + '</td>';
-            html += '<td style="font-size:12px;color:var(--text-muted);">' + mt + '</td>';
-            html += '<td>';
-            html += '<button class="btn btn-sm btn-outline" onclick="fmRename(\'' + safeSub + '\', \'' + escapeHtml(it.name) + '\')">✏️ 重命名</button> ';
-            if (!it.is_dir) {
-                html += '<button class="btn btn-sm btn-outline" onclick="fmDownload(\'' + safeSub + '\')">⬇ 下载</button> ';
-            }
-            html += '<button class="btn btn-sm btn-danger" onclick="fmDelete(\'' + safeSub + '\', ' + (it.is_dir ? 'true' : 'false') + ')">🗑 删除</button>';
-            html += '</td>';
-            html += '</tr>';
-        }
-        html += '</tbody></table>';
-        listEl.innerHTML = html;
-    }).catch(function(e) {
-        listEl.innerHTML = '<div style="color:#dc3545;text-align:center;padding:16px;">加载失败: ' + escapeHtml(e.message || '') + '</div>';
-    });
-}
-
-function fmGoTo(subpath) {
-    _fmState.subpath = subpath || '';
-    loadFileList();
-}
-
-function fmDownload(subpath) {
-    var params = 'folder_type=' + encodeURIComponent(_fmState.folderType) +
-                 '&subpath=' + encodeURIComponent(subpath);
-    if (_fmState.targetUser) params += '&target_user=' + encodeURIComponent(_fmState.targetUser);
-    // 使用 fetch 带 token 下载 blob
-    fetch(API_BASE + '/api/files/download?' + params, {
-        method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + (AUTH_TOKEN || '') }
-    }).then(function(res) {
-        if (!res.ok) throw new Error('下载失败');
-        var disp = res.headers.get('content-disposition') || '';
-        var m = /filename="?([^";]+)"?/.exec(disp);
-        var fname = m ? m[1] : 'download';
-        return res.blob().then(function(b) {
-            var url = URL.createObjectURL(b);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = fname;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
-        });
-    }).catch(function(e) { showToast('下载失败: ' + e.message, 'error'); });
-}
-
-function fmDelete(subpath, isDir) {
-    var tip = isDir ? '确定删除整个目录（含子内容）？' : '确定删除该文件？';
-    tip += '\n\n' + subpath;
-    customConfirm(tip + '\n\n此操作不可撤销！', function() {
-        apiPost('/api/files/delete', {
-            folder_type: _fmState.folderType,
-            subpath: subpath,
-            target_user: _fmState.targetUser
-        }).then(function(d) {
-            if (d && d.success) {
-                showToast('✓ 已删除', 'success');
-                loadFileList();
-            } else {
-                showToast('删除失败: ' + (d && (d.error || d.message) || ''), 'error');
-            }
-        });
-    });
-}
-
-function fmRename(subpath, oldName) {
-    var newName = prompt('请输入新名称：', oldName);
-    if (!newName) return;
-    newName = newName.trim();
-    if (!newName || newName === oldName) return;
-    if (newName.includes('/') || newName.includes('\\')) {
-        showToast('名称不能包含路径分隔符', 'warning');
-        return;
-    }
-    apiPost('/api/files/rename', {
-        folder_type: _fmState.folderType,
-        subpath: subpath,
-        new_name: newName,
-        target_user: _fmState.targetUser
-    }).then(function(d) {
-        if (d && d.success) {
-            showToast('✓ 已重命名', 'success');
-            loadFileList();
-        } else {
-            showToast('重命名失败: ' + (d && (d.error || d.message) || ''), 'error');
-        }
-    });
-}
-
-function fmMkdirPrompt() {
-    var name = prompt('请输入新目录名：');
-    if (!name) return;
-    name = name.trim().replace(/[\\\/]+/g, '/').replace(/^\/+|\/+$/g, '');
-    if (!name) { showToast('目录名无效', 'warning'); return; }
-    var sub = (_fmState.subpath ? _fmState.subpath + '/' : '') + name;
-    apiPost('/api/files/mkdir', {
-        folder_type: _fmState.folderType,
-        subpath: sub,
-        target_user: _fmState.targetUser
-    }).then(function(d) {
-        if (d && d.success) {
-            showToast('✓ 已创建目录', 'success');
-            loadFileList();
-        } else {
-            showToast('创建失败: ' + (d && (d.error || d.message) || ''), 'error');
-        }
-    });
-}
-
-function fmUploadInput(input) {
-    if (!input.files || !input.files.length) return;
-    var formData = new FormData();
-    formData.append('folder_type', _fmState.folderType);
-    formData.append('subpath', _fmState.subpath || '');
-    if (_fmState.targetUser) formData.append('target_user', _fmState.targetUser);
-    for (var i = 0; i < input.files.length; i++) {
-        formData.append('files', input.files[i]);
-    }
-    showToast('正在上传 ' + input.files.length + ' 个文件...', 'info');
-    fetch(API_BASE + '/api/files/upload', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + (AUTH_TOKEN || '') },
-        body: formData
-    }).then(function(res) { return res.json(); })
-      .then(function(d) {
-          if (d && d.success) {
-              showToast('✓ 已上传 ' + d.count + ' 个文件', 'success');
-              loadFileList();
-          } else {
-              showToast('上传失败: ' + (d && (d.error || d.message) || ''), 'error');
-          }
-      })
-      .catch(function(e) { showToast('上传失败: ' + e.message, 'error'); });
-    input.value = '';
-}
-
-function fmFileIcon(name) {
-    var ext = (name.split('.').pop() || '').toLowerCase();
-    var m = {
-        'log':'📝','txt':'📝','md':'📝','csv':'📊',
-        'yaml':'⚙️','yml':'⚙️','json':'⚙️','xml':'⚙️','ini':'⚙️','conf':'⚙️',
-        'bag':'📦','db3':'📦','sqlite':'📦',
-        'py':'🐍','sh':'🔧','bash':'🔧',
-        'png':'🖼️','jpg':'🖼️','jpeg':'🖼️','gif':'🖼️','svg':'🖼️',
-        'zip':'🗜️','tar':'🗜️','gz':'🗜️','bz2':'🗜️','tgz':'🗜️',
-        'pdf':'📄','html':'🌐','js':'📜','css':'🎨'
-    };
-    return m[ext] || '📄';
-}
-
-function getFileTypeHint(folderType) {
-    var hints = {
-        bags: '启动仿真车辆后自动生成',
-        logs: '启动仿真车辆后自动生成',
-        install: '请先上传安装包',
-        bk: '请工单联系管理员',
-        scripts: '由系统自动管理'
-    };
-    return hints[folderType] || '请联系管理员';
-}
-
-/**
- * 处理 doSwitchCert 相关前端逻辑。
- */
-function doSwitchCert(env) {
-    var body = { env: env };
-    if (currentTargetUser) body.target_user = currentTargetUser;
-    return apiPost('/api/system/certificates', body);
-}
-function doSwitchCloudIp(ip) {
-    var body = { ip: ip };
-    if (currentTargetUser) body.target_user = currentTargetUser;
-    return apiPost('/api/system/cloud-config', body);
-}
-
-window.switchCert = function(env) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    var targetEnv = env;
-    if (!targetEnv) { var el = document.getElementById('certSelect'); if (el) targetEnv = el.value; }
-    if (!targetEnv) { showToast('未指定环境', 'warning'); return; }
-    customConfirm('确定切换至 ' + targetEnv + ' 环境证书？', function() {
-        showToast('正在切换...', 'info');
-        doSwitchCert(targetEnv).then(function(d) {
-            var msg = d && d.success ? (d.message || '切换成功') : _errMsg(d, '切换失败');
-            showToast(msg, d && d.success ? 'success' : 'error');
-        });
-    });
-};
-
-window.switchCloudIp = function(ip) {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    var targetIp = ip;
-    if (!targetIp) { var el = document.getElementById('cloudIpSelect'); if (el) targetIp = el.value; }
-    if (!targetIp) { showToast('未指定IP', 'warning'); return; }
-    customConfirm('确定切换云配置 IP 至 ' + targetIp + '？', function() {
-        showToast('正在切换...', 'info');
-        doSwitchCloudIp(targetIp).then(function(d) {
-            var msg = d && d.success ? (d.message || '切换成功') : _errMsg(d, '切换失败');
-            showToast(msg, d && d.success ? 'success' : 'error');
-        });
-    });
-};
-
-/**
- * 云配置 IP 及证书切换。
- */
-function handleEnvSwitch() {
-    if (!hasPermission('tools')) {
-        showToast('您没有其他工具的操作权限', 'warning');
-        return;
-    }
-    var select = document.getElementById('envSwitchSelect');
-    var env = select.value;
-    var ip = ENV_IP_MAP[env];
-    var btn = document.getElementById('envSwitchBtn');
-    if (btn.disabled) return;
-    btn.disabled = true;
-    btn.textContent = '⏳ 切换中...';
-    showToast('🔄 开始切换至 ' + env + ' 环境 (IP: ' + ip + ') ...', 'info');
-
-    var certOk = false, ipOk = false;
-    var certErr = '', ipErr = '';
-
-    doSwitchCert(env).then(function(certRes) {
-        if (certRes.success) certOk = true;
-        else certErr = _errMsg(certRes, '证书切换失败');
-        return doSwitchCloudIp(ip);
-    }).then(function(ipRes) {
-        if (ipRes.success) ipOk = true;
-        else ipErr = _errMsg(ipRes, 'IP 切换失败');
-    }).catch(function(e) {
-        if (!certOk) certErr = (e && e.message) || '证书切换请求异常';
-        if (!ipOk) ipErr = (e && e.message) || 'IP 切换请求异常';
-    }).then(function() {
-        btn.disabled = false;
-        btn.textContent = '🔄 切换';
-        if (certOk && ipOk) {
-            localStorage.setItem('ros2_web_cloud_env', env);
-            localStorage.setItem('ros2_web_cloud_ip', ip);
-            showToast('✅ 全部切换成功！当前环境 ' + env + '，IP ' + ip, 'success');
-        } else {
-            var details = [];
-            if (!certOk) details.push('证书: ' + certErr);
-            if (!ipOk) details.push('IP: ' + ipErr);
-            showToast('❌ 切换失败：' + details.join('；'), 'error');
-        }
-    });
-}
-
-function initCloudEnv() {
-    apiGet('/api/system/cloud-env').then(function(data) {
-        if (data.success && data.current_env) {
-            var select = document.getElementById('envSwitchSelect');
-            if (select) {
-                select.value = data.current_env;
-            }
-            localStorage.setItem('ros2_web_cloud_env', data.current_env);
-            localStorage.setItem('ros2_web_cloud_ip', data.current_ip);
-        } else {
-            var savedEnv = localStorage.getItem('ros2_web_cloud_env');
-            if (savedEnv) {
-                var select = document.getElementById('envSwitchSelect');
-                if (select) {
-                    select.value = savedEnv;
-                }
-            }
-        }
-    }).catch(function() {
-        var savedEnv = localStorage.getItem('ros2_web_cloud_env');
-        if (savedEnv) {
-            var select = document.getElementById('envSwitchSelect');
-            if (select) {
-                select.value = savedEnv;
-            }
-        }
-    });
-}
-
-// ========== 预留扩展区域（第801-850行） ==========
-// 预留用于未来扩展，如更多工具等
-// ===========================================
-
-// ============================================================
-// 18. 红绿灯模拟
-// ============================================================
-
-/**
- * 处理 checkTrafficStatus 相关前端逻辑。
- */
-function checkTrafficStatus() {
-    apiGet('/api/traffic-light/status').then(function(d) {
-        updateTrafficUI(d.running);
-    });
-}
-
-/**
- * 处理 updateTrafficUI 相关前端逻辑。
- */
-function updateTrafficUI(running) {
-    var startBtn = document.getElementById('tlStartBtn');
-    var stopBtn = document.getElementById('tlStopBtn');
-    var statusEl = document.getElementById('tlStatus');
-    if (startBtn) startBtn.disabled = running;
-    if (stopBtn) stopBtn.disabled = !running;
-    if (statusEl) {
-        statusEl.textContent = running ? '🟢 运行中' : '⚪ 未运行';
-        statusEl.style.color = running ? 'var(--success)' : 'var(--text-secondary)';
-    }
-    if (running) {
-        setTimeout(checkTrafficPanelStatus, 500);
-    }
-}
-
-/**
- * 处理 startTrafficLight 相关前端逻辑。
- */
-function startTrafficLight() {
-    if (!hasPermission('traffic')) {
-        showToast('您没有红绿灯模拟的操作权限', 'warning');
-        return;
-    }
-    var body = {
-        sn: document.getElementById('tlSn').value,
-        project_id: document.getElementById('tlProjectId').value,
-        token: document.getElementById('tlToken').value.trim(),
-        http_host: document.getElementById('tlHttpHost').value,
-        mqtt_host: document.getElementById('tlMqttHost').value,
-        cloud_host: document.getElementById('tlCloudHost').value,
-        login_interval: parseInt(document.getElementById('tlLoginInterval').value),
-        report_interval: parseInt(document.getElementById('tlReportInterval').value)
-    };
-    apiPost('/api/traffic-light/start', body).then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-        if (d.success) updateTrafficUI(true);
-    });
-}
-
-/**
- * 处理 stopTrafficLight 相关前端逻辑。
- */
-function stopTrafficLight() {
-    if (!hasPermission('traffic')) {
-        showToast('您没有红绿灯模拟的操作权限', 'warning');
-        return;
-    }
-    apiPost('/api/traffic-light/stop').then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-        if (d.success) updateTrafficUI(false);
-    });
-}
-
-/**
- * 检查计时红绿灯状态
- */
-function checkTimerTrafficStatus() {
-    apiGet('/api/timer-traffic-light/status').then(function(d) {
-        updateTimerTrafficUI(d.running);
-    });
-}
-
-/**
- * 更新计时红绿灯UI状态
- */
-function updateTimerTrafficUI(running) {
-    var startBtn = document.getElementById('ttmStartBtn');
-    var stopBtn = document.getElementById('ttmStopBtn');
-    var statusEl = document.getElementById('ttmStatus');
-    if (startBtn) startBtn.disabled = running;
-    if (stopBtn) stopBtn.disabled = !running;
-    if (statusEl) {
-        statusEl.textContent = running ? '🟢 运行中' : '⚪ 未运行';
-        statusEl.style.color = running ? 'var(--success)' : 'var(--text-secondary)';
-    }
-}
-
-/**
- * 启动计时红绿灯
- */
-function startTimerTrafficLight() {
-    if (!hasPermission('traffic')) {
-        showToast('您没有计时红绿灯模拟的操作权限', 'warning');
-        return;
-    }
-    var body = {
-        sn: document.getElementById('ttmSn').value,
-        host: document.getElementById('ttmHost').value,
-        port: parseInt(document.getElementById('ttmPort').value),
-        red_duration: parseInt(document.getElementById('ttmRed').value),
-        green_duration: parseInt(document.getElementById('ttmGreen').value),
-        yellow_duration: parseInt(document.getElementById('ttmYellow').value)
-    };
-    apiPost('/api/timer-traffic-light/start', body).then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-        if (d.success) updateTimerTrafficUI(true);
-    });
-}
-
-/**
- * 停止计时红绿灯
- */
-function stopTimerTrafficLight() {
-    if (!hasPermission('traffic')) {
-        showToast('您没有计时红绿灯模拟的操作权限', 'warning');
-        return;
-    }
-    apiPost('/api/timer-traffic-light/stop').then(function(d) {
-        showToast(d.message || d.error, d.success ? 'success' : 'error');
-        if (d.success) updateTimerTrafficUI(false);
-    });
-}
-
-// ========== 预留扩展区域（第851-900行） ==========
-// 预留用于未来扩展，如更多红绿灯模式等
-// ===========================================
-
-// ============================================================
-// 18.1 交通红绿灯控制面板
-// ============================================================
-var trafficLightMode = 1;
-var trafficMainLightState = 1;
-var trafficSecondLightState = 2;
-var trafficMqttConnected = false;
-
-var STATE_LABEL = {1: "绿灯", 2: "红灯", 3: "灭灯", 4: "黄灯"};
-var STATE_COLOR_CLASS = {1: "green", 2: "red", 3: "", 4: "yellow"};
-
-function toggleTrafficMode() {
-    var newMode = trafficLightMode == 1 ? 2 : 1;
-    apiPost('/api/traffic-light/set-mode', { mode: newMode }).then(function(d) {
-        if (d.success) {
-            trafficLightMode = newMode;
-            showToast(d.message || (newMode === 1 ? '已切换为自动模式' : '已切换为手动模式'), 'success');
-        } else {
-            showToast(d.message || '切换模式失败', 'error');
-        }
-        updateTrafficPanelDisplay();
-    }).catch(function() {
-        showToast('切换模式失败', 'error');
-    });
-}
-
-function onManualLightChange(lightType) {
-    if (trafficLightMode != 2) {
-        showToast('请先切换到手动模式', 'warning');
-        var radios = document.getElementsByName(lightType === 'main' ? 'mainLightColor' : 'secondLightColor');
-        for (var i = 0; i < radios.length; i++) {
-            radios[i].checked = (parseInt(radios[i].value) === (lightType === 'main' ? trafficMainLightState : trafficSecondLightState));
-        }
-        return;
-    }
-    var body = {};
-    if (lightType === 'main') {
-        var radios = document.getElementsByName('mainLightColor');
-        for (var i = 0; i < radios.length; i++) {
-            if (radios[i].checked) {
-                body.light_state = parseInt(radios[i].value);
-                break;
-            }
-        }
-    } else {
-        var radios = document.getElementsByName('secondLightColor');
-        for (var i = 0; i < radios.length; i++) {
-            if (radios[i].checked) {
-                body.second_light_state = parseInt(radios[i].value);
-                break;
-            }
-        }
-    }
-    apiPost('/api/traffic-light/set-light-state', body).then(function(d) {
-        if (d.success) {
-            trafficMainLightState = d.light_state || trafficMainLightState;
-            trafficSecondLightState = d.second_light_state || trafficSecondLightState;
-        } else {
-            showToast(d.message || '设置灯状态失败', 'error');
-            var radios = document.getElementsByName(lightType === 'main' ? 'mainLightColor' : 'secondLightColor');
-            for (var i = 0; i < radios.length; i++) {
-                radios[i].checked = (parseInt(radios[i].value) === (lightType === 'main' ? trafficMainLightState : trafficSecondLightState));
-            }
-        }
-        updateTrafficPanelDisplay();
-    }).catch(function() {
-        showToast('设置灯状态失败', 'error');
-        var radios = document.getElementsByName(lightType === 'main' ? 'mainLightColor' : 'secondLightColor');
-        for (var i = 0; i < radios.length; i++) {
-            radios[i].checked = (parseInt(radios[i].value) === (lightType === 'main' ? trafficMainLightState : trafficSecondLightState));
-        }
-    });
-}
-
-function updateTrafficLightCircle(circleId, state) {
-    var circle = document.getElementById(circleId);
-    if (circle) {
-        circle.className = 'traffic-light-circle';
-        if (STATE_COLOR_CLASS[state]) {
-            circle.classList.add(STATE_COLOR_CLASS[state]);
-        }
-    }
-}
-
-function updateTrafficPanelDisplay() {
-    var modeLabel = document.getElementById('trafficModeLabel');
-    var modeBtn = document.getElementById('trafficModeBtn');
-    var ctrlPanel = document.querySelector('.traffic-manual-control');
-    var mainLightStatus = document.getElementById('mainLightStatus');
-    var secondLightStatus = document.getElementById('secondLightStatus');
-    var statusBar = document.getElementById('trafficStatusBar');
-
-    if (modeLabel) {
-        modeLabel.textContent = '当前模式: ' + (trafficLightMode === 1 ? '自动' : '手动');
-        modeLabel.style.color = trafficLightMode === 1 ? '#0066CC' : '#CC6600';
-    }
-
-    if (modeBtn) {
-        modeBtn.textContent = trafficLightMode === 1 ? '切换为手动' : '切换为自动';
-        modeBtn.className = 'btn ' + (trafficLightMode === 1 ? 'btn-warning' : 'btn-success');
-    }
-
-    if (ctrlPanel) {
-        if (trafficLightMode === 2) {
-            ctrlPanel.classList.remove('disabled');
-            var radios = ctrlPanel.querySelectorAll('input[type="radio"]');
-            radios.forEach(function(r) { r.disabled = false; });
-        } else {
-            ctrlPanel.classList.add('disabled');
-            var radios = ctrlPanel.querySelectorAll('input[type="radio"]');
-            radios.forEach(function(r) { r.disabled = true; });
-        }
-    }
-
-    updateTrafficLightCircle('mainLight', trafficMainLightState);
-    updateTrafficLightCircle('secondLight', trafficSecondLightState);
-
-    if (mainLightStatus) {
-        mainLightStatus.textContent = STATE_LABEL[trafficMainLightState] || '灭灯';
-    }
-    if (secondLightStatus) {
-        secondLightStatus.textContent = STATE_LABEL[trafficSecondLightState] || '灭灯';
-    }
-
-    if (statusBar) {
-        var mqttStatus = trafficMqttConnected ? 'MQTT: 已连接' : 'MQTT: 未连接';
-        var modeText = trafficLightMode === 1 ? '自动' : '手动';
-        statusBar.textContent = mqttStatus + ' | 模式: ' + modeText + ' | 主灯: ' + STATE_LABEL[trafficMainLightState] + ' | 次灯: ' + STATE_LABEL[trafficSecondLightState];
-    }
-}
-
-function handleTrafficLightStatus(msg) {
-    trafficMainLightState = (msg.light_state !== undefined && msg.light_state !== null) ? msg.light_state : 1;
-    trafficSecondLightState = (msg.second_light_state !== undefined && msg.second_light_state !== null) ? msg.second_light_state : 2;
-    trafficLightMode = (msg.light_mode !== undefined && msg.light_mode !== null) ? msg.light_mode : 1;
-    trafficMqttConnected = msg.mqtt_connected || false;
-    updateTrafficPanelDisplay();
-}
-
-function checkTrafficPanelStatus() {
-    apiGet('/api/traffic-light/light-status').then(function(d) {
-        if (d.success) {
-            trafficMainLightState = (d.light_state !== undefined && d.light_state !== null) ? d.light_state : 1;
-            trafficSecondLightState = (d.second_light_state !== undefined && d.second_light_state !== null) ? d.second_light_state : 2;
-            trafficLightMode = (d.light_mode !== undefined && d.light_mode !== null) ? d.light_mode : 1;
-            trafficMqttConnected = d.mqtt_connected || false;
-        } else {
-            trafficMqttConnected = false;
-        }
-        updateTrafficPanelDisplay();
-    });
-}
-
-function startTrafficPanelMonitor() {
-    setInterval(checkTrafficPanelStatus, 2000);
-}
-
-// ============================================================
-// 19. 批量生成车辆
-// ============================================================
-/**
- * 批量生成车辆配置（仅管理员）
- */
-function batchGenerate() {
-    // ★★★ 检查权限 ★★★
-    if (!hasPermission('tools')) {
-        showToast('您没有批量生成车辆的操作权限', 'warning');
-        return;
-    }
-
-    var identifier = document.getElementById('batchIdentifier').value.trim();
-    if (!identifier) {
-        showToast('请输入标识', 'warning');
-        return;
-    }
-    showToast('正在生成...', 'info');
-    var div = document.getElementById('batchResult');
-    apiPost('/api/batch/generate', {
-        identifier: identifier
-    }).then(function(d) {
-        if (d.success) {
-            var html = '<p style="color:var(--success)">✅ 生成完成！device_sn: <strong>' +
-                escapeHtml(d.device_sn) + '</strong></p>';
-            for (var i = 0; i < d.logs.length; i++) {
-                html += '<div style="font-size:12px">' + escapeHtml(d.logs[i]) + '</div>';
-            }
-            div.innerHTML = html;
-        } else {
-            var errHtml = '<p style="color:var(--error)">❌ ' + escapeHtml(d.error) + '</p>';
-            if (d.logs) {
-                for (var j = 0; j < d.logs.length; j++) {
-                    errHtml += '<div style="font-size:12px">' + escapeHtml(d.logs[j]) + '</div>';
-                }
-            }
-            div.innerHTML = errHtml;
-        }
-    });
-}
-
-// ========== 预留扩展区域（第901-950行） ==========
-// 预留用于未来扩展，如批量生成模板管理等
-// ===========================================
-
-// ============================================================
-// Truck配置管理
-// ============================================================
-
-function loadTruckConfigList() {
-    if (!hasPermission('tools')) {
-        showToast('您没有操作权限', 'warning');
-        return;
-    }
-    apiGet('/api/truck/config/list').then(function(d) {
-        if (d.success) {
-            var select = document.getElementById('truckConfigSelect');
-            select.innerHTML = '<option value="">请选择truck配置文件</option>';
-            for (var i = 0; i < d.files.length; i++) {
-                select.innerHTML += '<option value="' + escapeHtml(d.files[i]) + '">' + escapeHtml(d.files[i]) + '</option>';
-            }
-            document.getElementById('truckConfigForm').style.display = 'none';
-            document.getElementById('truckConfigEmpty').style.display = 'block';
-        } else {
-            showToast(d.error || '加载失败', 'error');
-        }
-    });
-}
-
-function loadTruckConfig() {
-    if (!hasPermission('tools')) {
-        showToast('您没有操作权限', 'warning');
-        return;
-    }
-    var select = document.getElementById('truckConfigSelect');
-    var filename = select.value;
-    if (!filename) {
-        document.getElementById('truckConfigForm').style.display = 'none';
-        document.getElementById('truckConfigEmpty').style.display = 'block';
-        return;
-    }
-    apiGet('/api/truck/config/' + encodeURIComponent(filename)).then(function(d) {
-        if (d.success) {
-            document.getElementById('truckStartX').value = d.start_x !== null ? d.start_x : '';
-            document.getElementById('truckStartY').value = d.start_y !== null ? d.start_y : '';
-            document.getElementById('truckStartYaw').value = d.start_yaw !== null ? d.start_yaw : '';
-            document.getElementById('truckConfigForm').style.display = 'block';
-            document.getElementById('truckConfigEmpty').style.display = 'none';
-        } else {
-            showToast(d.error || '加载失败', 'error');
-        }
-    });
-}
-
-function saveTruckConfig() {
-    if (!hasPermission('tools')) {
-        showToast('您没有操作权限', 'warning');
-        return;
-    }
-    var select = document.getElementById('truckConfigSelect');
-    var filename = select.value;
-    if (!filename) {
-        showToast('请选择配置文件', 'warning');
-        return;
-    }
-    var start_x = parseFloat(document.getElementById('truckStartX').value);
-    var start_y = parseFloat(document.getElementById('truckStartY').value);
-    var start_yaw = parseFloat(document.getElementById('truckStartYaw').value);
-    var data = {};
-    if (!isNaN(start_x)) data.start_x = start_x;
-    if (!isNaN(start_y)) data.start_y = start_y;
-    if (!isNaN(start_yaw)) data.start_yaw = start_yaw;
-    if (Object.keys(data).length === 0) {
-        showToast('请至少填写一个参数', 'warning');
-        return;
-    }
-    apiPut('/api/truck/config/' + encodeURIComponent(filename), data).then(function(d) {
-        if (d.success) {
-            showToast(d.message || '保存成功', 'success');
-        } else {
-            showToast(d.error || '保存失败', 'error');
-        }
-    });
-}
-
-function resetTruckConfig() {
-    loadTruckConfig();
-    showToast('已重置', 'info');
-}
 
 // ============================================================
 // 20. 主题设置
@@ -6249,1587 +4545,6 @@ function openTerminal(containerId, mode, sourceRos2) {
 
 // ========== 预留扩展区域（第1001-1050行） ==========
 // 预留用于未来扩展，如终端主题、快捷键等
-// ===========================================
-
-// ============================================================
-// 22. 高级功能 - 容器管理增强
-// ============================================================
-
-/**
- * 处理 loadAdvContainers 相关前端逻辑。
- */
-function loadAdvContainers() {
-    apiGet('/api/docker/containers?all=false').then(function(d) {
-        if (!d.success || !d.containers) return;
-        var html = '<option value="">-- 选择容器 --</option>';
-        for (var i = 0; i < d.containers.length; i++) {
-            var c = d.containers[i];
-            html += '<option value="' + escapeHtml(c.id) + '">' + escapeHtml(c.name) + '</option>';
-        }
-        var sel1 = document.getElementById('advLogContainer');
-        var sel2 = document.getElementById('foxgloveContainer');
-        if (sel1) sel1.innerHTML = html;
-        if (sel2) sel2.innerHTML = html;
-    });
-}
-
-/**
- * 处理 onAdvLogContainerChange 相关前端逻辑。
- */
-function onAdvLogContainerChange() {
-    var val = document.getElementById('advLogContainer').value;
-    document.getElementById('advLogStartBtn').disabled = !val;
-}
-
-/**
- * 处理 startRealtimeLogs 相关前端逻辑。
- */
-function startRealtimeLogs() {
-    var containerId = document.getElementById('advLogContainer').value;
-    if (!containerId) { showToast('请选择容器', 'warning'); return; }
-    if (advLogWs) { advLogWs.close(); }
-    var container = document.getElementById('advLogContainer2');
-    container.innerHTML = '<div style="opacity:0.5">正在连接...</div>';
-    var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    advLogWs = new WebSocket(protocol + '//' + location.host + '/ws/containers/' + containerId + '/logs?token=' + encodeURIComponent(AUTH_TOKEN));
-    advLogWs.onopen = function() {
-        container.innerHTML = '';
-        document.getElementById('advLogStartBtn').disabled = true;
-        document.getElementById('advLogStopBtn').disabled = false;
-    };
-    advLogWs.onmessage = function(event) {
-        var line = document.createElement('div');
-        line.className = 'log-entry';
-        var time = new Date().toLocaleTimeString();
-        line.innerHTML = '<span class="time">[' + time + ']</span>' +
-                        '<span class="type info">LOG</span>' +
-                        '<span class="message">' + escapeHtml(event.data) + '</span>';
-        container.appendChild(line);
-        container.scrollTop = container.scrollHeight;
-        if (container.children.length > 500) container.removeChild(container.firstChild);
-    };
-    advLogWs.onclose = function() {
-        document.getElementById('advLogStartBtn').disabled = false;
-        document.getElementById('advLogStopBtn').disabled = true;
-    };
-    advLogWs.onerror = function() {
-        container.innerHTML += '<div style="color:var(--error)">连接错误</div>';
-    };
-}
-
-/**
- * 处理 stopRealtimeLogs 相关前端逻辑。
- */
-function stopRealtimeLogs() {
-    if (advLogWs) { advLogWs.close(); advLogWs = null; }
-    document.getElementById('advLogStartBtn').disabled = false;
-    document.getElementById('advLogStopBtn').disabled = true;
-}
-
-/**
- * 提交容器为镜像（仅管理员）
- */
-function commitContainer() {
-    // ★★★ 检查是否为管理员 ★★★
-    if (!hasPermission('advanced-docker')) {
-        showToast('您没有容器管理增强的操作权限', 'warning');
-        return;
-    }
-
-    var containerId = document.getElementById('commitContainer').value;
-    if (!containerId) {
-        showToast('请选择要提交的容器', 'warning');
-        return;
-    }
-    var repo = document.getElementById('commitRepo').value.trim() || 'custom_image';
-    var tag = document.getElementById('commitTag').value.trim() || 'latest';
-    var msg = document.getElementById('commitMsg').value.trim();
-    showToast('正在提交...', 'info');
-    apiPost('/api/docker/container/' + containerId + '/commit', {
-        repository: repo,
-        tag: tag,
-        message: msg
-    }).then(function(d) {
-        document.getElementById('commitResult').innerHTML = d.success
-            ? '<span style="color:var(--success)">✅ 镜像已创建: ' + escapeHtml(d.image) + '</span>'
-            : '<span style="color:var(--error)">❌ ' + escapeHtml(d.message || '') + '</span>';
-        showToast(d.success ? '提交成功' : '失败', d.success ? 'success' : 'error');
-    });
-}
-
-/**
- * 加载提交镜像的容器列表
- */
-function loadCommitContainers() {
-    apiGet('/api/docker/containers?all=true').then(function(data) {
-        if (data.success && data.containers) {
-            var select = document.getElementById('commitContainer');
-            select.innerHTML = '<option value="">-- 选择容器 --</option>';
-            data.containers.forEach(function(c) {
-                var opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = c.name + (c.state === 'running' ? ' 🟢' : ' ⚪');
-                select.appendChild(opt);
-            });
-        }
-    });
-}
-
-/**
- * 提交容器选择变化处理
- */
-function onCommitContainerChange() {
-    // 可以在这里添加一些额外的处理逻辑
-}
-
-/**
- * 处理 openFoxglove 相关前端逻辑。
- * v3.6: Foxglove 已禁用，此函数保留占位以避免调用报错。
- */
-function openFoxglove() {
-    showToast('Foxglove 已禁用，请使用 VNC 远程桌面或原生 RVIZ', 'warning');
-    return;
-    var containerId = document.getElementById('foxgloveContainer').value;
-    if (!containerId) { showToast('请选择容器', 'warning'); return; }
-    apiGet('/api/docker/container/' + containerId + '/foxglove-url').then(function(d) {
-        if (d.success) {
-            document.getElementById('foxgloveResult').innerHTML = '<span style="color:var(--success)">✅ Foxglove URL: <a href="' + escapeHtml(d.foxglove_url || '') + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(d.foxglove_url || '') + '</a></span><br><small>容器IP: ' + escapeHtml(d.container_ip || '') + '</small>';
-            window.open(d.foxglove_url, '_blank');
-        } else {
-            document.getElementById('foxgloveResult').innerHTML = '<span style="color:var(--error)">❌ ' + escapeHtml(d.error || '') + '</span>';
-        }
-    });
-}
-
-/**
- * 处理 loadWhitelist 相关前端逻辑。
- */
-function loadWhitelist() {
-    apiGet('/api/system/whitelist').then(function(d) {
-        if (!d.success) return;
-        var container = document.getElementById('whitelistTags');
-        var html = '';
-        for (var i = 0; i < d.prefixes.length; i++) {
-            html += '<span class="tag tag-running" style="cursor:pointer" onclick="removeWhitelist(\'' + escapeHtml(d.prefixes[i]) + '\')">' + escapeHtml(d.prefixes[i]) + ' ✕</span>';
-        }
-        container.innerHTML = html || '<span style="opacity:0.5">暂无白名单</span>';
-    });
-}
-
-/**
- * 处理 addWhitelist 相关前端逻辑。
- */
-function addWhitelist() {
-    var prefix = document.getElementById('whitelistPrefix').value.trim();
-    if (!prefix) { showToast('请输入前缀', 'warning'); return; }
-    apiPost('/api/system/whitelist', { prefix: prefix }).then(function(d) {
-        showToast(d.message || '', d.success ? 'success' : 'error');
-        if (d.success) loadWhitelist();
-    });
-}
-
-/**
- * 处理 removeWhitelist 相关前端逻辑。
- */
-function removeWhitelist(prefix) {
-    apiDelete('/api/system/whitelist/' + encodeURIComponent(prefix)).then(function(d) {
-        showToast(d.message || '', d.success ? 'success' : 'error');
-        if (d.success) loadWhitelist();
-    });
-}
-
-// ========== 预留扩展区域（第1051-1100行） ==========
-// 预留用于未来扩展，如容器编排、批量操作等
-// ===========================================
-
-// ============================================================
-// 23. 高级功能 - 脚本执行增强
-// ============================================================
-
-/**
- * 处理 saveRetrySettings 相关前端逻辑。
- */
-function saveRetrySettings() {
-    if (window.userRole !== 'admin') {
-        showToast('只有管理员可以修改重试设置', 'warning');
-        return;
-    }
-    var count = document.getElementById('retryCount').value;
-    var delay = document.getElementById('retryDelay').value;
-    localStorage.setItem('retry_count', count);
-    localStorage.setItem('retry_delay', delay);
-    document.getElementById('retrySettingsStatus').textContent = '✅ 已保存';
-    setTimeout(function() { document.getElementById('retrySettingsStatus').textContent = ''; }, 2000);
-}
-
-/**
- * 处理 loadScriptsForRetry 相关前端逻辑。
- */
-function loadScriptsForRetry() {
-    var count = localStorage.getItem('retry_count') || '3';
-    var delay = localStorage.getItem('retry_delay') || '5';
-    document.getElementById('retryCount').value = count;
-    document.getElementById('retryDelay').value = delay;
-    apiGet(appendTargetUser('/api/scripts/list')).then(function(d) {
-        var tbody = document.getElementById('retryScriptsTableBody');
-        if (!d.success || !d.scripts || !d.scripts.length) {
-            tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;opacity:0.5">没有脚本</td></tr>';
-            return;
-        }
-        var html = '';
-        for (var i = 0; i < d.scripts.length; i++) {
-            html += '<tr><td><input type="checkbox" class="retry-checkbox" value="' + escapeHtml(d.scripts[i]) + '"></td><td><code>' + escapeHtml(d.scripts[i]) + '</code></td></tr>';
-        }
-        tbody.innerHTML = html;
-    });
-}
-
-/**
- * 处理 toggleRetryAll 相关前端逻辑。
- */
-function toggleRetryAll() {
-    var checked = document.getElementById('retrySelectAll').checked;
-    var cbs = document.querySelectorAll('.retry-checkbox');
-    for (var i = 0; i < cbs.length; i++) cbs[i].checked = checked;
-}
-
-/**
- * 批量执行脚本（带重试，仅管理员）
- */
-function batchExecuteWithRetry() {
-    // ★★★ 检查是否为管理员 ★★★
-    if (!hasPermission('advanced-scripts')) {
-        showToast('您没有脚本执行增强的操作权限', 'warning');
-        return;
-    }
-
-    var selected = [];
-    var cbs = document.querySelectorAll('.retry-checkbox:checked');
-    for (var i = 0; i < cbs.length; i++) selected.push(cbs[i].value);
-    if (!selected.length) {
-        showToast('请至少选择一个脚本', 'warning');
-        return;
-    }
-    var mode = document.getElementById('batchExecMode2').value;
-    var retryCount = parseInt(document.getElementById('retryCount').value) || 0;
-    var retryDelay = parseInt(document.getElementById('retryDelay').value) || 5;
-    showToast('正在执行（重试' + retryCount + '次）...', 'info');
-    var body = {
-        scripts: selected,
-        mode: mode,
-        retry_count: retryCount,
-        retry_delay: retryDelay
-    };
-    if (currentTargetUser) body.target_user = currentTargetUser;
-    apiPost('/api/scripts/batch-execute', body).then(function(result) {
-        var html = '<strong>执行结果:</strong><br>';
-        for (var i = 0; i < result.results.length; i++) {
-            var r = result.results[i];
-            html += '<div>' + escapeHtml(r.name) + ': ' + (r.success ? '✅成功' : '❌失败') +
-                ' (尝试' + (r.attempts || 1) + '次)</div>';
-            if (r.stderr) html += '<div style="color:var(--error);font-size:11px">' +
-                escapeHtml(r.stderr.substring(0, 200)) + '</div>';
-        }
-        document.getElementById('retryExecResult').innerHTML = html;
-        showToast('✅ 执行完成', 'success');
-        setTimeout(function() { loadContainers(false, 'ros2_'); }, 2000);
-        // 通知引导系统车辆已启动
-        var hasSuccess = result.results.some(function(r) { return r.success; });
-        if (hasSuccess && typeof Onboarding !== 'undefined' && Onboarding.notifyExecuteStarted) {
-            setTimeout(function() { Onboarding.notifyExecuteStarted(); }, 2500);
-        }
-    });
-}
-
-// ========== 预留扩展区域（第1101-1150行） ==========
-// 预留用于未来扩展，如脚本调度、定时任务等
-// ===========================================
-
-// ============================================================
-// 24. 高级功能 - 监控面板增强
-// ============================================================
-
-/**
- * 处理 loadGpuDetail 相关前端逻辑。
- */
-function loadGpuDetail() {
-    apiGet('/api/system/monitor/gpu-detail').then(function(d) {
-        if (!d.success) {
-            document.getElementById('gpuDetailContainer').innerHTML = '<p style="color:var(--error)">' + escapeHtml(d.error || '加载失败') + '</p>';
-            return;
-        }
-        var html = '';
-        if (d.gpu && d.gpu.length) {
-            for (var i = 0; i < d.gpu.length; i++) {
-                var g = d.gpu[i];
-                html += '<div class="card" style="margin-bottom:12px"><div class="card-title">GPU ' + g.index + ': ' + escapeHtml(g.name) + '</div>';
-                html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:13px">';
-                html += '<div>利用率: <strong>' + g.utilization + '%</strong></div>';
-                html += '<div>显存: <strong>' + g.mem_used + ' / ' + g.mem_total + ' MiB</strong></div>';
-                html += '<div>显存带宽使用: <strong>' + g.mem_bw_percent + '%</strong></div>';
-                html += '<div>温度: <strong>' + g.temperature + '°C</strong></div>';
-                html += '<div>功耗: <strong>' + g.power_draw + 'W / ' + g.power_limit + 'W</strong></div>';
-                html += '<div>SM时钟: <strong>' + g.sm_clock + ' MHz</strong></div>';
-                html += '<div>Mem时钟: <strong>' + g.mem_clock + ' MHz</strong></div>';
-                if (g.pcie && g.pcie.current_gen) {
-                    html += '<div>PCIe: <strong>Gen' + g.pcie.current_gen + ' x' + g.pcie.current_width + ' (最大 Gen' + g.pcie.max_gen + ' x' + g.pcie.max_width + ')</strong></div>';
-                }
-                html += '</div></div>';
-            }
-        } else {
-            html = '<p style="opacity:0.5">无 GPU 或 nvidia-smi 不可用</p>';
-        }
-        document.getElementById('gpuDetailContainer').innerHTML = html;
-        var pbody = document.getElementById('gpuPmonTableBody');
-        var pHtml = '';
-        if (d.pmon && d.pmon.length) {
-            for (var j = 0; j < d.pmon.length; j++) {
-                var p = d.pmon[j];
-                pHtml += '<tr><td>' + p.gpu + '</td><td>' + p.pid + '</td><td>' + p.type + '</td><td>' + p.sm + '</td><td>' + p.mem + '</td></tr>';
-            }
-        } else {
-            pHtml = '<tr><td colspan="5" style="text-align:center;opacity:0.5">无 GPU 进程数据</td></tr>';
-        }
-        pbody.innerHTML = pHtml;
-    });
-}
-
-/**
- * 处理 toggleGpuAutoRefresh 相关前端逻辑。
- */
-function toggleGpuAutoRefresh() {
-    gpuAutoRefresh = !gpuAutoRefresh;
-    var btn = document.getElementById('gpuAutoRefreshBtn');
-    if (gpuAutoRefresh) {
-        btn.textContent = '⏸ 停止刷新';
-        loadGpuDetail();
-        gpuRefreshTimer = setInterval(loadGpuDetail, 3000);
-    } else {
-        btn.textContent = '⏯ 自动刷新';
-        if (gpuRefreshTimer) { clearInterval(gpuRefreshTimer); gpuRefreshTimer = null; }
-    }
-}
-
-// ========== 预留扩展区域（第1151-1200行） ==========
-// 预留用于未来扩展，如更多GPU监控指标等
-// ===========================================
-
-// ============================================================
-// 25. 高级功能 - 系统自检
-// ============================================================
-
-/**
- * 处理 runSystemCheck 相关前端逻辑。
- */
-function runSystemCheck() {
-    document.getElementById('systemCheckResult').innerHTML = '<span class="loading"></span> 检查中...';
-    apiGet('/api/system/check').then(function(d) {
-        if (!d.success) { document.getElementById('systemCheckResult').innerHTML = '<p style="color:var(--error)">检查失败</p>'; return; }
-        var html = '<div style="margin-bottom:8px">总体状态: <strong style="color:' + (d.all_ok ? 'var(--success)' : 'var(--error)') + '">' + (d.all_ok ? '✅ 全部正常' : '❌ 存在问题') + '</strong></div>';
-        for (var i = 0; i < d.checks.length; i++) {
-            var c = d.checks[i];
-            var icon = c.ok ? '✅' : '❌';
-            var fixBtn = c.fixable && !c.ok ? ' <button class="btn btn-sm btn-warning" onclick="fixCheckItem(\'' + escapeHtml(c.name) + '\')">🔧 修复</button>' : '';
-            html += '<div style="padding:4px 0;border-bottom:1px solid var(--border-color)">' + icon + ' ' + escapeHtml(c.name) + ': ' + (c.path || '') + ' ' + (c.detail ? JSON.stringify(c.detail) : '') + fixBtn + '</div>';
-        }
-        document.getElementById('systemCheckResult').innerHTML = html;
-    });
-}
-
-/**
- * 处理 fixCheckItem 相关前端逻辑。
- */
-function fixCheckItem(item) {
-    apiPost('/api/system/check/fix', { item: item }).then(function(d) {
-        showToast(d.message || '', d.success ? 'success' : 'error');
-        if (d.success) runSystemCheck();
-    });
-}
-
-// ========== 预留扩展区域（第1201-1250行） ==========
-// 预留用于未来扩展，如自动修复增强等
-// ===========================================
-
-// ========== 预留扩展区域（第1251-1300行） ==========
-// 预留用于未来扩展，如配置集导入导出等
-// ===========================================
-
-// ============================================================
-// 27. 高级功能 - 拓展功能
-// ============================================================
-
-/**
- * 处理 addRemoteHost 相关前端逻辑。
- */
-function addRemoteHost() {
-    var name = document.getElementById('remoteName').value.trim();
-    var host = document.getElementById('remoteHost').value.trim();
-    var port = document.getElementById('remotePort').value.trim();
-    var user = document.getElementById('remoteUser').value.trim();
-    if (!name || !host) { showToast('请填写名称和主机', 'warning'); return; }
-    apiPost('/api/system/remote-hosts', { name: name, host: host, port: port, user: user }).then(function(d) {
-        showToast(d.message || '', d.success ? 'success' : 'error');
-        if (d.success) loadRemoteHosts();
-    });
-}
-
-/**
- * 处理 loadRemoteHosts 相关前端逻辑。
- */
-function loadRemoteHosts() {
-    apiGet('/api/system/remote-hosts').then(function(d) {
-        if (!d.success) return;
-        var hosts = d.hosts || [];
-        var html = '';
-        if (!hosts.length) {
-            html = '<p style="opacity:0.5">暂无远程主机</p>';
-        } else {
-            for (var i = 0; i < hosts.length; i++) {
-                var h = hosts[i];
-                html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px;border-bottom:1px solid var(--border-color)">';
-                html += '<span><strong>' + escapeHtml(h.name) + '</strong> - ' + escapeHtml(h.user) + '@' + escapeHtml(h.host) + ':' + escapeHtml(h.port) + '</span>';
-                html += '<div style="display:flex;gap:4px"><button class="btn btn-sm btn-outline" onclick="testRemoteHost(\'' + escapeHtml(h.name) + '\')">🧪 测试</button><button class="btn btn-sm btn-error" onclick="removeRemoteHost(\'' + escapeHtml(h.name) + '\')">🗑</button></div>';
-                html += '</div>';
-            }
-        }
-        document.getElementById('remoteHostsList').innerHTML = html;
-    });
-}
-
-/**
- * 处理 testRemoteHost 相关前端逻辑。
- */
-function testRemoteHost(name) {
-    apiPost('/api/system/remote-hosts/' + encodeURIComponent(name) + '/test').then(function(d) {
-        showToast(d.success ? '✅ 连接成功' : '❌ 连接失败: ' + (d.stderr || ''), d.success ? 'success' : 'error');
-    });
-}
-
-/**
- * 处理 removeRemoteHost 相关前端逻辑。
- */
-function removeRemoteHost(name) {
-    customConfirm('确定删除主机 ' + name + '？', function() {
-        apiDelete('/api/system/remote-hosts/' + encodeURIComponent(name)).then(function(d) {
-            showToast(d.message || '', d.success ? 'success' : 'error');
-            if (d.success) loadRemoteHosts();
-        });
-    });
-}
-
-/**
- * 处理 createPlugin 相关前端逻辑。
- */
-function createPlugin() {
-    var name = document.getElementById('pluginName').value.trim();
-    var code = document.getElementById('pluginCode').value.trim();
-    if (!name) { showToast('请输入插件名称', 'warning'); return; }
-    apiPost('/api/system/plugins', { name: name, code: code }).then(function(d) {
-        showToast(d.message || '', d.success ? 'success' : 'error');
-        if (d.success) loadPlugins();
-    });
-}
-
-/**
- * 处理 loadPlugins 相关前端逻辑。
- */
-function loadPlugins() {
-    apiGet('/api/system/plugins').then(function(d) {
-        if (!d.success) return;
-        var plugins = d.plugins || [];
-        var html = '';
-        if (!plugins.length) {
-            html = '<p style="opacity:0.5">暂无插件（插件目录: ' + escapeHtml(d.plugins_dir || '') + '）</p>';
-        } else {
-            for (var i = 0; i < plugins.length; i++) {
-                var p = plugins[i];
-                html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px;border-bottom:1px solid var(--border-color)">';
-                html += '<span><strong>' + escapeHtml(p.name) + '</strong> - ' + escapeHtml(p.description) + '</span>';
-                html += '<div style="display:flex;gap:4px"><button class="btn btn-sm btn-success" onclick="executePlugin(\'' + escapeHtml(p.name) + '\')">▶ 执行</button><button class="btn btn-sm btn-error" onclick="deletePlugin(\'' + escapeHtml(p.name) + '\')">🗑</button></div>';
-                html += '</div>';
-            }
-        }
-        document.getElementById('pluginsList').innerHTML = html;
-    });
-}
-
-/**
- * 处理 executePlugin 相关前端逻辑。
- */
-function executePlugin(name) {
-    apiPost('/api/system/plugins/' + encodeURIComponent(name) + '/execute').then(function(d) {
-        showToast(d.success ? '执行结果: ' + (d.result || '') : '失败: ' + (d.error || ''), d.success ? 'success' : 'error');
-    });
-}
-
-/**
- * 处理 deletePlugin 相关前端逻辑。
- */
-function deletePlugin(name) {
-    customConfirm('确定删除插件 ' + name + '？', function() {
-        apiDelete('/api/system/plugins/' + encodeURIComponent(name)).then(function(d) {
-            showToast(d.message || '', d.success ? 'success' : 'error');
-            if (d.success) loadPlugins();
-        });
-    });
-}
-
-function getApiBaseUrl() {
-    var port = parseInt(document.getElementById('apiPort').value) || 8875;
-    var protocol = window.location.protocol;
-    var hostname = window.location.hostname;
-    return protocol + '//' + hostname + ':' + port;
-}
-
-function updateApiUrlDisplay() {
-    var url = getApiBaseUrl();
-    document.getElementById('apiBaseUrl').textContent = url;
-    return url;
-}
-
-function updateApiStatus(isEnabled, isConnected) {
-    var badge = document.getElementById('apiStatusBadge');
-    var docsBtn = document.getElementById('openDocsBtn');
-    var redocBtn = document.getElementById('openRedocBtn');
-
-    if (!isEnabled) {
-        badge.textContent = '🔴 已禁用';
-        badge.style.background = '#fee2e2';
-        badge.style.color = '#dc2626';
-        docsBtn.disabled = true;
-        redocBtn.disabled = true;
-    } else if (isConnected) {
-        badge.textContent = '🟢 运行中';
-        badge.style.background = '#dcfce7';
-        badge.style.color = '#16a34a';
-        docsBtn.disabled = false;
-        redocBtn.disabled = false;
-    } else {
-        badge.textContent = '🟡 配置中';
-        badge.style.background = '#fef3c7';
-        badge.style.color = '#d97706';
-        docsBtn.disabled = false;
-        redocBtn.disabled = false;
-    }
-}
-
-/**
- * 处理 loadApiSettings 相关前端逻辑。
- */
-function loadApiSettings() {
-    updateApiUrlDisplay();
-    document.getElementById('apiPort').addEventListener('input', updateApiUrlDisplay);
-
-    apiGet('/api/system/api-settings').then(function(d) {
-        if (!d.success || !d.settings) return;
-        document.getElementById('apiPort').value = d.settings.api_port || '8875';
-        document.getElementById('apiToken').value = d.settings.auth_token || '';
-        document.getElementById('apiEnabled').checked = d.settings.api_enabled !== false;
-        document.getElementById('apiAuthRequired').checked = d.settings.auth_required === true;
-        updateApiUrlDisplay();
-        updateApiStatus(d.settings.api_enabled !== false, true);
-    }).catch(function() {
-        updateApiStatus(true, false);
-    });
-}
-
-/**
- * 处理 saveApiSettings 相关前端逻辑。
- */
-function saveApiSettings() {
-    if (window.userRole !== 'admin') {
-        showToast('只有管理员可以修改 API 设置', 'warning');
-        return;
-    }
-    var body = {
-        api_port: parseInt(document.getElementById('apiPort').value) || 8875,
-        auth_token: document.getElementById('apiToken').value.trim(),
-        api_enabled: document.getElementById('apiEnabled').checked,
-        auth_required: document.getElementById('apiAuthRequired').checked
-    };
-    apiPost('/api/system/api-settings', body).then(function(d) {
-        document.getElementById('apiSettingsStatus').textContent = d.success ? '✅ 已保存' : '❌ ' + (d.error || '');
-        showToast(d.message || (d.success ? 'API 设置已保存' : '保存失败'), d.success ? 'success' : 'error');
-        if (d.success) {
-            updateApiStatus(body.api_enabled, true);
-            updateApiUrlDisplay();
-        }
-        setTimeout(function() { document.getElementById('apiSettingsStatus').textContent = ''; }, 3000);
-    });
-}
-
-function openApiDocs() {
-    var baseUrl = getApiBaseUrl();
-    window.open(baseUrl + '/api/docs', '_blank');
-}
-
-function openApiRedoc() {
-    var baseUrl = getApiBaseUrl();
-    window.open(baseUrl + '/api/redoc', '_blank');
-}
-
-function copyApiUrl() {
-    var url = getApiBaseUrl();
-    navigator.clipboard.writeText(url).then(function() {
-        showToast('API 地址已复制到剪贴板', 'success');
-    }).catch(function() {
-        var textArea = document.createElement('textarea');
-        textArea.value = url;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        showToast('API 地址已复制', 'success');
-    });
-}
-
-function testApiConnection() {
-    var resultDiv = document.getElementById('apiTestResult');
-    var baseUrl = getApiBaseUrl();
-    resultDiv.style.display = 'block';
-    resultDiv.innerHTML = '<span style="color:var(--text-muted)">⏳ 正在测试连接...</span>';
-
-    var testUrl = baseUrl + '/openapi.json';
-    var startTime = Date.now();
-
-    fetch(testUrl, { method: 'GET', mode: 'cors' })
-        .then(function(response) {
-            var elapsed = Date.now() - startTime;
-            if (response.ok) {
-                return response.json().then(function(data) {
-                    resultDiv.innerHTML = '<div style="color:#16a34a;">✅ API 连接成功！</div>' +
-                        '<div style="margin-top:4px;opacity:0.8;">响应时间: ' + elapsed + 'ms</div>' +
-                        '<div style="opacity:0.8;">API 标题: ' + (data.info ? data.info.title : 'Unknown') + '</div>' +
-                        '<div style="opacity:0.8;">版本: ' + (data.info ? data.info.version : 'Unknown') + '</div>' +
-                        '<div style="opacity:0.8;">接口数量: ' + (data.paths ? Object.keys(data.paths).length : 0) + ' 个</div>';
-                    updateApiStatus(true, true);
-                });
-            } else {
-                resultDiv.innerHTML = '<div style="color:#dc2626;">❌ 连接失败 (HTTP ' + response.status + ')</div>' +
-                    '<div style="margin-top:4px;opacity:0.8;">请检查 API 服务是否在端口 ' + (parseInt(document.getElementById('apiPort').value) || 8875) + ' 上运行</div>';
-                updateApiStatus(document.getElementById('apiEnabled').checked, false);
-            }
-        })
-        .catch(function(err) {
-            var elapsed = Date.now() - startTime;
-            resultDiv.innerHTML = '<div style="color:#dc2626;">❌ 无法连接到 API 服务</div>' +
-                '<div style="margin-top:4px;opacity:0.8;">错误: ' + err.message + '</div>' +
-                '<div style="opacity:0.8;">请确认 API 服务已启动且端口 ' + (parseInt(document.getElementById('apiPort').value) || 8875) + ' 可访问</div>';
-            updateApiStatus(document.getElementById('apiEnabled').checked, false);
-        });
-}
-
-// ============================================================
-// 独立面板 REST API 管理函数
-// ============================================================
-
-function getApiMgrBaseUrl() {
-    var port = parseInt(document.getElementById('apiMgrPort').value) || 8875;
-    var protocol = window.location.protocol;
-    var hostname = window.location.hostname;
-    return protocol + '//' + hostname + ':' + port;
-}
-
-function updateApiMgrUrlDisplay() {
-    var url = getApiMgrBaseUrl();
-    document.getElementById('apiMgrBaseUrl').textContent = url;
-    document.getElementById('apiMgrPortText').textContent = '端口: ' + (parseInt(document.getElementById('apiMgrPort').value) || 8875);
-    return url;
-}
-
-function updateApiMgrStatus(isEnabled, isConnected, apiInfo) {
-    var badge = document.getElementById('apiMgrStatusBadge');
-    var icon = document.getElementById('apiMgrIcon');
-    var stateText = document.getElementById('apiMgrStateText');
-    var docsBtn = document.getElementById('apiMgrOpenDocsBtn');
-    var redocBtn = document.getElementById('apiMgrOpenRedocBtn');
-
-    if (!isEnabled) {
-        if (badge) {
-            badge.textContent = '🔴 已禁用';
-            badge.style.background = '#fee2e2';
-            badge.style.color = '#dc2626';
-        }
-        if (icon) icon.textContent = '🔴';
-        if (stateText) stateText.textContent = 'API 服务已禁用';
-        if (docsBtn) docsBtn.disabled = true;
-        if (redocBtn) redocBtn.disabled = true;
-    } else if (isConnected) {
-        if (badge) {
-            badge.textContent = '🟢 运行中';
-            badge.style.background = '#dcfce7';
-            badge.style.color = '#16a34a';
-        }
-        if (icon) icon.textContent = '🟢';
-        if (stateText) stateText.textContent = 'API 服务运行正常';
-        if (docsBtn) docsBtn.disabled = false;
-        if (redocBtn) redocBtn.disabled = false;
-    } else {
-        if (badge) {
-            badge.textContent = '🟡 待连接';
-            badge.style.background = '#fef3c7';
-            badge.style.color = '#d97706';
-        }
-        if (icon) icon.textContent = '🟡';
-        if (stateText) stateText.textContent = '配置完成，可尝试打开文档';
-        if (docsBtn) docsBtn.disabled = false;
-        if (redocBtn) redocBtn.disabled = false;
-    }
-}
-
-function loadApiMgrSettings() {
-    updateApiMgrUrlDisplay();
-    document.getElementById('apiMgrPort').addEventListener('input', updateApiMgrUrlDisplay);
-
-    apiGet('/api/system/api-settings').then(function(d) {
-        if (!d.success || !d.settings) return;
-        document.getElementById('apiMgrPort').value = d.settings.api_port || '8875';
-        document.getElementById('apiMgrToken').value = d.settings.auth_token || '';
-        document.getElementById('apiMgrEnabled').checked = d.settings.api_enabled !== false;
-        document.getElementById('apiMgrAuthRequired').checked = d.settings.auth_required === true;
-        updateApiMgrUrlDisplay();
-        updateApiMgrStatus(d.settings.api_enabled !== false, true);
-        testApiMgrConnection(true);
-    }).catch(function() {
-        updateApiMgrStatus(true, false);
-    });
-}
-
-function saveApiMgrSettings() {
-    if (window.userRole !== 'admin') {
-        showToast('只有管理员可以修改 API 设置', 'warning');
-        return;
-    }
-    var body = {
-        api_port: parseInt(document.getElementById('apiMgrPort').value) || 8875,
-        auth_token: document.getElementById('apiMgrToken').value.trim(),
-        api_enabled: document.getElementById('apiMgrEnabled').checked,
-        auth_required: document.getElementById('apiMgrAuthRequired').checked
-    };
-    apiPost('/api/system/api-settings', body).then(function(d) {
-        var statusEl = document.getElementById('apiMgrSaveStatus');
-        statusEl.textContent = d.success ? '✅ 已保存' : '❌ ' + (d.error || '');
-        statusEl.style.color = d.success ? '#16a34a' : '#dc2626';
-        showToast(d.message || (d.success ? 'API 设置已保存' : '保存失败'), d.success ? 'success' : 'error');
-        if (d.success) {
-            updateApiMgrStatus(body.api_enabled, true);
-            updateApiMgrUrlDisplay();
-        }
-        setTimeout(function() { statusEl.textContent = ''; }, 3000);
-    });
-}
-
-function openApiMgrDocs() {
-    var port = parseInt(document.getElementById('apiMgrPort').value) || 8875;
-    var currentPort = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-    var docsUrl;
-    if (String(port) === String(currentPort)) {
-        docsUrl = '/api/docs';
-    } else {
-        docsUrl = getApiMgrBaseUrl() + '/api/docs';
-    }
-    window.open(docsUrl, '_blank');
-}
-
-function openApiMgrRedoc() {
-    var port = parseInt(document.getElementById('apiMgrPort').value) || 8875;
-    var currentPort = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-    var redocUrl;
-    if (String(port) === String(currentPort)) {
-        redocUrl = '/api/redoc';
-    } else {
-        redocUrl = getApiMgrBaseUrl() + '/api/redoc';
-    }
-    window.open(redocUrl, '_blank');
-}
-
-function copyApiMgrUrl() {
-    var url = getApiMgrBaseUrl();
-    navigator.clipboard.writeText(url).then(function() {
-        showToast('API 地址已复制到剪贴板', 'success');
-    }).catch(function() {
-        var textArea = document.createElement('textarea');
-        textArea.value = url;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        showToast('API 地址已复制', 'success');
-    });
-}
-
-function testApiMgrConnection(silent) {
-    var resultDiv = document.getElementById('apiMgrTestResult');
-    var port = parseInt(document.getElementById('apiMgrPort').value) || 8875;
-    var currentPort = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-    
-    // 如果配置的端口和当前访问端口相同，直接使用相对路径（同源）
-    var testUrl;
-    if (String(port) === String(currentPort)) {
-        testUrl = '/openapi.json';
-    } else {
-        var protocol = window.location.protocol;
-        var hostname = window.location.hostname;
-        testUrl = protocol + '//' + hostname + ':' + port + '/openapi.json';
-    }
-    
-    if (!silent) {
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = '<span style="color:var(--text-muted)">⏳ 正在测试连接...</span>';
-    }
-
-    var startTime = Date.now();
-
-    // 同源请求不需要 cors 模式
-    var fetchOptions = { method: 'GET' };
-    if (String(port) !== String(currentPort)) {
-        fetchOptions.mode = 'cors';
-    }
-
-    fetch(testUrl, fetchOptions)
-        .then(function(response) {
-            var elapsed = Date.now() - startTime;
-            if (response.ok) {
-                return response.json().then(function(data) {
-                    var endpointCount = data.paths ? Object.keys(data.paths).length : 0;
-                    if (!silent) {
-                        resultDiv.innerHTML = '<div style="color:#16a34a;font-weight:500;">✅ API 连接成功！</div>' +
-                            '<div style="margin-top:6px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">' +
-                            '<div>响应时间: <strong>' + elapsed + 'ms</strong></div>' +
-                            '<div>API 名称: <strong>' + (data.info ? data.info.title : 'Unknown') + '</strong></div>' +
-                            '<div>版本: <strong>' + (data.info ? data.info.version : 'Unknown') + '</strong></div>' +
-                            '<div>接口数量: <strong>' + endpointCount + ' 个</strong></div>' +
-                            '</div>';
-                    }
-                    updateApiMgrStatus(true, true);
-                });
-            } else {
-                if (!silent) {
-                    resultDiv.innerHTML = '<div style="color:#dc2626;font-weight:500;">❌ 连接失败 (HTTP ' + response.status + ')</div>' +
-                        '<div style="margin-top:6px;opacity:0.8;">请检查 API 服务是否在端口 ' + port + ' 上运行</div>';
-                }
-                updateApiMgrStatus(document.getElementById('apiMgrEnabled').checked, false);
-            }
-        })
-        .catch(function(err) {
-            if (!silent) {
-                resultDiv.innerHTML = '<div style="color:#dc2626;font-weight:500;">❌ 无法连接到 API 服务</div>' +
-                    '<div style="margin-top:6px;opacity:0.8;">错误: ' + err.message + '</div>' +
-                    '<div style="opacity:0.8;">提示: FastAPI 默认自带 Swagger 文档，服务启动后即可访问 /api/docs</div>';
-            }
-            updateApiMgrStatus(document.getElementById('apiMgrEnabled').checked, false);
-        });
-}
-
-// ========== 预留扩展区域（第1301-1350行） ==========
-// 预留用于未来扩展，如更多API管理功能等
-// ===========================================
-
-// ============================================================
-// 28. 高级功能 - 全局增强
-// ============================================================
-
-/**
- * 处理 clearGlobalErrors 相关前端逻辑。
- */
-function clearGlobalErrors() {
-    document.getElementById('globalErrorLog').innerHTML = '<div style="opacity:0.5">暂无错误...</div>';
-}
-
-/**
- * 处理 testGlobalError 相关前端逻辑。
- */
-function testGlobalError() {
-    showToast('这是一条测试错误提示', 'error');
-    var container = document.getElementById('globalErrorLog');
-    if (container.children.length === 1 && container.children[0].textContent === '暂无错误...') {
-        container.innerHTML = '';
-    }
-    var entry = document.createElement('div');
-    entry.className = 'log-entry';
-    entry.innerHTML = '<span class="time">[' + new Date().toLocaleTimeString() + ']</span><span class="type" style="color:var(--error)">[ERROR]</span>测试错误 - 全局错误弹窗功能正常';
-    container.appendChild(entry);
-}
-
-/**
- * 处理 loadResourceLeaks 相关前端逻辑。
- */
-function loadResourceLeaks() {
-    apiGet('/api/system/resource-leaks').then(function(d) {
-        if (!d.success) return;
-        var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:13px">';
-        html += '<div>活跃线程: <strong>' + d.active_threads + '</strong></div>';
-        html += '<div>WebSocket 连接: <strong>' + d.websocket_clients + '</strong></div>';
-        html += '<div>CPU: <strong>' + d.cpu_percent + '%</strong></div>';
-        html += '<div>内存 RSS: <strong>' + d.memory_rss_mb + ' MB</strong></div>';
-        html += '<div>内存 VMS: <strong>' + d.memory_vms_mb + ' MB</strong></div>';
-        html += '<div>打开文件: <strong>' + d.open_files_count + '</strong></div>';
-        html += '</div>';
-        document.getElementById('resourceLeaksData').innerHTML = html;
-    });
-}
-
-/**
- * 处理 checkSudo 相关前端逻辑。
- */
-function checkSudo() {
-    apiGet('/api/system/sudo-check').then(function(d) {
-        if (!d.success) return;
-        var html = '<div style="font-size:13px">';
-        html += '<div>免密 sudo: <strong style="color:' + (d.no_password_sudo ? 'var(--success)' : 'var(--error)') + '">' + (d.no_password_sudo ? '✅ 已配置' : '❌ 未配置') + '</strong></div>';
-        html += '<div>Docker 组成员: <strong>' + (d.in_docker_group ? '✅ 是' : '❌ 否') + '</strong></div>';
-        if (d.fix_guide) html += '<div style="margin-top:8px;padding:8px;background:var(--accent-light);border-radius:var(--radius);font-family:monospace;font-size:11px;white-space:pre-wrap">' + escapeHtml(d.fix_guide) + '</div>';
-        html += '</div>';
-        document.getElementById('sudoCheckResult').innerHTML = html;
-    });
-}
-
-/**
- * 处理 loadAuthStatus 相关前端逻辑。
- */
-function loadAuthStatus() {
-    apiGet('/api/system/auth/status').then(function(d) {
-        if (d.success) {
-            document.getElementById('authStatus').innerHTML = d.exists ? '<span style="color:var(--success)">✅ 已加密存储 (方法: ' + (d.method || 'unknown') + ')</span>' : '<span style="opacity:0.5">未保存认证信息</span>';
-        }
-    });
-}
-
-/**
- * 处理 saveAuthSecure 相关前端逻辑。
- */
-function saveAuthSecure() {
-    var username = document.getElementById('authUsername').value.trim();
-    var password = document.getElementById('authPassword').value.trim();
-    var token = document.getElementById('authToken').value.trim();
-    if (!username) { showToast('请输入用户名', 'warning'); return; }
-    apiPost('/api/system/auth/save', { username: username, password: password, token: token }).then(function(d) {
-        showToast(d.message || '', d.success ? 'success' : 'error');
-        if (d.success) loadAuthStatus();
-    });
-}
-
-// ========== 预留扩展区域（第1351-1400行） ==========
-// 预留用于未来扩展，如更多全局增强功能等
-// ===========================================
-
-// ============================================================
-// 29. 高级功能 - 故障注入
-// ============================================================
-
-/**
- * 处理 loadFaultContainers 相关前端逻辑。
- */
-function loadFaultContainers() {
-    var allowedImages = ['ros2_humble_image:v2', 'ros2_humble_image:v1', 'robotruck20.04:latest'];
-    
-    apiGet('/api/docker/containers?all=false').then(function(d) {
-        var sel = document.getElementById('faultContainer');
-        if (!d.success || !d.containers) {
-            sel.innerHTML = '<option value="">-- 无运行中的 ROS2 容器 --</option>';
-            return;
-        }
-        
-        var filteredContainers = d.containers.filter(function(c) {
-            if (!c.image) return false;
-            for (var i = 0; i < allowedImages.length; i++) {
-                if (c.image.indexOf(allowedImages[i]) !== -1) {
-                    return true;
-                }
-            }
-            return false;
-        });
-        
-        var html = '<option value="">-- 选择运行中的 ROS2 容器 --</option>';
-        for (var i = 0; i < filteredContainers.length; i++) {
-            html += '<option value="' + filteredContainers[i].id + '" data-name="' + escapeHtml(filteredContainers[i].name) + '">' + escapeHtml(filteredContainers[i].name) + ' (' + escapeHtml(filteredContainers[i].image) + ')</option>';
-        }
-        if (filteredContainers.length === 0) {
-            html = '<option value="">-- 无运行中的仿真车容器 --</option>';
-        }
-        sel.innerHTML = html;
-        
-        // 容器列表加载完成后，如果只有一个容器，自动选中并加载话题
-        if (filteredContainers.length === 1) {
-            sel.value = filteredContainers[0].id;
-            loadFaultContainerTopics(filteredContainers[0].id);
-            updateFaultInjectBtn();
-            clearFaultHistoryDisplay();
-        }
-    });
-}
-
-/**
- * 处理 onFaultContainerChange 相关前端逻辑。
- */
-function onFaultContainerChange() {
-    var containerId = document.getElementById('faultContainer').value;
-    updateFaultInjectBtn();
-    loadFaultContainerTopics(containerId);
-    clearFaultHistoryDisplay();
-    document.getElementById('faultResult').innerHTML = '';
-}
-
-/**
- * 加载选中容器的话题/节点/服务列表
- */
-var faultContainerTopics = [];
-var faultContainerNodes = [];
-var faultContainerServices = [];
-function loadFaultContainerResources(containerId) {
-    faultContainerTopics = [];
-    faultContainerNodes = [];
-    faultContainerServices = [];
-    if (!containerId) return;
-    
-    // 更新话题下拉
-    var topicSelect = document.getElementById('faultParamTopic');
-    if (topicSelect) {
-        topicSelect.innerHTML = '<option value="">加载中...</option>';
-    }
-    // 更新节点下拉
-    var nodeSelect = document.getElementById('faultParamNode');
-    if (nodeSelect) {
-        nodeSelect.innerHTML = '<option value="">加载中...</option>';
-    }
-    // 更新服务下拉
-    var serviceSelect = document.getElementById('faultParamService');
-    if (serviceSelect) {
-        serviceSelect.innerHTML = '<option value="">加载中...</option>';
-    }
-    
-    // 加载话题列表
-    apiGet('/api/ros2/topics?container_id=' + encodeURIComponent(containerId)).then(function(d) {
-        if (d.success && d.topics) {
-            faultContainerTopics = d.topics;
-            updateFaultTopicSelect();
-        } else {
-            faultContainerTopics = [];
-            updateFaultTopicSelect();
-        }
-    }).catch(function() {
-        faultContainerTopics = [];
-        updateFaultTopicSelect();
-    });
-    
-    // 加载节点列表
-    apiGet('/api/ros2/nodes?container_id=' + encodeURIComponent(containerId)).then(function(d) {
-        if (d.success && d.nodes) {
-            faultContainerNodes = d.nodes;
-            updateFaultNodeSelect();
-        } else {
-            faultContainerNodes = [];
-            updateFaultNodeSelect();
-        }
-    }).catch(function() {
-        faultContainerNodes = [];
-        updateFaultNodeSelect();
-    });
-    
-    // 加载服务列表
-    apiGet('/api/ros2/services?container_id=' + encodeURIComponent(containerId)).then(function(d) {
-        if (d.success && d.services) {
-            faultContainerServices = d.services;
-            updateFaultServiceSelect();
-        } else {
-            faultContainerServices = [];
-            updateFaultServiceSelect();
-        }
-    }).catch(function() {
-        faultContainerServices = [];
-        updateFaultServiceSelect();
-    });
-}
-
-// 为兼容旧代码保留别名
-function loadFaultContainerTopics(containerId) {
-    loadFaultContainerResources(containerId);
-}
-
-/**
- * 更新话题下拉选择框
- */
-function updateFaultTopicSelect() {
-    var topicSelect = document.getElementById('faultParamTopic');
-    if (!topicSelect) return;
-    
-    var currentVal = topicSelect.value || '/cmd_vel';
-    if (currentVal === '__custom__') {
-        var customInput = document.getElementById('faultParamTopicCustom');
-        if (customInput && customInput.value) currentVal = customInput.value;
-    }
-    var html = '';
-    
-    // 添加常用话题
-    var commonTopics = ['/cmd_vel', '/scan', '/odom', '/image_raw', '/imu/data'];
-    for (var i = 0; i < commonTopics.length; i++) {
-        var selected = commonTopics[i] === currentVal ? ' selected' : '';
-        html += '<option value="' + commonTopics[i] + '"' + selected + '>' + commonTopics[i] + '</option>';
-    }
-    
-    // 添加分隔线和容器中检测到的话题
-    if (faultContainerTopics.length > 0) {
-        html += '<option disabled>── 容器内话题 ──</option>';
-        for (var j = 0; j < faultContainerTopics.length; j++) {
-            var topic = faultContainerTopics[j];
-            if (commonTopics.indexOf(topic) === -1) {
-                var sel = topic === currentVal ? ' selected' : '';
-                html += '<option value="' + escapeHtml(topic) + '"' + sel + '>' + escapeHtml(topic) + '</option>';
-            }
-        }
-    }
-    
-    html += '<option value="__custom__">✎ 手动输入...</option>';
-    topicSelect.innerHTML = html;
-    
-    // 如果当前值不在列表中，切换到自定义输入
-    var customInput = document.getElementById('faultParamTopicCustom');
-    if (customInput) {
-        if (topicSelect.value === '__custom__') {
-            customInput.style.display = 'block';
-        } else {
-            customInput.style.display = 'none';
-            customInput.value = topicSelect.value;
-        }
-    }
-}
-
-/**
- * 更新节点下拉选择框
- */
-function updateFaultNodeSelect() {
-    var nodeSelect = document.getElementById('faultParamNode');
-    if (!nodeSelect) return;
-    
-    var currentVal = nodeSelect.value || '';
-    if (currentVal === '__custom__') {
-        var customInput = document.getElementById('faultParamNodeCustom');
-        if (customInput && customInput.value) currentVal = customInput.value;
-    }
-    var html = '<option value="">-- 选择节点 --</option>';
-    
-    // 添加容器中检测到的节点
-    for (var j = 0; j < faultContainerNodes.length; j++) {
-        var node = faultContainerNodes[j];
-        var sel = node === currentVal ? ' selected' : '';
-        html += '<option value="' + escapeHtml(node) + '"' + sel + '>' + escapeHtml(node) + '</option>';
-    }
-    
-    html += '<option value="__custom__">✎ 手动输入...</option>';
-    nodeSelect.innerHTML = html;
-    
-    var customInput = document.getElementById('faultParamNodeCustom');
-    if (customInput) {
-        if (nodeSelect.value === '__custom__') {
-            customInput.style.display = 'block';
-        } else {
-            customInput.style.display = 'none';
-            customInput.value = nodeSelect.value;
-        }
-    }
-}
-
-/**
- * 更新服务下拉选择框
- */
-function updateFaultServiceSelect() {
-    var serviceSelect = document.getElementById('faultParamService');
-    if (!serviceSelect) return;
-    
-    var currentVal = serviceSelect.value || '';
-    if (currentVal === '__custom__') {
-        var customInput = document.getElementById('faultParamServiceCustom');
-        if (customInput && customInput.value) currentVal = customInput.value;
-    }
-    var html = '<option value="">-- 选择服务 --</option>';
-    
-    // 添加容器中检测到的服务
-    for (var j = 0; j < faultContainerServices.length; j++) {
-        var service = faultContainerServices[j];
-        var sel = service === currentVal ? ' selected' : '';
-        html += '<option value="' + escapeHtml(service) + '"' + sel + '>' + escapeHtml(service) + '</option>';
-    }
-    
-    html += '<option value="__custom__">✎ 手动输入...</option>';
-    serviceSelect.innerHTML = html;
-    
-    var customInput = document.getElementById('faultParamServiceCustom');
-    if (customInput) {
-        if (serviceSelect.value === '__custom__') {
-            customInput.style.display = 'block';
-        } else {
-            customInput.style.display = 'none';
-            customInput.value = serviceSelect.value;
-        }
-    }
-}
-
-/**
- * 切换话题输入为手动输入模式
- */
-function onFaultTopicChange() {
-    var select = document.getElementById('faultParamTopic');
-    var customInput = document.getElementById('faultParamTopicCustom');
-    if (!select || !customInput) return;
-    
-    if (select.value === '__custom__') {
-        customInput.style.display = 'block';
-        customInput.focus();
-    } else {
-        customInput.style.display = 'none';
-        customInput.value = select.value;
-    }
-}
-
-/**
- * 切换节点输入为手动输入模式
- */
-function onFaultNodeChange() {
-    var select = document.getElementById('faultParamNode');
-    var customInput = document.getElementById('faultParamNodeCustom');
-    if (!select || !customInput) return;
-    
-    if (select.value === '__custom__') {
-        customInput.style.display = 'block';
-        customInput.focus();
-    } else {
-        customInput.style.display = 'none';
-        customInput.value = select.value;
-    }
-}
-
-/**
- * 切换服务输入为手动输入模式
- */
-function onFaultServiceChange() {
-    var select = document.getElementById('faultParamService');
-    var customInput = document.getElementById('faultParamServiceCustom');
-    if (!select || !customInput) return;
-    
-    if (select.value === '__custom__') {
-        customInput.style.display = 'block';
-        customInput.focus();
-    } else {
-        customInput.style.display = 'none';
-        customInput.value = select.value;
-    }
-}
-
-/**
- * 获取故障注入的话题名
- */
-function getFaultTopicValue() {
-    var select = document.getElementById('faultParamTopic');
-    var customInput = document.getElementById('faultParamTopicCustom');
-    if (select && select.value === '__custom__' && customInput) {
-        return customInput.value;
-    }
-    return select ? select.value : '';
-}
-
-/**
- * 获取故障注入的节点名
- */
-function getFaultNodeValue() {
-    var select = document.getElementById('faultParamNode');
-    var customInput = document.getElementById('faultParamNodeCustom');
-    if (select && select.value === '__custom__' && customInput) {
-        return customInput.value;
-    }
-    return select ? select.value : '';
-}
-
-/**
- * 获取故障注入的服务名
- */
-function getFaultServiceValue() {
-    var select = document.getElementById('faultParamService');
-    var customInput = document.getElementById('faultParamServiceCustom');
-    if (select && select.value === '__custom__' && customInput) {
-        return customInput.value;
-    }
-    return select ? select.value : '';
-}
-
-/**
- * 处理 selectFaultType 相关前端逻辑。
- */
-function selectFaultType(type) {
-    selectedFaultType = type;
-    var cards = document.querySelectorAll('.fault-card');
-    for (var i = 0; i < cards.length; i++) cards[i].classList.remove('active');
-    var card = document.querySelector('.fault-card[data-fault="' + type + '"]');
-    if (card) card.classList.add('active');
-
-    var names = {
-        topic_stop: '话题停止发布', topic_delay: '话题延迟',
-        node_kill: '节点 Kill', service_timeout: '服务超时',
-        cpu_stress: 'CPU 满载', memory_leak: '内存泄漏',
-        network_loss: '网络丢包', gps_drift: 'GPS 漂移'
-    };
-    document.getElementById('faultTypeName').textContent = names[type] || type;
-    document.getElementById('faultParams').style.display = 'block';
-
-    var paramsHtml = '';
-    if (type === 'topic_stop' || type === 'topic_delay' || type === 'gps_drift') {
-        paramsHtml += '<div style="margin-bottom:4px">' +
-                      '<label style="font-size:11px">话题名</label>' +
-                      '<select id="faultParamTopic" style="width:100%" onchange="onFaultTopicChange()">' +
-                      '<option value="/cmd_vel" selected>/cmd_vel</option>' +
-                      '</select>' +
-                      '<input type="text" id="faultParamTopicCustom" style="width:100%;margin-top:4px;display:none" placeholder="手动输入话题名，如 /my_topic">' +
-                      '</div>';
-    }
-    if (type === 'topic_delay') {
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">延迟 (ms)</label><input type="number" id="faultParamDelay" value="1000" style="width:100%"></div>';
-    }
-    if (type === 'node_kill') {
-        paramsHtml += '<div style="margin-bottom:4px">' +
-                      '<label style="font-size:11px">节点名</label>' +
-                      '<select id="faultParamNode" style="width:100%" onchange="onFaultNodeChange()">' +
-                      '<option value="">-- 选择节点 --</option>' +
-                      '</select>' +
-                      '<input type="text" id="faultParamNodeCustom" style="width:100%;margin-top:4px;display:none" placeholder="手动输入节点名，如 /my_node">' +
-                      '</div>';
-    }
-    if (type === 'service_timeout') {
-        paramsHtml += '<div style="margin-bottom:4px">' +
-                      '<label style="font-size:11px">服务名</label>' +
-                      '<select id="faultParamService" style="width:100%" onchange="onFaultServiceChange()">' +
-                      '<option value="">-- 选择服务 --</option>' +
-                      '</select>' +
-                      '<input type="text" id="faultParamServiceCustom" style="width:100%;margin-top:4px;display:none" placeholder="手动输入服务名，如 /my_service">' +
-                      '</div>';
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">超时 (ms)</label><input type="number" id="faultParamTimeout" value="5000" style="width:100%"></div>';
-    }
-    if (type === 'cpu_stress') {
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">CPU 核心数</label><input type="number" id="faultParamCpuCount" value="1" min="1" style="width:100%"></div>';
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">持续时间 (秒)</label><input type="number" id="faultParamDuration" value="30" style="width:100%"></div>';
-    }
-    if (type === 'memory_leak') {
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">内存 (MB)</label><input type="number" id="faultParamMemMb" value="256" style="width:100%"></div>';
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">持续时间 (秒)</label><input type="number" id="faultParamDuration" value="30" style="width:100%"></div>';
-    }
-    if (type === 'network_loss') {
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">丢包率 (%)</label><input type="number" id="faultParamLossPct" value="10" min="0" max="100" style="width:100%"></div>';
-    }
-    if (type === 'gps_drift') {
-        paramsHtml += '<div style="margin-bottom:4px"><label style="font-size:11px">漂移量 (米)</label><input type="number" id="faultParamDrift" value="5" step="0.1" style="width:100%"></div>';
-    }
-    document.getElementById('faultParamsContent').innerHTML = paramsHtml;
-    
-    // DOM 渲染完成后，如果已选中容器，加载话题/节点/服务列表
-    var containerId = document.getElementById('faultContainer').value;
-    if (containerId) {
-        setTimeout(function() {
-            loadFaultContainerResources(containerId);
-        }, 100);
-    }
-    
-    updateFaultInjectBtn();
-}
-
-/**
- * 处理 updateFaultInjectBtn 相关前端逻辑。
- */
-function updateFaultInjectBtn() {
-    var containerId = document.getElementById('faultContainer').value;
-    document.getElementById('faultInjectBtn').disabled = !containerId || !selectedFaultType;
-}
-
-/**
- * 注入故障（仅管理员）
- */
-function injectFault() {
-    // ★★★ 检查是否为管理员 ★★★
-    if (!hasPermission('advanced-fault')) {
-        showToast('您没有故障注入的操作权限', 'warning');
-        return;
-    }
-
-    var containerId = document.getElementById('faultContainer').value;
-    if (!containerId || !selectedFaultType) {
-        showToast('请选择容器和故障类型', 'warning');
-        return;
-    }
-
-    var params = {};
-    var topic = document.getElementById('faultParamTopic');
-    if (topic) params.topic = getFaultTopicValue();
-    var delay = document.getElementById('faultParamDelay');
-    if (delay) params.delay_ms = parseInt(delay.value);
-    var node = document.getElementById('faultParamNode');
-    if (node) params.node = getFaultNodeValue();
-    var service = document.getElementById('faultParamService');
-    if (service) params.service = getFaultServiceValue();
-    var timeout = document.getElementById('faultParamTimeout');
-    if (timeout) params.timeout_ms = parseInt(timeout.value);
-    var cpuCount = document.getElementById('faultParamCpuCount');
-    if (cpuCount) params.cpu_count = parseInt(cpuCount.value);
-    var duration = document.getElementById('faultParamDuration');
-    if (duration) params.duration = parseInt(duration.value);
-    var memMb = document.getElementById('faultParamMemMb');
-    if (memMb) params.mem_mb = parseInt(memMb.value);
-    var lossPct = document.getElementById('faultParamLossPct');
-    if (lossPct) params.loss_pct = parseInt(lossPct.value);
-    var drift = document.getElementById('faultParamDrift');
-    if (drift) params.drift_m = parseFloat(drift.value);
-
-    showToast('正在注入故障...', 'warning');
-    apiPost('/api/fault/inject', {
-        container_id: containerId,
-        fault_type: selectedFaultType,
-        params: params
-    }).then(function(d) {
-        var html = '<strong>注入结果:</strong><br>';
-        if (d.faults) {
-            for (var i = 0; i < d.faults.length; i++) {
-                var f = d.faults[i];
-                html += '<div>' + (f.ok ? '✅' : '❌') + ' ' + escapeHtml(f.type) + ': ' + escapeHtml(f.output || '') + '</div>';
-            }
-        }
-        document.getElementById('faultResult').innerHTML = html;
-        showToast(d.success ? '故障注入完成' : '失败: ' + (d.error || ''), d.success ? 'success' : 'error');
-        loadFaultHistory();
-    });
-}
-
-/**
- * 处理 clearFault 相关前端逻辑。
- */
-function clearFault() {
-    if (!hasPermission('advanced-fault')) {
-        showToast('您没有故障注入的操作权限', 'warning');
-        return;
-    }
-    var containerId = document.getElementById('faultContainer').value;
-    if (!containerId) { showToast('请选择容器', 'warning'); return; }
-    apiPost('/api/fault/clear', { container_id: containerId }).then(function(d) {
-        showToast(d.success ? '已清除故障' : '清除失败', d.success ? 'success' : 'error');
-        document.getElementById('faultResult').innerHTML = d.success ? '<span style="color:var(--success)">✅ 已清除所有故障</span>' : '';
-    });
-}
-
-/**
- * 处理 loadFaultHistory 相关前端逻辑。
- */
-function loadFaultHistory() {
-    apiGet('/api/fault/history').then(function(d) {
-        if (!d.success || !d.history) return;
-        var history = d.history;
-        var html = '';
-        if (!history.length) {
-            html = '<p style="opacity:0.5">暂无故障注入历史</p>';
-        } else {
-            for (var i = history.length - 1; i >= 0; i--) {
-                var h = history[i];
-                html += '<div style="padding:4px 0;border-bottom:1px solid var(--border-color);font-size:11px">';
-                html += '<span style="color:var(--warning)">[' + escapeHtml(h.timestamp || '') + ']</span> ';
-                html += '<strong>' + escapeHtml(h.fault_type) + '</strong> -> 容器: ' + escapeHtml(h.container_id || '');
-                html += '</div>';
-            }
-        }
-        document.getElementById('faultHistoryList').innerHTML = html;
-    });
-}
-
-/**
- * 清空故障历史显示（仅前端）
- */
-function clearFaultHistoryDisplay() {
-    var listEl = document.getElementById('faultHistoryList');
-    if (listEl) {
-        listEl.innerHTML = '<p style="opacity:0.5">暂无故障注入历史</p>';
-    }
-}
-
-/**
- * 清除故障历史记录（前后端）
- */
-function clearFaultHistory() {
-    if (!hasPermission('advanced-fault')) {
-        showToast('您没有故障注入的操作权限', 'warning');
-        return;
-    }
-    customConfirm('确定要清除所有故障历史记录吗？', function() {
-        apiPost('/api/fault/history/clear', {}).then(function(d) {
-            if (d.success) {
-                showToast('故障历史已清除', 'success');
-                clearFaultHistoryDisplay();
-            } else {
-                showToast('清除失败: ' + (d.error || '未知错误'), 'error');
-            }
-        });
-    });
-}
-
-// ========== 预留扩展区域（第1401-1450行） ==========
-// 预留用于未来扩展，如更多故障类型等
-// ===========================================
-
-// ============================================================
-// 30. ROS2 面板容器选择器
-// ============================================================
-
-/**
- * 处理 loadRos2PanelContainers 相关前端逻辑。
- */
-function loadRos2PanelContainers() {
-    apiGet('/api/docker/containers?all=false').then(function(d) {
-        var html = '<option value="">-- 选择运行中的 ROS2 容器 --</option>';
-        if (d.success && d.containers) {
-            for (var i = 0; i < d.containers.length; i++) {
-                var c = d.containers[i];
-                if (c.state === 'running') {
-                    // ★★★ 修复bug3：使用name作为value，避免id为空时无法选中 ★★★
-                    html += '<option value="' + escapeHtml(c.name) + '">' + escapeHtml(c.name) + '</option>';
-                }
-            }
-        }
-        var selectors = ['ros2SimContainer', 'ros2TopicsContainer', 'ros2NodesContainer', 'ros2ServicesContainer', 'ros2ActionsContainer'];
-        for (var j = 0; j < selectors.length; j++) {
-            var sel = document.getElementById(selectors[j]);
-            if (sel) {
-                var currentVal = sel.value;
-                sel.innerHTML = html;
-                if (currentVal) sel.value = currentVal;
-            }
-        }
-        showToast('容器列表已刷新', 'success');
-    });
-}
-
-/**
- * 处理 onRos2PanelContainerChange 相关前端逻辑。
- */
-function onRos2PanelContainerChange(select, panelType) {
-    var containerId = select.value;
-    var containerName = select.options[select.selectedIndex].text;
-    var statusEl = document.getElementById('ros2' + panelType.charAt(0).toUpperCase() + panelType.slice(1) + 'ContainerStatus');
-    if (containerId) {
-        ros2PanelContainers[panelType] = { id: containerId, name: containerName };
-        if (statusEl) statusEl.innerHTML = '✅ 已选中: <strong>' + escapeHtml(containerName) + '</strong>';
-    } else {
-        delete ros2PanelContainers[panelType];
-        if (statusEl) statusEl.innerHTML = '⚠️ 未选择容器，功能不可用';
-    }
-}
-
-/**
- * 处理 getRos2PanelContainerId 相关前端逻辑。
- */
-function getRos2PanelContainerId(panelType) {
-    if (ros2PanelContainers[panelType] && ros2PanelContainers[panelType].id) {
-        return ros2PanelContainers[panelType].id;
-    }
-    if (selectedContainerId) {
-        return selectedContainerId;
-    }
-    return null;
-}
-
-// ========== 预留扩展区域（第1451-1500行） ==========
-// 预留用于未来扩展，如容器选择器增强等
 // ===========================================
 
 // ============================================================
@@ -8082,27 +4797,99 @@ function loadUserList() {
         }
         var users = data.users || {};
         var html = '<table class="data-table">';
-        html += '<thead><tr><th>用户名(Email)</th><th>角色</th><th>权限数</th><th>操作</th></tr></thead><tbody>';
+        html += '<thead><tr><th>用户名(Email)</th><th>角色</th><th>权限数</th><th>密码</th><th>操作</th></tr></thead><tbody>';
         for (var email in users) {
             var info = users[email];
             var permsCount = (info.permissions || []).length;
             var isCurrent = (email === CURRENT_USER || email === localStorage.getItem('ros2_web_user'));
+            var pwdPlain = info.password_plain || '';
+            var pwdDisplay = pwdPlain ? '••••••' : '<span style="color:var(--text-muted);font-size:11px;">未记录</span>';
             html += '<tr>';
             html += '<td><strong>' + escapeHtml(email) + '</strong>' + (info.username ? ' <span style="color:var(--text-muted);font-size:11px;">(' + escapeHtml(info.username) + ')</span>' : '') + (isCurrent ? ' <span class="tag tag-info">当前</span>' : '') + '</td>';
             html += '<td><span class="tag ' + (info.role === 'admin' ? 'tag-running' : 'tag-info') + '">' + escapeHtml(info.role || 'user') + '</span></td>';
             html += '<td>' + permsCount + '</td>';
+            // v5.2：密码列（眼睛切换显示明文；未记录时显示"未记录"）
+            html += '<td style="font-family:monospace;">';
+            if (pwdPlain) {
+                html += '<span id="pwd-' + escapeHtml(info.id) + '" data-pwd="' + escapeHtml(pwdPlain) + '">' + pwdDisplay + '</span> ';
+                html += '<button class="btn btn-sm btn-outline" style="padding:2px 6px;font-size:11px;" onclick="togglePasswordVisibility(\'' + escapeHtml(info.id) + '\', this)">👁</button> ';
+                html += '<button class="btn btn-sm btn-outline" style="padding:2px 6px;font-size:11px;" onclick="copyPassword(\'' + escapeHtml(info.id) + '\')">📋</button>';
+            } else {
+                html += pwdDisplay;
+            }
+            html += '</td>';
             html += '<td>';
             if (window.userRole === 'admin' && !isCurrent) {
                 html += '<button class="btn btn-sm btn-outline" onclick="editUser(\'' + escapeHtml(email) + '\', \'' + escapeHtml(info.id) + '\')">✏️ 编辑</button> ';
+                html += '<button class="btn btn-sm btn-outline" style="border-color:var(--warning);color:var(--warning);" onclick="resetUserPassword(\'' + escapeHtml(email) + '\', \'' + escapeHtml(info.id) + '\')">🔑 重置密码</button> ';
                 html += '<button class="btn btn-sm btn-error" onclick="deleteUser(\'' + escapeHtml(email) + '\', \'' + escapeHtml(info.id) + '\')">🗑 删除</button>';
             } else if (window.userRole === 'admin' && isCurrent) {
                 html += '<button class="btn btn-sm btn-outline" onclick="editUser(\'' + escapeHtml(email) + '\', \'' + escapeHtml(info.id) + '\')">✏️ 编辑</button> ';
+                html += '<button class="btn btn-sm btn-outline" style="border-color:var(--warning);color:var(--warning);" onclick="resetUserPassword(\'' + escapeHtml(email) + '\', \'' + escapeHtml(info.id) + '\')">🔑 重置密码</button> ';
                 html += '<span style="color:var(--text-muted);font-size:11px;">不能删除自己</span>';
             }
             html += '</td></tr>';
         }
         html += '</tbody></table>';
         container.innerHTML = html;
+    });
+}
+
+/**
+ * v5.2：切换密码明文/隐藏显示
+ */
+function togglePasswordVisibility(userId, btn) {
+    var span = document.getElementById('pwd-' + userId);
+    if (!span) return;
+    if (span.dataset.shown === 'true') {
+        span.textContent = '••••••';
+        span.dataset.shown = 'false';
+        btn.textContent = '👁';
+    } else {
+        span.textContent = span.dataset.pwd;
+        span.dataset.shown = 'true';
+        btn.textContent = '🙈';
+    }
+}
+
+/**
+ * v5.2：复制密码到剪贴板
+ */
+function copyPassword(userId) {
+    var span = document.getElementById('pwd-' + userId);
+    if (!span || !span.dataset.pwd) return;
+    var pwd = span.dataset.pwd;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(pwd).then(function() {
+            showToast('密码已复制到剪贴板', 'success');
+        }).catch(function() {
+            showToast('复制失败，请手动复制', 'warning');
+        });
+    } else {
+        // 兜底：选中文本
+        var range = document.createRange();
+        range.selectNode(span);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        try { document.execCommand('copy'); showToast('密码已复制', 'success'); }
+        catch (e) { showToast('复制失败，请手动复制', 'warning'); }
+        window.getSelection().removeAllRanges();
+    }
+}
+
+/**
+ * v5.2：重置用户密码为默认密码（B@@nray!123）
+ */
+function resetUserPassword(email, userId) {
+    customConfirm('确定要将用户 ' + email + ' 的密码重置为默认密码 B@@nray!123 吗？', function() {
+        apiPost('/api/admin/users/' + encodeURIComponent(userId) + '/reset-password', {}).then(function(data) {
+            if (data.success) {
+                showToast('密码已重置：' + (data.new_password || ''), 'success');
+                loadUserList();  // 刷新列表以反映新密码
+            } else {
+                showToast('重置失败: ' + (data.detail || data.error || ''), 'error');
+            }
+        });
     });
 }
 
@@ -8134,10 +4921,9 @@ function showAddUserModal() {
     var container = document.getElementById('addPermissionsContainer');
     var allPanels = [
         {id: 'welcome', label: '🏠 首页', default: true},
-        {id: 'scripts', label: '📜 脚本生成', default: true},
+        {id: 'scripts', label: '📜 脚本与启动', default: true},
         {id: 'advanced-scripts', label: '📜 脚本执行增强', default: false},
-        {id: 'vehicle', label: '🚛 仿真车启动', default: true},
-        {id: 'docker', label: '🐳 Docker 管理', default: true},
+        {id: 'docker', label: '🚛 仿真车管理', default: true},
         {id: 'advanced-docker', label: '🐳 容器管理增强', default: false},
         {id: 'images', label: '💿 镜像管理', default: true},
         {id: 'traffic', label: '🚦 红绿灯模拟', default: true},
@@ -8229,10 +5015,9 @@ function editUser(email, userId) {
         var container = document.getElementById('editPermissionsContainer');
         var allPanels = [
             {id: 'welcome', label: '🏠 首页'},
-            {id: 'scripts', label: '📜 脚本生成'},
+            {id: 'scripts', label: '📜 脚本与启动'},
             {id: 'advanced-scripts', label: '📜 脚本执行增强'},
-            {id: 'vehicle', label: '🚛 仿真车启动'},
-            {id: 'docker', label: '🐳 Docker 管理'},
+            {id: 'docker', label: '🚛 仿真车管理'},
             {id: 'advanced-docker', label: '🐳 容器管理增强'},
             {id: 'images', label: '💿 镜像管理'},
             {id: 'traffic', label: '🚦 红绿灯模拟'},
@@ -8253,7 +5038,8 @@ function editUser(email, userId) {
         var userPerms = user.permissions || [];
         var html = '';
         allPanels.forEach(function(p) {
-            var checked = userPerms.includes(p.id) ? 'checked' : '';
+            var has = userPerms.includes(p.id) || (p.id === 'scripts' && userPerms.includes('vehicle'));
+            var checked = has ? 'checked' : '';
             html += '<label style="font-size:12px;display:flex;align-items:center;gap:4px;"><input type="checkbox" class="edit-perm-checkbox" value="' + p.id + '" ' + checked + '>' + p.label + '</label>';
         });
         container.innerHTML = html;
@@ -8308,9 +5094,8 @@ function deleteUser(email, userId) {
  */
 function getQuickStartPanels() {
     return [
-        { id: 'scripts', label: '脚本生成', icon: '📜', fixed: true },
-        { id: 'vehicle', label: '仿真车启动', icon: '🚛', fixed: true },
-        { id: 'docker', label: 'Docker 管理', icon: '🐳', fixed: true },
+        { id: 'scripts', label: '脚本与启动', icon: '📜', fixed: true },
+        { id: 'docker', label: '仿真车管理', icon: '🚛', fixed: true },
         { id: 'images', label: '镜像管理', icon: '💿', fixed: false },
         { id: 'traffic', label: '红绿灯模拟', icon: '🚦', fixed: false },
         { id: 'tools', label: '其他工具', icon: '🛠', fixed: false },
@@ -8376,7 +5161,7 @@ function renderQuickStart() {
     if (userConfig && userConfig.length > 0) {
         userSelectedPanels = allPanels.filter(function(p) {
             if (p.fixed) return false;
-            return userConfig.includes(p.id) && (isAdmin || perms.includes(p.id));
+            return userConfig.includes(p.id) && (isAdmin || hasPermission(p.id));
         });
         // 按配置顺序排序
         userSelectedPanels.sort(function(a, b) {
@@ -8391,7 +5176,7 @@ function renderQuickStart() {
 
     var html = '';
     displayPanels.forEach(function(p) {
-        var hasPerm = isAdmin || perms.includes(p.id);
+        var hasPerm = isAdmin || hasPermission(p.id);
         var disabledClass = p.fixed || hasPerm ? '' : 'disabled';
         html += '<div class="welcome-card ' + disabledClass + '" data-panel="' + p.id + '" onclick="handleQuickStartClick(\'' + p.id + '\')">' +
                 '<span class="icon">' + p.icon + '</span>' +
@@ -8471,7 +5256,7 @@ function showQuickStartConfig() {
                       '<button class="btn btn-sm btn-outline" onclick="closeQuickStartConfig()">✕</button>' +
                       '</div>' +
                       '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">' +
-                      '勾选要显示在快速开始区域的页面。<strong style="color:#d97706">脚本生成、仿真车启动、Docker 管理</strong>为固定页面，不可取消。' +
+                      '勾选要显示在快速开始区域的页面。<strong style="color:#d97706">脚本与启动、仿真车管理</strong>为固定页面，不可取消。' +
                       '</div>' +
                       '<div id="quickStartConfigContainer" style="max-height:300px;overflow-y:auto;"></div>' +
                       '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">' +

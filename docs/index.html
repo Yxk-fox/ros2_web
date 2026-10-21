@@ -12,16 +12,16 @@
     <header class="portal-hero">
         <div class="doc-eyebrow">DOCUMENTATION CENTER</div>
         <h1>Mock Truck 管理工具 · 文档中心</h1>
-        <p class="hero-sub">版本 4.0-decoupled　|　上海伯镭科技有限公司　|　2026 年 8 月</p>
+        <p class="hero-sub">版本 v5.0　|　上海伯镭科技有限公司　|　2026 年 9 月</p>
     </header>
 
     <div class="doc-abstract">
         <div class="abstract-title">摘　要</div>
-        <p>本中心为 Mock Truck 管理工具的统一文档入口，面向不同读者群体提供分层文档体系。工具定位为面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队的通用仿真测试平台，以 Web 化方式封装 Docker 容器调度、ROS2 话题与节点管理、脚本批量执行、系统监控、故障注入等核心能力，旨在降低一线操作门槛、统一操作规范、支撑远程协作与后续平台化扩展。全部文档按读者身份分为四类，风格统一，遵循论文式排版与中文标点规范。</p>
+        <p>本中心为 Mock Truck 管理工具的统一文档入口，面向不同读者群体提供分层文档体系。工具定位为面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队的通用仿真测试平台，以 Web 化方式封装 Docker 容器调度、ROS2 话题与节点管理、脚本批量执行、系统监控、故障注入、数据导出与安装目录多版本管理等核心能力，旨在降低一线操作门槛、统一操作规范、支撑远程协作与后续平台化扩展。当前版本 v5.0 已完成后端四层解耦与 install 多版本管理，全部文档按读者身份分为四类，风格统一，遵循论文式排版与中文标点规范。</p>
     </div>
 
     <div class="doc-keywords">
-        <strong>关键词：</strong>ROS2；Docker 容器管理；仿真测试平台；Web 运维；降本增效；标准化合规
+        <strong>关键词：</strong>ROS2；Docker 容器管理；仿真测试平台；Web 运维；install 多版本管理；降本增效；标准化合规
     </div>
 
     <h2 class="section-title">一、文档体系总览</h2>
@@ -36,25 +36,25 @@
             <tr>
                 <td>按钮操作手册</td>
                 <td>一线操作 / 运维人员</td>
-                <td>全部功能面板的按钮含义、操作步骤、注意事项与常见问题</td>
+                <td>全部功能面板的按钮含义、操作步骤、注意事项与常见问题，含 install 版本切换与数据导出操作</td>
                 <td><code>operations.html</code></td>
             </tr>
             <tr>
                 <td>新入职培训手册</td>
                 <td>新入职同事</td>
-                <td>项目背景、登录注册、功能地图、典型工作流与上手路径</td>
+                <td>项目背景、登录注册、功能地图、权限模型、典型工作流与上手路径</td>
                 <td><code>onboarding.html</code></td>
             </tr>
             <tr>
                 <td>技术开发文档</td>
                 <td>技术开发团队</td>
-                <td>系统架构、目录结构、API 清单、二次开发规范与扩展点</td>
+                <td>系统架构、目录结构、API 清单、install 版本管理机制、数据库适配、安全机制与二次开发规范</td>
                 <td><code>development.html</code></td>
             </tr>
             <tr>
                 <td>建设后续与价值报告</td>
                 <td>公司管理层 / 决策者</td>
-                <td>建设历程、收益分析、为公司带来的价值与后续规划</td>
+                <td>建设历程、收益分析、为公司带来的价值与后续规划（v5.1—v6.0 路线图）</td>
                 <td><code>value-report.html</code></td>
             </tr>
         </tbody>
@@ -68,7 +68,7 @@
         <a class="portal-card" href="operations.html">
             <div class="card-audience">一线操作 / 运维人员</div>
             <h3>按钮操作手册</h3>
-            <p>逐一说明仿真控制、Docker 管理、话题节点、脚本执行、监控、红绿灯、故障注入等全部面板的按钮作用、操作顺序与风险提示，附常见问题排查。</p>
+            <p>逐一说明仿真控制、Docker 管理、话题节点、脚本执行、监控、红绿灯、故障注入、数据导出与 install 版本切换等全部面板的按钮作用、操作顺序与风险提示，附常见问题排查。</p>
             <div class="card-tags">
                 <span># 操作步骤</span><span># 按钮释义</span><span># 故障排查</span>
             </div>
@@ -86,7 +86,7 @@
         <a class="portal-card" href="development.html">
             <div class="card-audience">技术开发团队</div>
             <h3>技术开发文档</h3>
-            <p>四层解耦架构说明、目录约定、REST API 与 WebSocket 清单、数据库适配、安全机制及二次开发规范，供维护与扩展参考。</p>
+            <p>四层解耦架构说明、目录约定、REST API 与 WebSocket 清单、install 多版本管理机制、数据库适配（含 current_version 迁移）、安全机制及二次开发规范，供维护与扩展参考。</p>
             <div class="card-tags">
                 <span># 架构设计</span><span># API 参考</span><span># 二次开发</span>
             </div>
@@ -95,7 +95,7 @@
         <a class="portal-card" href="value-report.html">
             <div class="card-audience">公司管理层 / 决策者</div>
             <h3>建设后续与价值报告</h3>
-            <p>系统建设历程回顾，从降本增效、标准化合规、远程协作、可扩展平台化四个维度量化收益，并给出后续建设规划与风险提示。</p>
+            <p>系统建设历程回顾（v1.0—v5.0），从降本增效、标准化合规、远程协作、可扩展平台化四个维度量化收益，并给出 v5.1—v6.0 后续建设规划与风险提示。</p>
             <div class="card-tags">
                 <span># 收益分析</span><span># 价值评估</span><span># 后续规划</span>
             </div>
@@ -113,8 +113,8 @@
     </ul>
 
     <footer class="doc-footer">
-        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v4.0-decoupled<br>
-        文档中心　|　最后更新：2026 年 8 月
+        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v5.0<br>
+        文档中心　|　最后更新：2026 年 9 月
     </footer>
 
 </div>

@@ -13,19 +13,19 @@
         <div class="doc-eyebrow">ONBOARDING GUIDE · 新入职同事</div>
         <h1>新入职培训手册</h1>
         <div class="doc-meta">
-            <span>版本：4.0-decoupled</span>
+            <span>版本：v5.0</span>
             <span>适用对象：新入职同事</span>
-            <span>更新：2026 年 8 月</span>
+            <span>更新：2026 年 9 月</span>
         </div>
     </header>
 
     <div class="doc-abstract">
         <div class="abstract-title">摘　要</div>
-        <p>本手册面向新入职同事，旨在帮助其在最短时间内理解 Mock Truck 管理工具的定位、功能边界与使用方法，并独立完成一次仿真车启动与验证。手册首先交代项目背景与价值，继而说明账号注册与登录流程，随后给出功能地图与权限模型，最后以三条典型工作流串联核心功能。阅读本手册后，新人应能顺利过渡到《按钮操作手册》进行深入练习。</p>
+        <p>本手册面向新入职同事，旨在帮助其在最短时间内理解 Mock Truck 管理工具的定位、功能边界与使用方法，并独立完成一次仿真车启动与验证。手册首先交代项目背景与价值，继而说明账号注册与登录流程，随后给出功能地图与权限模型，最后以三条典型工作流串联核心功能（含 install 版本切换）。阅读本手册后，新人应能顺利过渡到《按钮操作手册》进行深入练习。</p>
     </div>
 
     <div class="doc-keywords">
-        <strong>关键词：</strong>项目背景；功能地图；权限模型；典型工作流；快速上手
+        <strong>关键词：</strong>项目背景；功能地图；权限模型；典型工作流；install 版本切换；快速上手
     </div>
 
     <nav class="doc-toc">
@@ -43,9 +43,9 @@
 
     <h2 class="section-title" id="sec-1">一、项目背景与定位</h2>
 
-    <p>Mock Truck 管理工具是公司面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队所使用的通用仿真测试平台。其核心价值在于：将原本散落在命令行、脚本与多台机器上的研发与运维操作，收敛为统一的 Web 界面，使研发、测试与运维人员能够通过浏览器完成容器调度、ROS2 调试、脚本批量执行、系统监控与故障注入等工作。</p>
+    <p>Mock Truck 管理工具是公司面向无人驾驶、矿区作业及物流运输场景的 ROS2 仿真车研发团队所使用的通用仿真测试平台。其核心价值在于：将原本散落在命令行、脚本与多台机器上的研发与运维操作，收敛为统一的 Web 界面，使研发、测试与运维人员能够通过浏览器完成容器调度、ROS2 调试、脚本批量执行、系统监控、故障注入、数据导出与安装目录多版本管理等工作。</p>
 
-    <p>工具采用前后端分离架构：后端基于 FastAPI 与 WebSocket，负责与 Docker、ROS2 及系统资源交互；前端为独立静态文件，提供图形化操作界面。当前版本为 <code>4.0-decoupled</code>，后端已实现四层解耦，便于维护与扩展。</p>
+    <p>工具采用前后端分离架构：后端基于 FastAPI 与 WebSocket，负责与 Docker、ROS2 及系统资源交互；前端为独立静态文件，提供图形化操作界面。当前版本为 <code>v5.0</code>，后端已实现四层解耦，并支持 install 安装目录多版本上传与切换，便于在不同软件版本间快速对比测试，便于维护与扩展。</p>
 
     <blockquote>一句话理解：这是一个把“ROS2 + Docker 的复杂命令行操作”变成“网页按钮”的内部工具，目的是让团队成员都能高效、规范地完成仿真与运维。</blockquote>
 
@@ -75,7 +75,7 @@
         <caption>表 3-1　功能地图一览</caption>
         <thead><tr><th>分组</th><th>面板</th><th>用途</th></tr></thead>
         <tbody>
-            <tr><td rowspan="8">基础</td><td>首页</td><td>欢迎信息、安装目录状态、快速开始</td></tr>
+            <tr><td rowspan="8">基础</td><td>首页</td><td>欢迎信息、安装目录管理（含 install 版本切换）、快速开始</td></tr>
             <tr><td>仿真控制</td><td>启动 launch、速度控制</td></tr>
             <tr><td>话题 / 节点 / 服务 / Action</td><td>ROS2 运行时查询与调用</td></tr>
             <tr><td>Docker 管理</td><td>容器启停、终端、日志、资源调整</td></tr>
@@ -83,10 +83,11 @@
             <tr><td>仿真车启动</td><td>脚本批量执行</td></tr>
             <tr><td>镜像管理</td><td>镜像导入、删除</td></tr>
             <tr><td>系统监控 / 工具 / 红绿灯 / 主题 / 设置</td><td>监控、文件同步、红绿灯模拟、个性化</td></tr>
-            <tr><td rowspan="6">高级</td><td>容器管理增强</td><td>实时日志、提交镜像、Foxglove、白名单</td></tr>
+            <tr><td rowspan="7">高级</td><td>容器管理增强</td><td>实时日志、提交镜像、Foxglove、白名单</td></tr>
             <tr><td>脚本执行增强</td><td>失败自动重试</td></tr>
             <tr><td>监控面板增强</td><td>GPU 进程级占用</td></tr>
             <tr><td>工单系统</td><td>问题反馈与跟踪</td></tr>
+            <tr><td>数据导出</td><td>hdmap 地图提取、ros2 bag 录制与下载（v4.0 起）</td></tr>
             <tr><td>REST API 管理</td><td>对外接口配置与文档</td></tr>
             <tr><td>扩展 / 故障注入</td><td>分布式管理、插件、故障测试</td></tr>
         </tbody>
@@ -120,12 +121,14 @@
 
     <h3 class="subsection-title">5.2 工作流二：生成并批量执行脚本</h3>
     <ol class="doc-steps">
+        <li>（如需切换软件版本）在首页「安装目录管理」卡片的版本下拉框中选择目标版本，点击 <span class="btn-demo primary">🔄 切换版本</span>，确认后页面自动刷新，所有菜单随即在所选版本目录下工作。</li>
         <li>进入“脚本管理”面板，点击 <span class="btn-demo">🔍 扫描 Launch 文件</span>。</li>
         <li>确认脚本生成参数无误，点击 <span class="btn-demo success">⚡ 生成 ROS2 脚本</span>。</li>
         <li>进入“仿真车启动”面板，勾选需要执行的脚本。</li>
         <li>选择执行模式（顺序或并行），点击 <span class="btn-demo success">▶ 批量启动</span>。</li>
         <li>观察执行结果，失败可在“脚本执行增强”中开启自动重试。</li>
     </ol>
+    <div class="doc-note"><span class="note-label">注意：</span>切换版本后，先前生成的启动脚本内路径仍是旧版本的，需重新生成脚本再执行；容器也需重启以挂载新版本，具体见《按钮操作手册》第十三章。</div>
 
     <h3 class="subsection-title">5.3 工作流三：监控与排障</h3>
     <ol class="doc-steps">
@@ -141,6 +144,7 @@
 
     <ol class="doc-steps">
         <li>独立完成注册、登录与登出（　）。</li>
+        <li>在首页识别当前 install 版本徽标，并完成一次版本切换（　）。</li>
         <li>在 Docker 面板选中一个容器并查看其日志（　）。</li>
         <li>启动一辆仿真车并查看话题列表（　）。</li>
         <li>使用速度控制发送一次零速指令（　）。</li>
@@ -157,6 +161,7 @@
             <tr><td>“为什么我看不到容器？”</td><td>普通用户仅可见自己创建的容器；需先启动自己的容器或联系管理员。</td></tr>
             <tr><td>“按钮点了没反应”</td><td>检查是否已选中运行中的 ROS2 容器；查看浏览器控制台是否有报错。</td></tr>
             <tr><td>“运行时长怎么不走了？”</td><td>容器停止后运行时长自动归零，属正常；运行中每秒刷新。</td></tr>
+            <tr><td>“切换版本后行为没变”</td><td>版本切换后需重新生成启动脚本并重启容器，新版本才会生效。</td></tr>
             <tr><td>“误删了镜像 / 容器怎么办”</td><td>容器与镜像删除不可恢复，操作前务必确认；如影响业务及时通知团队。</td></tr>
         </tbody>
     </table>
@@ -166,8 +171,8 @@
     <div class="doc-back"><a href="index.html">← 返回文档中心</a></div>
 
     <footer class="doc-footer">
-        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v4.0-decoupled<br>
-        新入职培训手册　|　最后更新：2026 年 8 月
+        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v5.0<br>
+        新入职培训手册　|　最后更新：2026 年 9 月
     </footer>
 
 </div>

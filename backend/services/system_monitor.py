@@ -6,6 +6,7 @@
 
 import os
 import time
+import subprocess
 import psutil
 
 from logger import logger
@@ -101,4 +102,133 @@ class SystemMonitor:
                 cmd_str = ' '.join(p.get('cmdline'))[:100]
             proc_data.append((pid, user, cpu, mem, cmd_str))
         return sys_text, proc_data, gpu_proc_data
+
+    @staticmethod
+    def get_structured_metrics():
+        """结构化资源指标采集（T-5.2-03，供 metrics_history 周期采样落库）
+
+        与 get_system_status()（面向面板的格式化文本）不同，本方法返回纯数值结构，
+        任一子项采集失败仅静默降级（None/空列表），不抛异常、不影响其他字段。
+
+        返回结构::
+
+            {
+                "cpu_percent": float,           # 整体 CPU 使用率（%）
+                "mem_percent": float,           # 内存使用率（%）
+                "mem_used_mb": int,
+                "mem_total_mb": int,
+                "swap_percent": float,          # Swap 使用率（%），无 swap 为 None
+                "load_1m": float,               # 1 分钟平均负载
+                "gpus": [                       # 无 NVIDIA 环境为 []
+                    {"index": int, "util_percent": float, "mem_used_mb": int,
+                     "mem_total_mb": int, "temp_c": float}
+                ],
+                "containers": {                 # docker 不可用时为 None
+                    "count": int,               # 运行中容器数
+                    "cpu_percent_sum": float,   # 各容器 CPU% 之和（单容器以单核计，可超 100）
+                    "mem_used_mb_sum": float,   # 各容器内存用量之和（MB）
+                },
+            }
+        """
+        # ----- CPU / 内存 / 负载（psutil，interval=None 复用上次调用以来的均值，非阻塞） -----
+        cpu_percent = psutil.cpu_percent(interval=None)
+        mem = psutil.virtual_memory()
+        swap = psutil.swap_memory()
+        try:
+            load_1m = psutil.getloadavg()[0]
+        except Exception:
+            load_1m = None
+
+        # ----- GPU（nvidia-smi 单次查询，仅取历史曲线所需子集） -----
+        gpus = []
+        try:
+            cmd = [
+                "nvidia-smi",
+                "--query-gpu=index,utilization.gpu,memory.used,memory.total,temperature.gpu",
+                "--format=csv,noheader,nounits",
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=3)
+            if result.returncode == 0:
+                for line in result.stdout.strip().split("\n"):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    parts = [x.strip() for x in line.split(",")]
+                    if len(parts) < 5:
+                        continue
+                    try:
+                        gpus.append({
+                            "index": int(parts[0]),
+                            "util_percent": float(parts[1]),
+                            "mem_used_mb": int(float(parts[2])),
+                            "mem_total_mb": int(float(parts[3])),
+                            "temp_c": float(parts[4]),
+                        })
+                    except ValueError:
+                        continue
+        except Exception:
+            gpus = []  # 无 NVIDIA 驱动 / nvidia-smi 不存在 → 静默降级
+
+        # ----- 容器资源聚合（docker stats --no-stream 一次取全部，约 1~2s） -----
+        containers = None
+        try:
+            cmd = ["docker", "stats", "--no-stream", "--format",
+                   "{{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}"]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+            if result.returncode == 0:
+                count = 0
+                cpu_sum = 0.0
+                mem_sum_mb = 0.0
+                for line in result.stdout.strip().split("\n"):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    parts = line.split("\t")
+                    if len(parts) < 3:
+                        continue
+                    count += 1
+                    # CPUPerc 形如 "12.34%"
+                    cpu_str = parts[1].strip().rstrip("%")
+                    try:
+                        cpu_sum += float(cpu_str)
+                    except ValueError:
+                        pass
+                    # MemUsage 形如 "123.4MiB / 4GiB"，取已用值
+                    used_str = parts[2].strip().split("/")[0].strip()
+                    mem_sum_mb += _parse_size_to_mb(used_str)
+                containers = {
+                    "count": count,
+                    "cpu_percent_sum": round(cpu_sum, 2),
+                    "mem_used_mb_sum": round(mem_sum_mb, 1),
+                }
+        except Exception:
+            containers = None  # docker 不可用 / 超时 → 静默降级
+
+        return {
+            "cpu_percent": round(cpu_percent, 2),
+            "mem_percent": round(mem.percent, 2),
+            "mem_used_mb": int(mem.used // 1024 ** 2),
+            "mem_total_mb": int(mem.total // 1024 ** 2),
+            "swap_percent": round(swap.percent, 2) if swap.total > 0 else None,
+            "load_1m": round(load_1m, 2) if load_1m is not None else None,
+            "gpus": gpus,
+            "containers": containers,
+        }
+
+
+def _parse_size_to_mb(size_str):
+    """解析 docker stats 的内存用量字符串（如 '123.4MiB'/'1.5GiB'/'976kB'）为 MB"""
+    size_str = size_str.strip()
+    units = {"B": 1 / 1024 ** 2, "KiB": 1 / 1024, "MiB": 1.0, "GiB": 1024.0,
+             "kB": 1 / 1024, "MB": 1.0, "GB": 1024.0, "TiB": 1024.0 ** 2}
+    for unit in sorted(units, key=len, reverse=True):
+        if size_str.endswith(unit):
+            try:
+                return float(size_str[:-len(unit)].strip()) * units[unit]
+            except ValueError:
+                return 0.0
+    try:
+        return float(size_str) / 1024 ** 2  # 纯字节数兜底
+    except ValueError:
+        return 0.0
 

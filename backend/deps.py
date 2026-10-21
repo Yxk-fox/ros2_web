@@ -42,6 +42,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         user_info["username"] = user.get("username", email)
         user_info["home_folder_path"] = user.get("home_folder_path", "")
         user_info["id"] = user.get("id", "")
+        # v5.0：用户当前选择的 install 版本目录名（空表示未选择，回退旧版 install）
+        user_info["current_version"] = user.get("current_version", "") or ""
+    else:
+        user_info["current_version"] = ""
     
     return user_info
 

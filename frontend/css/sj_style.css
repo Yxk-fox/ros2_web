@@ -22,7 +22,7 @@
             9. 表格样式
             10. Toast 通知样式
             11. 监控面板样式
-            12. Docker 管理样式
+            12. 仿真车管理样式
             13. 脚本管理样式
             14. 终端模拟样式
             15. 主题设置样式
@@ -975,30 +975,36 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .btn-success {
-    background: var(--success);
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
     color: #fff;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
 }
 .btn-success:hover {
-    background: var(--success-dark);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: #fff;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 
 .btn-warning {
-    background: var(--warning);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     color: var(--text-primary);
+    box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3);
 }
 .btn-warning:hover {
-    background: var(--warning-dark);
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
 }
 
 .btn-error {
-    background: var(--error);
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
     color: #fff;
+    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
 }
 .btn-error:hover {
-    background: var(--error-dark);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: #fff;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
 }
 
 .btn-outline {
@@ -1050,11 +1056,12 @@ input[type="range"]::-moz-range-thumb {
 /* ---------- 容器操作按钮样式 ---------- */
 .action-buttons {
     display: flex;
-    gap: 4px;
+    gap: 5px;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    padding: 4px 0;
+    justify-content: flex-start;
+    padding: 2px 0;
+    line-height: 1;
 }
 
 .more-actions-container {
@@ -1158,7 +1165,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .action-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 3px;
     padding: 4px 8px;
@@ -1168,6 +1175,8 @@ input[type="range"]::-moz-range-thumb {
     transition: all 0.2s ease;
     border: 1px solid transparent;
     cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .action-btn:hover {
@@ -1206,12 +1215,26 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .btn-info {
-    background: var(--info);
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
     color: #fff;
+    box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
 }
 
 .btn-info:hover {
-    background: #0284c7;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* ★ btn-primary 补充定义（可视化按钮使用） */
+.btn-primary {
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(139, 92, 246, 0.3);
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
 }
 
 /* ========== 预留扩展区域（第351-400行） ========== */
@@ -1225,6 +1248,7 @@ input[type="range"]::-moz-range-thumb {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    table-layout: fixed; /* ★ 列宽固定分配，操作列自适应 */
 }
 .data-table th {
     text-align: left;
@@ -1239,6 +1263,58 @@ input[type="range"]::-moz-range-thumb {
     top: 0;
     background: var(--bg-card);
     z-index: 2;
+}
+/* ★ 容器列表表格：内容列完全紧凑（按内容宽度），操作列占据所有剩余空间 */
+#containersCollapsible .data-table {
+    table-layout: auto;
+    width: 100%;
+}
+#containersCollapsible .data-table th:nth-child(1),
+#containersCollapsible .data-table td:nth-child(1) {
+    width: 1%;
+    white-space: nowrap;
+    padding-right: 12px;
+}
+#containersCollapsible .data-table th:nth-child(2),
+#containersCollapsible .data-table td:nth-child(2) {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    padding: 6px 8px;
+}
+#containersCollapsible .data-table th:nth-child(3),
+#containersCollapsible .data-table td:nth-child(3) {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    padding: 6px 8px;
+}
+#containersCollapsible .data-table th:nth-child(4),
+#containersCollapsible .data-table td:nth-child(4) {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    padding: 6px 12px;
+}
+#containersCollapsible .data-table th:last-child,
+#containersCollapsible .data-table td:last-child {
+    width: auto;
+    text-align: left;
+    padding-left: 12px;
+}
+#containersCollapsible .data-table th {
+    padding: 8px 6px;
+    font-size: 11px;
+    text-align: center;
+}
+#containersCollapsible .data-table th:nth-child(1) {
+    text-align: left;
+}
+#containersCollapsible .data-table th:last-child {
+    text-align: center !important;
+}
+#containersCollapsible .data-table td {
+    padding: 6px 6px;
 }
 .data-table th:last-child {
     text-align: center;
@@ -1271,6 +1347,61 @@ input[type="range"]::-moz-range-thumb {
     padding: 2px 8px;
     border-radius: 4px;
     border: 1px solid var(--border-color);
+}
+
+/* ---------- v5.1 操作历史/回滚模态框表格（加宽防重叠） ---------- */
+#bkHistoryModal .data-table {
+    table-layout: auto; /* 列宽按内容自适应，替代均分导致的挤压重叠 */
+}
+#bkHistoryModal .data-table th,
+#bkHistoryModal .data-table td {
+    padding: 8px 12px;
+    vertical-align: top;
+}
+/* 时间/用户/操作列：短内容不换行 */
+#bkHistoryList .data-table td:nth-child(1),
+#bkHistoryList .data-table td:nth-child(2) {
+    white-space: nowrap;
+}
+/* 详情/备份列：长文本允许换行，超长字符串强制断行 */
+#bkHistoryList .data-table td:nth-child(4),
+#bkHistoryList .data-table td:nth-child(5) {
+    white-space: normal;
+    word-break: break-all;
+    min-width: 160px;
+}
+/* 备份包表：文件名长且不可断行 → 强制断行 */
+#bkBackupsList .data-table td:nth-child(1) {
+    word-break: break-all;
+    white-space: normal;
+    min-width: 240px;
+}
+#bkBackupsList .data-table td:nth-child(2),
+#bkBackupsList .data-table td:nth-child(3) {
+    white-space: nowrap;
+}
+
+/* ---------- 审计日志表格 ---------- */
+.audit-log-table {
+    table-layout: auto;
+}
+.audit-log-table th {
+    text-align: left;
+}
+.audit-log-table .audit-col-time,
+.audit-log-table .audit-col-user,
+.audit-log-table .audit-col-action {
+    white-space: nowrap;
+}
+.audit-log-table .audit-col-action {
+    min-width: 150px;
+}
+.audit-log-table th.audit-col-details,
+.audit-log-table td.audit-col-details {
+    text-align: left;
+    white-space: normal;
+    word-break: break-all;
+    width: auto;
 }
 
 /* ---------- 表格容器（滚动） ---------- */
@@ -1315,21 +1446,21 @@ input[type="range"]::-moz-range-thumb {
     overflow-y: visible;
 }
 #containersCollapsible .data-table {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+#containersCollapsible .data-table thead {
+    display: table-header-group;
 }
 #containersCollapsible .data-table tbody {
-    flex: 1;
-    overflow-y: auto;
-    display: block;
+    display: table-row-group;
+    overflow-y: visible;
 }
-#containersCollapsible .data-table thead,
+#containersCollapsible .data-table thead tr,
 #containersCollapsible .data-table tbody tr {
-    display: table;
+    display: table-row;
     width: 100%;
-    table-layout: fixed;
 }
 #containersTableBody {
     display: table-row-group;
@@ -1461,7 +1592,7 @@ input[type="range"]::-moz-range-thumb {
 /* =========================================== */
 
 /* ============================================================
-12. Docker 管理样式
+12. 仿真车管理样式
 ============================================================ */
 /* ---------- 容器列表 ---------- */
 #containersTableBody tr.selected-container {
@@ -1481,11 +1612,14 @@ input[type="range"]::-moz-range-thumb {
     padding: 14px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-    max-height: 280px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
+    max-height: 60vh;
+    min-height: 400px;
+    overflow: auto;
+    white-space: pre;
+    word-break: normal;
     transition: background var(--transition), border var(--transition);
+    width: 100%;
+    box-sizing: border-box;
 }
 .log-container::-webkit-scrollbar {
     width: 4px;
@@ -1591,6 +1725,7 @@ input[type="range"]::-moz-range-thumb {
 .collapsible-content.expanded {
     max-height: none;
     height: auto;
+    overflow: visible;
 }
 .collapse-toggle {
     cursor: pointer;
@@ -2993,10 +3128,13 @@ small.hint {
     font-family: 'JetBrains Mono', 'Consolas', monospace;
     font-size: 13px;
     line-height: 1.6;
-    max-height: 280px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
+    max-height: 60vh;
+    min-height: 400px;
+    overflow: auto;
+    white-space: pre;
+    word-break: normal;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .log-entry {

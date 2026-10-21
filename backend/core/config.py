@@ -60,6 +60,13 @@ def _default_config():
                 "192": "192.168.9.252"
             }
         },
+        "vehicle_limits": {
+            "admin_quota": 55,
+            "user_quota": 26,
+            "global_max": 300,
+            "base_vnc_port": 5900,
+            "base_web_port": 6080
+        },
         "visualization": {
             "default_method": "vnc",
             "order": ["vnc", "rviz_x11", "rvizweb"],

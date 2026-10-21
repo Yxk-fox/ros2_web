@@ -6,19 +6,25 @@
 @File    :  deploy.py
 @Time    :  2026/07/21
 @Author  :  Fox
-@Version :  4.0-decoupled
+@Version :  5.2
 @Desc    :  Mock Truck 管理工具 - 一键部署脚本（解耦优化版）
             包含：环境检测、依赖安装、服务部署、自启动配置
             优化：已安装环境自动跳过，支持 --skip-system 快速部署
+            v5.2：部署前单测回归（--skip-tests 可跳过并留痕）+
+                  部署后健康探测（/ 与 /api/system/ping）+ 失败回滚指引
 """
 
 import os
 import sys
+import time
+import json
 import subprocess
 import shutil
 import platform
 import re
 import argparse
+import urllib.request
+import urllib.error
 
 DEPLOY_REPORT = {
     "environment": {},
@@ -26,6 +32,17 @@ DEPLOY_REPORT = {
         "already_installed": [],
         "newly_installed": [],
         "failed": []
+    },
+    "tests": {
+        "executed": False,
+        "skipped": False,
+        "passed": False,
+        "summary": ""
+    },
+    "health_check": {
+        "executed": False,
+        "passed": False,
+        "endpoints": []
     },
     "steps": [],
     "status": "success"
@@ -44,6 +61,60 @@ def run_cmd(cmd, capture=True, sudo=False):
             return 0, "", ""
     except Exception as e:
         return -1, "", str(e)
+
+
+def get_current_user():
+    """获取实际执行用户名（适配所有服务器环境，无需修改脚本）
+
+    获取优先级：
+      1. SUDO_USER   —— sudo 执行时记录的真实调用用户
+      2. LOGNAME / USER / USERNAME —— 各发行版通用的环境变量
+      3. getpass.getuser() —— 兜底方案
+    不使用 os.getlogin()，因其依赖控制终端，在 systemd / cron / ssh 无 tty
+    环境下会抛 OSError。
+    """
+    user = os.environ.get("SUDO_USER", "").strip()
+    if user:
+        return user
+    for var in ("LOGNAME", "USER", "USERNAME"):
+        user = os.environ.get(var, "").strip()
+        if user and user != "root":
+            return user
+    try:
+        import getpass
+        user = getpass.getuser()
+        if user and user != "root":
+            return user
+    except Exception:
+        pass
+    return "root"
+
+
+def ensure_root(args):
+    """确保以 root 权限运行；非 root 时提示使用 sudo 执行（会提示输入当前用户密码）
+
+    --only-deps 模式仅安装 Python 依赖（pip --user），无需 root。
+    """
+    if os.geteuid() == 0:
+        return
+    if args.only_deps:
+        print_warning("当前以普通用户运行，仅安装依赖模式（--only-deps）无需 root")
+        return
+
+    user = get_current_user()
+    script = os.path.abspath(__file__)
+    print_error("部署需要 root 权限（安装系统软件 / 写入 systemd 服务 / 配置 Docker 组）")
+    print_info(f"请使用以下命令重新执行（sudo 将提示输入用户 {user} 的密码）：")
+    print_info(f"    sudo python3 {script}")
+    try:
+        answer = input("\n是否现在自动以 sudo 重新执行？[y/N] ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        answer = "n"
+    if answer in ("y", "yes"):
+        cmd = ["sudo", sys.executable, script] + sys.argv[1:]
+        sys.exit(subprocess.run(cmd).returncode)
+    print_warning(f"已取消，请手动执行：sudo python3 {script}")
+    sys.exit(1)
 
 
 def print_info(msg):
@@ -241,12 +312,38 @@ def install_python_dependencies():
     return True
 
 
+def user_in_docker_group(user):
+    """检查用户是否已在 docker 组"""
+    rc, out, err = run_cmd(["id", "-nG", user])
+    if rc == 0 and out:
+        return "docker" in out.split()
+    # 兜底：直接读取 /etc/group
+    try:
+        with open("/etc/group") as f:
+            for line in f:
+                if line.startswith("docker:"):
+                    members = line.strip().split(":")[-1]
+                    return user in members.split(",") if members else False
+    except Exception:
+        pass
+    return False
+
+
 def add_user_to_docker_group():
-    print_info("将当前用户添加到 docker 组...")
-    user = os.environ.get("SUDO_USER", os.getlogin())
+    """将实际执行用户自动加入 docker 组（已入组则跳过）"""
+    user = get_current_user()
+    if user == "root":
+        print_warning("检测到 root 直接执行且无 SUDO_USER，跳过 docker 组配置")
+        print_warning("如需普通用户使用 docker，请手动执行: sudo usermod -aG docker <用户名>")
+        return False
+    print_info(f"检查用户 {user} 的 docker 组权限...")
+    if user_in_docker_group(user):
+        print_success(f"用户 {user} 已在 docker 组中，跳过添加")
+        return True
     rc, out, err = run_cmd(["usermod", "-aG", "docker", user], sudo=True)
     if rc == 0:
-        print_success(f"用户 {user} 已添加到 docker 组")
+        print_success(f"用户 {user} 已自动加入 docker 组")
+        print_warning("注意：docker 组权限需注销并重新登录后生效（或先执行 newgrp docker）")
         return True
     print_error(f"添加失败: {err}")
     return False
@@ -258,7 +355,7 @@ def deploy_systemd_service():
 
     project_dir = os.path.dirname(os.path.abspath(__file__))
     backend_dir = os.path.join(project_dir, "backend")
-    current_user = os.environ.get("SUDO_USER", os.getlogin())
+    current_user = get_current_user()
     user_home = os.path.expanduser(f"~{current_user}")
     python3_path = shutil.which("python3") or "/usr/bin/python3"
 
@@ -293,6 +390,12 @@ WantedBy=multi-user.target
             print_success("systemd 服务配置已是最新，跳过写入")
             rc, out, err = run_cmd(["systemctl", "daemon-reload"], sudo=True)
             rc, out, err = run_cmd(["systemctl", "enable", "ros2_web"], sudo=True)
+            # v5.2：配置未变也重启服务，确保本次部署的代码真正生效（供健康探测验证）
+            rc, out, err = run_cmd(["systemctl", "restart", "ros2_web"], sudo=True)
+            if rc != 0:
+                print_error(f"重启服务失败: {err}")
+                return False
+            print_success("服务已重启以加载最新代码")
             return True
 
     import tempfile
@@ -318,7 +421,7 @@ WantedBy=multi-user.target
         print_error(f"启用服务失败: {err}")
         return False
 
-    rc, out, err = run_cmd(["systemctl", "start", "ros2_web"], sudo=True)
+    rc, out, err = run_cmd(["systemctl", "restart", "ros2_web"], sudo=True)
     if rc != 0:
         print_error(f"启动服务失败: {err}")
         return False
@@ -375,6 +478,182 @@ def check_port_status():
         print_warning("端口 8875 未监听")
 
 
+# ---------- v5.2：部署前回归 + 部署后健康探测 + 回滚指引 ----------
+
+def get_server_config():
+    """读取后端 config.json 的 server 节（端口 / SSL 配置），供健康探测使用"""
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               "backend", "config.json")
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            server = json.load(f).get("server", {})
+        return {
+            "port": int(server.get("port", 8875)),
+            "ssl_cert": server.get("ssl_cert", ""),
+            "ssl_key": server.get("ssl_key", ""),
+        }
+    except Exception as e:
+        print_warning(f"读取 config.json 失败（{e}），健康探测使用默认端口 8875")
+        return {"port": 8875, "ssl_cert": "", "ssl_key": ""}
+
+
+def run_unit_tests():
+    """部署前执行后端单元测试回归（T-5.2-02）
+
+    - 使用当前 Python 解释器执行 `python -m pytest backend/tests -q`
+    - 失败即返回 False，调用方须中止部署（阻止带病上线）
+    - pytest 未安装时视为失败并提示（依赖安装步骤已覆盖 requirements.txt）
+    """
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    tests_dir = os.path.join(project_dir, "backend", "tests")
+
+    DEPLOY_REPORT["tests"]["executed"] = True
+    print_info("部署前回归：执行后端单元测试（pytest）...")
+
+    if not os.path.isdir(tests_dir):
+        DEPLOY_REPORT["tests"]["passed"] = False
+        DEPLOY_REPORT["tests"]["summary"] = f"测试目录不存在: {tests_dir}"
+        print_error(DEPLOY_REPORT["tests"]["summary"])
+        return False
+
+    try:
+        # 注意：不传 -q —— pytest.ini 已有 addopts=-q，叠加会升级为 -qq 并抑制统计行
+        result = subprocess.run(
+            [sys.executable, "-m", "pytest", tests_dir, "--no-header"],
+            cwd=project_dir, capture_output=True, text=True, timeout=600
+        )
+    except subprocess.TimeoutExpired:
+        DEPLOY_REPORT["tests"]["passed"] = False
+        DEPLOY_REPORT["tests"]["summary"] = "单元测试执行超时（>10 分钟）"
+        print_error(DEPLOY_REPORT["tests"]["summary"])
+        return False
+    except FileNotFoundError:
+        DEPLOY_REPORT["tests"]["passed"] = False
+        DEPLOY_REPORT["tests"]["summary"] = (
+            f"pytest 不可用（{sys.executable} -m pytest 失败），"
+            f"请先安装: pip3 install pytest pytest-cov"
+        )
+        print_error(DEPLOY_REPORT["tests"]["summary"])
+        return False
+
+    # pytest -q 输出统计行形如 "45 passed in 2.34s" / "2 failed, 43 passed in ..."
+    # 从后往前找第一行含 "passed"/"failed"/"error" 的统计行，避免取到进度点行 [100%]
+    summary = ""
+    for line in reversed((result.stdout or "").strip().splitlines()):
+        line = line.strip()
+        if line and re.search(r"\b(passed|failed|error)\b", line):
+            summary = line
+            break
+    if not summary:
+        summary = (result.stderr or "").strip()[:200] or f"pytest 退出码 {result.returncode}"
+    DEPLOY_REPORT["tests"]["summary"] = summary
+
+    if result.returncode != 0:
+        print_error(f"单元测试未通过（退出码 {result.returncode}）：{summary}")
+        print_error("为阻止带病上线，部署已中止。可修复后重试，或使用 --skip-tests 显式跳过")
+        # 输出失败详情，便于现场定位
+        detail = (result.stdout or "")[-3000:]
+        for line in detail.splitlines():
+            if line.strip():
+                print(f"    {line}")
+        return False
+
+    DEPLOY_REPORT["tests"]["passed"] = True
+    print_success(f"单元测试全部通过：{summary}")
+    return True
+
+
+def _http_get(url, timeout=5):
+    """轻量 HTTP GET 探测，返回 (状态码, 错误信息)"""
+    try:
+        req = urllib.request.Request(url, method="GET",
+                                     headers={"User-Agent": "deploy-healthcheck/5.2"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.status, None
+    except urllib.error.HTTPError as e:
+        # 能拿到 HTTP 状态码说明服务本身在响应（如 307 HTTPS 重定向），视为存活
+        return e.code, None
+    except Exception as e:
+        return None, str(e)
+
+
+def health_check():
+    """部署后健康探测（T-5.2-02）
+
+    依次探测（最多重试 6 次、间隔 5s，覆盖 systemd RestartSec=10 的启动窗口）：
+      1. GET /                      —— 前端入口（HTTP 任意响应码即存活）
+      2. GET /api/system/ping       —— 无鉴权健康端点（要求 200）
+    """
+    DEPLOY_REPORT["health_check"]["executed"] = True
+    print_info("部署后健康探测：/ 与 /api/system/ping ...")
+
+    server = get_server_config()
+    scheme = "https" if (server["ssl_cert"] and server["ssl_key"]) else "http"
+    base_url = f"{scheme}://127.0.0.1:{server['port']}"
+
+    probes = [
+        {"name": f"GET {scheme}://127.0.0.1:{server['port']}/", "url": f"{base_url}/",
+         "expect": "any", "passed": False, "detail": ""},
+        {"name": f"GET {scheme}://127.0.0.1:{server['port']}/api/system/ping",
+         "url": f"{base_url}/api/system/ping", "expect": 200, "passed": False, "detail": ""},
+    ]
+
+    max_attempts, interval = 6, 5
+    for attempt in range(1, max_attempts + 1):
+        pending = [p for p in probes if not p["passed"]]
+        if not pending:
+            break
+        for probe in pending:
+            code, err = _http_get(probe["url"])
+            if code is not None and (probe["expect"] == "any" or code == probe["expect"]):
+                probe["passed"] = True
+                probe["detail"] = f"HTTP {code}"
+            else:
+                probe["detail"] = f"无响应（{err}）" if code is None else f"HTTP {code}（预期 {probe['expect']})"
+        if [p for p in probes if not p["passed"]]:
+            if attempt < max_attempts:
+                print_info(f"  第 {attempt}/{max_attempts} 次探测未全通过，{interval}s 后重试（等待服务启动）...")
+                time.sleep(interval)
+
+    all_passed = all(p["passed"] for p in probes)
+    for probe in probes:
+        status_icon = "✓" if probe["passed"] else "✗"
+        print(f"  {status_icon} {probe['name']} → {probe['detail']}")
+        DEPLOY_REPORT["health_check"]["endpoints"].append(
+            {"name": probe["name"], "passed": probe["passed"], "detail": probe["detail"]}
+        )
+
+    DEPLOY_REPORT["health_check"]["passed"] = all_passed
+    if all_passed:
+        print_success("健康探测全部通过")
+    else:
+        print_error("健康探测失败")
+    return all_passed
+
+
+def print_rollback_guide(reason):
+    """部署失败时的回滚指引（T-5.2-02）
+
+    项目代码由 git 管理，服务由 systemd 管理：
+      - 代码回滚：git reset/checkout 回到上一个可用提交
+      - 服务恢复：systemctl restart ros2_web
+    """
+    print("\n" + "=" * 60)
+    print_error(f"部署失败：{reason}")
+    print("=" * 60)
+    print("回滚步骤：")
+    print("  1. 查看部署前最后一个可用提交：")
+    print("       git log --oneline -5")
+    print("  2. 回滚代码到该提交（保留现场可用 git stash）：")
+    print("       git stash && git reset --hard <上一个可用提交>")
+    print("  3. 重启服务使旧代码生效：")
+    print("       sudo systemctl restart ros2_web")
+    print("  4. 验证服务恢复：")
+    print(f"       curl -fsS http://127.0.0.1:{get_server_config()['port']}/api/system/ping")
+    print("  5. 排查本次失败原因后，修复再重新部署")
+    print("=" * 60)
+
+
 def print_deploy_report():
     print("\n" + "=" * 60)
     print("  部署报告")
@@ -413,6 +692,21 @@ def print_deploy_report():
         for pkg in DEPLOY_REPORT["python_deps"]["failed"]:
             print(f"    ✗ {pkg}")
 
+    print("\n【部署前单元测试回归】")
+    if DEPLOY_REPORT["tests"]["skipped"]:
+        print("  ⚠ 已通过 --skip-tests 显式跳过（留痕）")
+    elif DEPLOY_REPORT["tests"]["executed"]:
+        status_icon = "✓" if DEPLOY_REPORT["tests"]["passed"] else "✗"
+        print(f"  {status_icon} {DEPLOY_REPORT['tests']['summary'] or '（无摘要）'}")
+    else:
+        print("  - 未执行")
+
+    if DEPLOY_REPORT["health_check"]["executed"]:
+        print("\n【部署后健康探测】")
+        for ep in DEPLOY_REPORT["health_check"]["endpoints"]:
+            status_icon = "✓" if ep["passed"] else "✗"
+            print(f"  {status_icon} {ep['name']} → {ep['detail']}")
+
     print("\n【部署步骤状态】")
     for step in DEPLOY_REPORT["steps"]:
         status = "✓" if step["status"] else "✗"
@@ -425,8 +719,8 @@ def print_deploy_report():
         print_warning("  部署部分完成，请检查上述失败项")
     print("=" * 60)
     print("\n访问地址: http://<服务器IP>:8875")
-    print("默认账号: admin / 123456")
-    print("\n注意：Docker 组权限需要重新登录后生效")
+    print("默认账号: admin / Boonray2020!")
+    print("\n注意：Docker 组权限需要重新登录后生效（首次登录后请立即修改默认密码）")
 
 
 def main():
@@ -437,15 +731,16 @@ def main():
                         help="跳过 Python 依赖安装")
     parser.add_argument("--only-deps", action="store_true",
                         help="仅安装 Python 依赖，跳过系统服务部署")
+    parser.add_argument("--skip-tests", action="store_true",
+                        help="跳过部署前单元测试回归（默认执行，跳过时在日志与部署报告中留痕）")
     args = parser.parse_args()
 
     print("=" * 60)
-    print("  Mock Truck 管理工具 - 一键部署脚本 v4.0-decoupled")
+    print("  Mock Truck 管理工具 - 一键部署脚本 v5.2")
     print("=" * 60)
 
-    if os.geteuid() != 0 and not args.only_deps:
-        print_error("需要以 root 权限运行，请使用 sudo")
-        sys.exit(1)
+    # 非 root 运行时提示 sudo 执行（--only-deps 免 sudo），可选择自动拉起
+    ensure_root(args)
 
     # ---------- 系统环境检测与安装 ----------
     if not args.skip_system:
@@ -516,9 +811,27 @@ def main():
     add_user_to_docker_group()
     DEPLOY_REPORT["steps"].append({"name": "配置 Docker 权限", "status": True})
 
+    # ---------- 部署前单元测试回归（v5.2，默认开启） ----------
+    print("\n" + "=" * 60)
+    print("  第五步：部署前单元测试回归")
+    print("=" * 60)
+
+    if args.skip_tests:
+        DEPLOY_REPORT["tests"]["skipped"] = True
+        print_warning("--skip-tests 已指定，跳过部署前单元测试回归（此跳过行为已在部署报告留痕）")
+        DEPLOY_REPORT["steps"].append({"name": "跳过单元测试回归（--skip-tests）", "status": True})
+    else:
+        if not run_unit_tests():
+            print_error("单元测试回归未通过，中止部署（服务仍运行旧代码，无需回滚）")
+            DEPLOY_REPORT["status"] = "failed"
+            DEPLOY_REPORT["steps"].append({"name": "单元测试回归", "status": False})
+            print_deploy_report()
+            sys.exit(1)
+        DEPLOY_REPORT["steps"].append({"name": "单元测试回归", "status": True})
+
     # ---------- 系统服务部署 ----------
     print("\n" + "=" * 60)
-    print("  第五步：部署系统服务")
+    print("  第六步：部署系统服务")
     print("=" * 60)
 
     if not deploy_systemd_service():
@@ -531,12 +844,25 @@ def main():
 
     # ---------- 验证 ----------
     print("\n" + "=" * 60)
-    print("  第六步：验证服务状态")
+    print("  第七步：验证服务状态")
     print("=" * 60)
 
     check_service_status()
     check_port_status()
     DEPLOY_REPORT["steps"].append({"name": "验证服务状态", "status": True})
+
+    # ---------- 部署后健康探测（v5.2） ----------
+    print("\n" + "=" * 60)
+    print("  第八步：部署后健康探测")
+    print("=" * 60)
+
+    if not health_check():
+        DEPLOY_REPORT["status"] = "failed"
+        DEPLOY_REPORT["steps"].append({"name": "部署后健康探测", "status": False})
+        print_rollback_guide("部署后健康探测未通过（/ 或 /api/system/ping 无响应）")
+        print_deploy_report()
+        sys.exit(1)
+    DEPLOY_REPORT["steps"].append({"name": "部署后健康探测", "status": True})
 
     print_deploy_report()
 

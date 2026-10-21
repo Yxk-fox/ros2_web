@@ -18,11 +18,15 @@ class ROS2ScriptGenerator:
     """ROS2 启动脚本生成器，扫描 launch 文件并生成 Docker 启动脚本"""
 
     # 配额常量
-    ADMIN_QUOTA = CONFIG.get("vehicle_limits", {}).get("admin_quota", 10)
-    USER_QUOTA = CONFIG.get("vehicle_limits", {}).get("user_quota", 5)
-    GLOBAL_MAX = CONFIG.get("vehicle_limits", {}).get("global_max", 25)
+    ADMIN_QUOTA = CONFIG.get("vehicle_limits", {}).get("admin_quota", 55)
+    USER_QUOTA = CONFIG.get("vehicle_limits", {}).get("user_quota", 26)
+    GLOBAL_MAX = CONFIG.get("vehicle_limits", {}).get("global_max", 300)
     BASE_VNC_PORT = CONFIG.get("vehicle_limits", {}).get("base_vnc_port", 5900)
     BASE_WEB_PORT = CONFIG.get("vehicle_limits", {}).get("base_web_port", 6080)
+
+    # 不计入车辆配额的 launch 基名（核心仿真 launch，每个工作空间固定一个，
+    # 独立于车辆脚本存在）。总数上限 16 个脚本位 = 15 辆车 + 1 个 simulation_launch。
+    QUOTA_EXEMPT_BASES = {"simulation_launch"}
 
     # 模板文件名（存放在全局 bk 目录，避免被脚本清空逻辑误删）
     TEMPLATE_NAME = "start_docker_template.sh"
@@ -34,6 +38,49 @@ class ROS2ScriptGenerator:
         # 模板始终从管理员全局 bk 目录读取
         admin_bk = os.path.expanduser("~/robotruck_ros2/Docker/bk")
         self.template_path = os.path.join(admin_bk, self.TEMPLATE_NAME)
+
+    # ================================================================
+    # 脚本元信息解析（v5.1 多版本共存）
+    # ================================================================
+
+    @staticmethod
+    def _parse_script_meta(fpath):
+        """解析脚本内的标记行，返回 {"index": int|None, "version": str|None, "launch": str|None}
+
+        - index: ``# VEHICLE_INDEX=N``（旧脚本退回 ROS_DOMAIN_ID / DISPLAY 反推）
+        - version: ``# SCRIPT_VERSION=版本名``（无标记 = 旧版 install 脚本）
+        - launch: ``# SCRIPT_LAUNCH=launch基名``（旧脚本退回按文件名解析）
+        """
+        meta = {}
+        try:
+            with open(fpath, "r", encoding="utf-8") as f:
+                content = f.read()
+        except Exception:
+            return meta
+        m = re.search(r"#\s*VEHICLE_INDEX\s*=\s*(\d+)", content)
+        if m:
+            meta["index"] = int(m.group(1))
+        else:
+            m = re.search(r"ROS_DOMAIN_ID\s*=\s*(\d+)", content)
+            if m and 1 <= int(m.group(1)) <= ROS2ScriptGenerator.GLOBAL_MAX:
+                meta["index"] = int(m.group(1)) - 1
+            else:
+                m = re.search(r"DISPLAY\s*=\s*:(\d+)", content)
+                if m and 1 <= int(m.group(1)) <= ROS2ScriptGenerator.GLOBAL_MAX:
+                    meta["index"] = int(m.group(1)) - 1
+        m = re.search(r"#\s*SCRIPT_VERSION\s*=\s*(\S*)", content)
+        if m:
+            meta["version"] = m.group(1)
+        m = re.search(r"#\s*SCRIPT_LAUNCH\s*=\s*(\S+)", content)
+        if m:
+            meta["launch"] = m.group(1)
+        return meta
+
+    @staticmethod
+    def _version_tag(version):
+        """版本名 → 文件名/容器名安全标签（保留字母数字和 . _ -）"""
+        tag = re.sub(r'[^a-zA-Z0-9._-]', '_', version or '')
+        return tag.strip('._-') or "legacy"
 
     # ================================================================
     # 索引管理
@@ -122,7 +169,7 @@ class ROS2ScriptGenerator:
 
         旧脚本使用动态端口（find_free_port），其运行时占用的端口
         与索引无关，可能导致新脚本按固定映射分配的端口与之冲突。
-        此方法检测 5900-5924 / 6080-6104 范围内被占用的端口，
+        此方法检测 5900-5922 / 6080-6104 范围内被占用的端口，
         反推索引并标记为已用。
         """
         used = set()
@@ -147,10 +194,10 @@ class ROS2ScriptGenerator:
                     if not m:
                         continue
                     host_port = int(m.group(1))
-                    # VNC 端口范围 5900-5924
+                    # VNC 端口范围 5900-5949
                     if cls.BASE_VNC_PORT <= host_port < cls.BASE_VNC_PORT + cls.GLOBAL_MAX:
                         used.add(host_port - cls.BASE_VNC_PORT)
-                    # Web 端口范围 6080-6104
+                    # Web 端口范围 6080-6129
                     if cls.BASE_WEB_PORT <= host_port < cls.BASE_WEB_PORT + cls.GLOBAL_MAX:
                         used.add(host_port - cls.BASE_WEB_PORT)
         except Exception:
@@ -204,17 +251,60 @@ class ROS2ScriptGenerator:
     # ================================================================
 
     @classmethod
-    def _count_scripts_in_dir(cls, scripts_dir):
-        """统计目录中的启动脚本数量（排除模板和批量脚本）"""
+    def _count_scripts_in_dir(cls, scripts_dir, version=None):
+        """统计目录中的启动脚本数量（排除模板、批量脚本和配额豁免的脚本）
+
+        v5.1 多版本共存：version 参数控制统计口径
+        - None: 统计全部版本脚本（全局配额用）
+        - "": 仅统计旧版 install 脚本（无 SCRIPT_VERSION 标记）
+        - "X": 仅统计 SCRIPT_VERSION=X 的脚本
+
+        豁免脚本（如 simulation_launch）由 QUOTA_EXEMPT_BASES 中的 launch 生成，
+        不占用车辆配额；豁免判定优先读脚本内 SCRIPT_LAUNCH 标记，旧脚本退回按文件名解析。
+        """
         if not os.path.isdir(scripts_dir):
             return 0
         count = 0
         for fname in os.listdir(scripts_dir):
-            if fname.startswith("start_docker_") and fname.endswith(".sh"):
-                if fname == cls.TEMPLATE_NAME:
-                    continue
+            if not (fname.startswith("start_docker_") and fname.endswith(".sh")):
+                continue
+            if fname == cls.TEMPLATE_NAME:
+                continue
+            fpath = os.path.join(scripts_dir, fname)
+            meta = cls._parse_script_meta(fpath)
+            launch = meta.get("launch")
+            if not launch:
+                # 旧脚本无标记：按文件名回退解析基名（去掉可能的版本后缀）
+                base = fname[len("start_docker_ros2_"):-len(".sh")]
+                launch = base.rsplit("__", 1)[0] if "__" in base else base
+            if launch in cls.QUOTA_EXEMPT_BASES:
+                continue
+            if version is None or (meta.get("version") or "") == version:
                 count += 1
         return count
+
+    @classmethod
+    def remove_version_scripts(cls, scripts_dir, version=""):
+        """删除指定版本的启动脚本（v5.1：删版本时联动清理；version="" 表示旧版脚本）
+
+        :return: 删除的脚本数量
+        """
+        if not os.path.isdir(scripts_dir):
+            return 0
+        removed = 0
+        for fname in os.listdir(scripts_dir):
+            if not (fname.startswith("start_docker_ros2_") and fname.endswith(".sh")):
+                continue
+            if fname == cls.TEMPLATE_NAME:
+                continue
+            fpath = os.path.join(scripts_dir, fname)
+            if (cls._parse_script_meta(fpath).get("version") or "") == (version or ""):
+                try:
+                    os.remove(fpath)
+                    removed += 1
+                except OSError as e:
+                    logger.warning(f"删除版本脚本失败: {fpath}: {e}")
+        return removed
 
     @classmethod
     def get_global_script_count(cls, base_ws="~/robotruck_ros2"):
@@ -231,16 +321,23 @@ class ROS2ScriptGenerator:
         return total
 
     @classmethod
-    def check_quota(cls, scripts_dir, user_role, new_count):
-        """检查配额，返回 (allowed: bool, message: str)"""
-        current_count = cls._count_scripts_in_dir(scripts_dir)
-        global_count = cls.get_global_script_count()
+    def check_quota(cls, scripts_dir, user_role, new_count, version="", replaced_count=0):
+        """检查配额，返回 (allowed: bool, message: str)
+
+        v5.1：角色配额按当前版本计数（多版本共存时其他版本脚本不占本版本配额，
+        但全局配额仍统计全部版本）。replaced_count 为本次生成将被替换掉的
+        同版本脚本数（重新生成场景不重复计数）。
+        """
+        current_count = cls._count_scripts_in_dir(scripts_dir, version=version)
+        effective_count = max(0, current_count - replaced_count)
+        global_count = max(0, cls.get_global_script_count() - replaced_count)
 
         # 检查角色配额
         role_quota = cls.ADMIN_QUOTA if user_role == "admin" else cls.USER_QUOTA
-        if current_count + new_count > role_quota:
+        if effective_count + new_count > role_quota:
             role_name = "管理员" if user_role == "admin" else "普通用户"
-            return False, f"[{role_name}] 当前已有 {current_count} 辆车，新增 {new_count} 辆后将超出上限（最多 {role_quota} 辆），请删除部分脚本后再生成"
+            ver_label = f"版本 {version}" if version else "旧版 install"
+            return False, f"[{role_name}] {ver_label} 当前已有 {effective_count} 辆车，新增 {new_count} 辆后将超出上限（最多 {role_quota} 辆），请删除部分脚本后再生成"
 
         # 检查全局配额
         if global_count + new_count > cls.GLOBAL_MAX:
@@ -298,8 +395,14 @@ class ROS2ScriptGenerator:
     # 主流程
     # ================================================================
 
+    @staticmethod
+    def _natural_key(text):
+        """自然排序 key：按数字段比较，使 fz_c5 < fz_c9 < fz_c50 < fz_c65"""
+        return [int(part) if part.isdigit() else part.lower()
+                for part in re.split(r'(\d+)', text)]
+
     def get_launch_files(self):
-        """获取 launch 文件列表"""
+        """获取 launch 文件列表（自然序；核心仿真 launch 不生成车辆脚本）"""
         launch_dir = self.cfg["launch_dir"]
         if not os.path.isdir(launch_dir):
             raise RuntimeError(f"ROS2 launch 目录不存在: {launch_dir}")
@@ -308,36 +411,55 @@ class ROS2ScriptGenerator:
             if not f.endswith('.py'):
                 continue
             base = f[:-3]
+            if base in self.QUOTA_EXEMPT_BASES:
+                continue
             safe_base = re.sub(r'[^a-zA-Z0-9_]', '_', base)
             files.append((base, f, safe_base))
+        files.sort(key=lambda lf: self._natural_key(lf[0]))
         if not files:
             raise RuntimeError(f"未在 {launch_dir} 中找到任何 .py launch 文件")
         return files
 
-    def generate(self, port_conflicts=None):
-        """主生成流程：扫描 launch 文件 → 配额检查 → 索引分配 → 生成脚本"""
+    def generate(self, port_conflicts=None, version=None, progress_cb=None):
+        """主生成流程：扫描 launch 文件 → 配额检查 → 索引分配 → 生成脚本
+
+        v5.1 多版本共存：
+        - version: 目标 install 版本（None/"" 表示旧版 install 路径）
+        - 仅清理当前版本的旧脚本，其他版本脚本原样保留（含旧版脚本）
+        - progress_cb(percent, message): 异步联动任务进度回调（0~100）
+        """
+        def _report(pct, msg):
+            if progress_cb:
+                try:
+                    progress_cb(pct, msg)
+                except Exception:
+                    pass
+
+        _report(5, "扫描 launch 文件…")
         launch_files = self.get_launch_files()
         scripts_dir = self.cfg["scripts_dir"]
         os.makedirs(scripts_dir, exist_ok=True)
         os.makedirs(self.cfg["logs_dir"], exist_ok=True)
         os.makedirs(self.cfg["bag_storage"], exist_ok=True)
 
-        # 配额检查
-        allowed, msg = self.check_quota(scripts_dir, self.user_role, len(launch_files))
+        # 配额检查（豁免的 launch 文件不计入新增数量；扣除将被替换的同版本脚本）
+        _report(15, f"发现 {len(launch_files)} 个 launch 文件，检查配额…")
+        billable = [lf for lf in launch_files if lf[0] not in self.QUOTA_EXEMPT_BASES]
+        replaced = self._count_scripts_in_dir(scripts_dir, version=version or "")
+        allowed, msg = self.check_quota(scripts_dir, self.user_role, len(billable),
+                                        version=version or "", replaced_count=replaced)
         if not allowed:
             raise RuntimeError(msg)
 
-        # 清空旧脚本
-        for f in os.listdir(scripts_dir):
-            if f.startswith("start_docker_") and f.endswith(".sh"):
-                if f == self.TEMPLATE_NAME:
-                    continue
-                os.remove(os.path.join(scripts_dir, f))
+        # v5.1：仅清理当前版本的旧脚本（其他版本脚本原样保留）
+        _report(35, "清理当前版本旧脚本…")
+        self.remove_version_scripts(scripts_dir, version or "")
 
         # 分配索引
+        _report(45, "分配端口索引…")
         indices = self.allocate_indices(len(launch_files))
         if len(indices) < len(launch_files):
-            raise RuntimeError(f"可用索引不足：需要 {len(launch_files)} 个，仅剩 {len(indices)} 个（全局上限 {self.GLOBAL_MAX}）")
+            raise RuntimeError(f"可用索引不足：需要 {len(launch_files)} 个，仅剩 {len(indices)} 个（全局上限 {self.GLOBAL_MAX} 个）")
 
         # 确保模板文件存在
         if not os.path.isfile(self.template_path):
@@ -348,19 +470,36 @@ class ROS2ScriptGenerator:
 
         for idx, (base, py_file, safe_base) in enumerate(launch_files):
             vehicle_index = indices[idx]
-            self._write_start_script(base, py_file, safe_base, vehicle_index)
+            self._write_start_script(base, py_file, safe_base, vehicle_index, version)
             identifiers.append(base)
+            _report(50 + int(40 * (idx + 1) / len(launch_files)),
+                    f"生成启动脚本（{idx + 1}/{len(launch_files)}）: {base}")
 
+        _report(95, "生成批量启动/停止脚本…")
         self._write_batch_start(identifiers)
         self._write_batch_stop()
+        _report(100, "脚本生成完成")
         return identifiers, port_warnings
 
-    def _write_start_script(self, base, py_file, safe_base, vehicle_index):
-        """基于模板生成单个启动脚本"""
-        script_path = os.path.join(self.cfg["scripts_dir"], f"start_docker_ros2_{safe_base}.sh")
+    def _write_start_script(self, base, py_file, safe_base, vehicle_index, version=None):
+        """基于模板生成单个启动脚本
+
+        v5.1 多版本共存：
+        - 脚本名带版本后缀: start_docker_ros2_{launch}__{版本标签}.sh（旧版 install 无后缀）
+        - 容器名带版本段: ros2_{owner}_{版本标签}_{launch}（避免不同版本同名 launch 容器互杀）
+        - 注入 SCRIPT_VERSION / SCRIPT_LAUNCH 标记行，供配额统计与版本清理识别
+        """
+        vtag = self._version_tag(version) if version else ""
+        if version:
+            script_path = os.path.join(self.cfg["scripts_dir"], f"start_docker_ros2_{safe_base}__{vtag}.sh")
+        else:
+            script_path = os.path.join(self.cfg["scripts_dir"], f"start_docker_ros2_{safe_base}.sh")
         # 容器名带 owner 段，避免不同用户同名 launch 产生同名容器互相顶替
         owner = self._owner_from_host_ws(self.cfg["host_ws"])
-        container_name = f"ros2_{owner}_{safe_base}"
+        if version:
+            container_name = f"ros2_{owner}_{vtag}_{safe_base}"
+        else:
+            container_name = f"ros2_{owner}_{safe_base}"
 
         ports = self.calc_ports(vehicle_index)
         display_num = vehicle_index + 1
@@ -396,6 +535,14 @@ class ROS2ScriptGenerator:
 
         template = self._read_template()
         content = self._replace_placeholders(template, replacements)
+
+        # v5.1：注入版本标记行（shebang 之后），供配额统计/版本清理/多版本识别
+        markers = f"# SCRIPT_VERSION={version or ''}\n# SCRIPT_LAUNCH={base}\n"
+        shebang = "#!/bin/bash\n"
+        if content.startswith(shebang):
+            content = shebang + markers + content[len(shebang):]
+        else:
+            content = markers + content
 
         with open(script_path, 'w', encoding='utf-8') as f:
             f.write(content)

@@ -18,7 +18,6 @@ from datetime import datetime
 
 from logger import logger
 from services.docker_manager import DockerManager
-from core.workspace import get_user_workspace_paths
 
 
 _bag_sessions: dict = {}
@@ -34,8 +33,8 @@ class DataExportService:
 
     @classmethod
     def _get_bag_storage(cls, current_user: dict, target_user: str = None) -> str:
-        paths = get_user_workspace_paths(current_user, target_user=target_user)
-        bag_storage = paths["bag_storage"]
+        from core.constants import ROS2_DEFAULT
+        bag_storage = ROS2_DEFAULT["bag_storage"]
         os.makedirs(bag_storage, exist_ok=True)
         return bag_storage
 
@@ -142,7 +141,8 @@ class DataExportService:
                     raise RuntimeError(f"容器 '{container_name}' 已有录制任务进行中")
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        bag_dir_name = f"rosbag2_{timestamp}"
+        vehicle_id = cls._extract_vehicle_id(container_name)
+        bag_dir_name = f"rosbag2_{vehicle_id}_{timestamp}" if vehicle_id else f"rosbag2_{timestamp}"
 
         start_cmd = (
             f"source /home/boonray/install/setup.bash && "
@@ -307,18 +307,35 @@ class DataExportService:
             "timestamp": session.get("timestamp"),
         }
 
+    @staticmethod
+    def _extract_vehicle_id(container_name: str) -> str:
+        if not container_name:
+            return ""
+        for prefix in ["ros2_admin_", "ros2_"]:
+            if container_name.startswith(prefix):
+                return container_name[len(prefix):]
+        parts = container_name.split("_")
+        if len(parts) >= 3 and parts[0] == "ros2":
+            return "_".join(parts[2:])
+        return container_name
+
     @classmethod
-    def list_bag_files(cls, current_user: dict, target_user: str = None) -> dict:
+    def list_bag_files(cls, current_user: dict, target_user: str = None,
+                       container_name: str = None) -> dict:
         bag_storage = cls._get_bag_storage(current_user, target_user)
 
         if not os.path.exists(bag_storage):
             return {"success": True, "files": [], "path": bag_storage}
+
+        vehicle_id = cls._extract_vehicle_id(container_name) if container_name else None
 
         files = []
         try:
             for name in sorted(os.listdir(bag_storage)):
                 p = os.path.join(bag_storage, name)
                 if os.path.isfile(p):
+                    if vehicle_id and vehicle_id not in name:
+                        continue
                     st = os.stat(p)
                     files.append({
                         "name": name,
@@ -330,3 +347,39 @@ class DataExportService:
             raise RuntimeError("无权限访问bag目录")
 
         return {"success": True, "files": files, "path": bag_storage}
+
+    @classmethod
+    def delete_bag_files(cls, filenames: list, current_user: dict,
+                         target_user: str = None) -> dict:
+        bag_storage = cls._get_bag_storage(current_user, target_user)
+
+        deleted = []
+        failed = []
+        for fname in filenames:
+            if not fname or os.sep in fname or '/' in fname or '..' in fname:
+                failed.append({"name": fname, "error": "非法文件名"})
+                continue
+
+            full_path = os.path.normpath(os.path.join(bag_storage, fname))
+            if not full_path.startswith(os.path.normpath(bag_storage)):
+                failed.append({"name": fname, "error": "非法路径访问"})
+                continue
+
+            try:
+                if os.path.isfile(full_path):
+                    os.remove(full_path)
+                    deleted.append(fname)
+                    logger.info(f"删除bag文件: {full_path}, user={current_user.get('username')}")
+                else:
+                    failed.append({"name": fname, "error": "文件不存在"})
+            except Exception as e:
+                failed.append({"name": fname, "error": str(e)})
+                logger.error(f"删除bag文件失败: {full_path}, error={e}")
+
+        return {
+            "success": len(deleted) > 0,
+            "deleted": deleted,
+            "failed": failed,
+            "deleted_count": len(deleted),
+            "failed_count": len(failed),
+        }

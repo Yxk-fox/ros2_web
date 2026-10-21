@@ -13,19 +13,19 @@
         <div class="doc-eyebrow">OPERATIONS MANUAL · 一线操作 / 运维人员</div>
         <h1>按钮操作手册</h1>
         <div class="doc-meta">
-            <span>版本：4.0-decoupled</span>
+            <span>版本：v5.0</span>
             <span>适用对象：一线操作 / 运维人员</span>
-            <span>更新：2026 年 8 月</span>
+            <span>更新：2026 年 9 月</span>
         </div>
     </header>
 
     <div class="doc-abstract">
         <div class="abstract-title">摘　要</div>
-        <p>本手册面向一线操作与运维人员，逐一说明 Mock Truck 管理工具各功能面板中按钮的含义、操作步骤、前置条件与注意事项。全文按功能模块组织，涵盖首页、仿真控制、话题与节点、Docker 容器管理、脚本生成与执行、镜像管理、系统监控、系统工具、红绿灯模拟、主题与设置、高级功能（容器增强、脚本重试、监控增强、工单、API 管理、分布式与插件、故障注入）等共二十一个面板。每节均给出操作流程与风险提示，旨在使操作者能够准确、安全地完成日常任务。</p>
+        <p>本手册面向一线操作与运维人员，逐一说明 Mock Truck 管理工具各功能面板中按钮的含义、操作步骤、前置条件与注意事项。全文按功能模块组织，涵盖首页（含安装目录多版本管理）、仿真控制、话题与节点、Docker 容器管理（含数据导出按钮注入）、脚本生成与执行、镜像管理、系统监控、系统工具、红绿灯模拟、主题与设置、高级功能（容器增强、脚本重试、监控增强、工单、数据导出、API 管理、分布式与插件、故障注入）等全部面板。每节均给出操作流程与风险提示，旨在使操作者能够准确、安全地完成日常任务。</p>
     </div>
 
     <div class="doc-keywords">
-        <strong>关键词：</strong>按钮操作；功能面板；操作流程；风险提示；故障排查
+        <strong>关键词：</strong>按钮操作；功能面板；install 版本切换；数据导出；操作流程；风险提示；故障排查
     </div>
 
     <nav class="doc-toc">
@@ -69,18 +69,36 @@
 
     <h2 class="section-title" id="sec-2">二、首页与快速开始</h2>
 
-    <p>首页为登录后默认页面，集中展示欢迎信息、安装目录状态与快速入口。其核心按钮如下。</p>
+    <p>首页为登录后默认页面，集中展示欢迎信息、安装目录管理（v5.0 起含版本切换区）与快速入口。侧边栏顶部同步展示当前 install 版本徽标，无版本时隐藏。其核心按钮如下。</p>
 
-    <h3 class="subsection-title">2.1 安装目录管理</h3>
+    <h3 class="subsection-title">2.1 安装目录管理（含版本切换）</h3>
+
+    <p>v5.0 起，上传的 install 压缩包按压缩包顶层目录名归档为独立版本目录（<code>&lt;工作空间&gt;/&lt;版本名&gt;/install/</code>），首页可下拉切换版本，切换后所有菜单操作（脚本生成、仿真控制、话题节点、工单等）均在所选版本目录下进行。</p>
+
+    <h4 class="sub-subsection-title">2.1.1 版本切换区</h4>
+    <table class="data-table">
+        <thead><tr><th>按钮 / 控件</th><th>作用</th><th>操作说明</th></tr></thead>
+        <tbody>
+            <tr><td>当前版本徽标</td><td>展示当前生效的版本号</td><td>未选择版本时显示“旧版 install”，表示使用兼容的旧版安装目录。</td></tr>
+            <tr><td>版本下拉框</td><td>选择目标版本</td><td>列出该工作空间内全部有效版本；存在旧版 install 目录时额外提供“旧版 install”回退项。</td></tr>
+            <tr><td><span class="btn-demo primary">🔄 切换版本</span></td><td>切换到所选版本</td><td>二次确认后切换，成功后页面在约 1 秒内自动刷新使全局生效。</td></tr>
+            <tr><td><span class="btn-demo danger">🗑 删除</span></td><td>删除指定版本</td><td>二次确认后执行；被删目录自动备份为 <code>&lt;名&gt;.deleted.&lt;时间戳&gt;</code>，不会立即物理删除。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-warn"><span class="note-label">警告：</span>切换版本前已生成的启动脚本内路径是固化的，切换后需重新生成脚本（确认框中有明确提示）。删除当前生效版本时，系统会自动清理 Docker 生成产物并切换到剩余最新版本，无剩余版本时回退旧版。</div>
+    <div class="doc-note"><span class="note-label">注意：</span>管理员视图带“我的工作空间（admin）”用户切换器，可代目标用户查看、切换与删除版本；普通用户传入目标用户参数将被拒绝。</div>
+
+    <h4 class="sub-subsection-title">2.1.2 上传与部署</h4>
     <table class="data-table">
         <thead><tr><th>按钮</th><th>作用</th><th>操作说明</th></tr></thead>
         <tbody>
-            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>重新检测 install 目录状态</td><td>点击后后台扫描安装目录，更新目录是否存在、关键子目录是否齐全等状态展示。</td></tr>
-            <tr><td><span class="btn-demo success">🚀 部署到 bk 空间</span></td><td>将当前 install 目录部署到备份（bk）空间</td><td>仅管理员可见。点击后触发部署流程，用于版本归档与回滚。</td></tr>
-            <tr><td><span class="btn-demo">📜 操作历史 / 回滚</span></td><td>查看部署历史并回滚到历史版本</td><td>仅管理员可见。弹出历史列表，可选择某次记录进行回滚。</td></tr>
+            <tr><td><span class="btn-demo success">📤 上传</span></td><td>上传 install 压缩包</td><td>支持 <code>.zip / .tar.gz / .tgz / .tar.bz2 / .tar</code>，上限 5 GB，分片显示上传进度。成功后自动切换到新版本并整页刷新；同名版本重传时旧目录自动备份（保留最近 2 份）。</td></tr>
+            <tr><td><span class="btn-demo">🔄 刷新</span></td><td>重新检测 install 目录状态</td><td>点击后后台扫描安装目录，更新目录是否存在、关键子目录是否齐全、当前版本与版本列表等状态展示。</td></tr>
+            <tr><td><span class="btn-demo success">创建该版本对应模板</span></td><td>将当前 install 目录内容模板化</td><td>用户可见。点击后触发部署流程，用于版本归档与回滚。</td></tr>
+            <!-- <tr><td><span class="btn-demo">📜 操作历史 / 回滚</span></td><td>查看部署历史并回滚到历史版本</td><td>仅管理员可见。弹出历史列表，可选择某次记录进行回滚。</td></tr> -->
         </tbody>
     </table>
-    <div class="doc-warn"><span class="note-label">警告：</span>回滚操作会覆盖当前 install 目录内容，执行前请确认目标版本正确，必要时先手动备份。</div>
+    <div class="doc-warn"><span class="note-label">警告：</span>回滚操作会覆盖当前 install 目录内容，执行前请确认目标版本正确，必要时先手动备份。上传后若提示“自动切换失败”并附带 <code>ALTER TABLE</code> 字样的 SQL 指引，说明数据库缺少 <code>current_version</code> 列，须由管理员在 Supabase 控制台执行该 SQL（详见第十三章常见问题）。</div>
 
     <h3 class="subsection-title">2.2 快速开始</h3>
     <table class="data-table">
@@ -158,7 +176,7 @@
     </table>
 
     <h3 class="subsection-title">5.2 容器行操作按钮</h3>
-    <p>每行容器提供基础操作与“更多”展开操作两组按钮。</p>
+    <p>自 v4.0.2 起，容器行的全部操作按钮（启动、停止、重启、终端、日志、RVIZ、资源、删除以及数据导出按钮）直接单行排列在操作列中，不再使用“更多”下拉；操作列占据剩余宽度，按钮不换行、不被压缩。</p>
 
     <h4 class="sub-subsection-title">5.2.1 基础按钮</h4>
     <table class="data-table">
@@ -166,11 +184,12 @@
         <tbody>
             <tr><td><span class="btn-demo success">▶ 启动</span></td><td>容器未运行时</td><td>启动该容器。</td></tr>
             <tr><td><span class="btn-demo warn">⏹ 停止</span></td><td>容器运行中</td><td>停止该容器。停止后运行时长自动归零。</td></tr>
+            <tr><td><span class="btn-demo">🔄 重启</span></td><td>任意状态</td><td>重启该容器。install 版本切换后需重启容器使新版本挂载生效。</td></tr>
             <tr><td><span class="btn-demo">✅ 选中</span></td><td>任意状态</td><td>将该容器设为当前操作目标，ROS2 功能依赖此选中项。</td></tr>
         </tbody>
     </table>
 
-    <h4 class="sub-subsection-title">5.2.2 更多操作（展开后）</h4>
+    <h4 class="sub-subsection-title">5.2.2 运维操作按钮</h4>
     <table class="data-table">
         <thead><tr><th>按钮</th><th>作用</th><th>说明</th></tr></thead>
         <tbody>
@@ -179,13 +198,24 @@
             <tr><td><span class="btn-demo">⚙ 资源</span></td><td>动态调整 CPU / 内存</td><td>填写数值后点击 <span class="btn-demo">💾 应用</span>，调用 <code>docker update</code> 即时生效。</td></tr>
             <tr><td><span class="btn-demo primary">🖥 终端</span></td><td>打开普通终端</td><td>ROS2 容器自动 source 环境。</td></tr>
             <tr><td><span class="btn-demo primary">👑 Root</span></td><td>打开 Root 终端</td><td>以 root 身份进入容器终端。</td></tr>
-            <tr><td><span class="btn-demo primary">🖼 可视化</span></td><td>启动可视化</td><td>下拉菜单可选择 VNC 远程桌面或原生 RVIZ（X11 转发），仅 ROS2 运行中容器可见。</td></tr>
+            <tr><td><span class="btn-demo primary">🖼 可视化</span></td><td>启动可视化</td><td>下拉菜单可选择 Foxglove、VNC 远程桌面或原生 RVIZ（X11 转发），仅 ROS2 运行中容器可见。</td></tr>
             <tr><td><span class="btn-demo danger">🗑 删除</span></td><td>删除容器</td><td>需有 Docker 权限，删除前请确认容器可弃。</td></tr>
         </tbody>
     </table>
 
+    <h4 class="sub-subsection-title">5.2.3 数据导出按钮（v4.0 起）</h4>
+    <p>以下三个按钮仅出现在名称含 <code>ros2</code> / <code>humble</code> / <code>foxy</code> 的容器行上（由数据导出模块自动注入），需拥有 <code>data-export</code> 权限：</p>
+    <table class="data-table">
+        <thead><tr><th>按钮</th><th>作用</th><th>操作说明</th></tr></thead>
+        <tbody>
+            <tr><td><span class="btn-demo primary">🗺️ 提取地图</span></td><td>提取容器内高精地图</td><td>弹出 SN 选择框，确认后容器内打包 <code>hdmap_&lt;SN&gt;_&lt;时间戳&gt;.tar.gz</code> 并拷贝到宿主机 bag 目录。</td></tr>
+            <tr><td><span class="btn-demo warn">⏺️ 录制 Bag</span></td><td>启动 / 停止话题录制</td><td>点击启动全话题 mcap 录制（容器内后台执行），按钮变为“停止录制”；同一容器重复启动会被拒绝。</td></tr>
+            <tr><td><span class="btn-demo">📦 下载 Bags</span></td><td>查看并下载录制文件</td><td>弹出 bag 列表，可按车辆筛选、批量删除或逐个下载（浏览器直接下载压缩包）。</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-note"><span class="note-label">注意：</span>停止录制时系统会先温和终止进程（3 秒后仍存活才强制终止），随后自动打包，请耐心等待返回结果后再进行其他操作。</div>
+
     <div class="doc-note"><span class="note-label">注意：</span>“运行时长”列以容器真实启动时间为准，每秒自动刷新。容器停止后该列显示“—”，无需手动清零。</div>
-    <div class="doc-warn"><span class="note-label">警告：</span>同一时刻仅允许展开一行的“更多”操作，展开新行时旧行自动收起。</div>
 
     <h2 class="section-title" id="sec-6">六、脚本生成与仿真车启动</h2>
 
@@ -352,6 +382,18 @@
     </ol>
     <div class="doc-danger"><span class="note-label">危险：</span>故障注入会人为制造异常，仅用于鲁棒性测试。严禁在生产环境或实车运行中注入，否则可能导致任务失败或设备损伤。</div>
 
+    <h3 class="subsection-title">12.12 数据导出（v4.0 起）</h3>
+    <p>数据导出能力以按钮形式注入 Docker 容器列表（详见 5.2.3 节），本面板集中展示数据导出权限与使用统计。hdmap 提取与 bag 录制均要求目标容器处于运行状态且镜像为 ROS2 系列。</p>
+    <table class="data-table">
+        <thead><tr><th>功能</th><th>产物</th><th>存放位置</th></tr></thead>
+        <tbody>
+            <tr><td>提取地图</td><td><code>hdmap_&lt;SN&gt;_&lt;时间戳&gt;.tar.gz</code></td><td>用户 bag 目录（<code>~/robotruck_ros2/&lt;用户&gt;/Docker/bags</code>）</td></tr>
+            <tr><td>录制 Bag</td><td><code>rosbag2_&lt;车号&gt;_&lt;时间戳&gt;.tar.gz</code>（mcap 格式）</td><td>同上，经容器打包后拷贝回宿主机</td></tr>
+            <tr><td>下载 Bags</td><td>浏览器直接下载压缩包</td><td>—</td></tr>
+        </tbody>
+    </table>
+    <div class="doc-note"><span class="note-label">注意：</span>数据导出受 <code>data-export</code> 权限点控制，未授权用户看不到注入按钮；所有导出与删除操作均写入审计日志。</div>
+
     <h2 class="section-title" id="sec-13">十三、常见问题排查</h2>
 
     <table class="data-table">
@@ -393,14 +435,34 @@
                 <td>未选择脚本或镜像未拉取</td>
                 <td>确认已勾选脚本、目标镜像存在且容器已选中。</td>
             </tr>
+            <tr>
+                <td>切换版本后仿真行为仍是旧版本</td>
+                <td>容器尚未重启，新版本未挂载</td>
+                <td>install 版本切换后需重启对应仿真容器，使所选版本挂载到容器内固定路径后生效。</td>
+            </tr>
+            <tr>
+                <td>切换版本后批量启动脚本失败</td>
+                <td>启动脚本内路径为切换前版本所固化</td>
+                <td>切换版本后须重新生成启动脚本（切换确认框有提示），再执行批量启动。</td>
+            </tr>
+            <tr>
+                <td>版本切换报错并提示 ALTER TABLE</td>
+                <td>Supabase 数据库缺少 <code>current_version</code> 列（PGRST204）</td>
+                <td>由管理员在 Supabase 控制台 SQL Editor 执行报错信息中给出的 <code>ALTER TABLE public.users ADD COLUMN IF NOT EXISTS current_version TEXT DEFAULT '';</code>，执行后无需重启服务即可恢复。</td>
+            </tr>
+            <tr>
+                <td>上传的版本未出现在下拉列表</td>
+                <td>版本目录缺少 <code>install/setup.bash</code>，或被识别为备份目录</td>
+                <td>确认压缩包结构包含有效的 install 目录；<code>.deleted / .bak / .replaced</code> 后缀的备份目录不会出现在版本列表中。</td>
+            </tr>
         </tbody>
     </table>
 
     <div class="doc-back"><a href="index.html">← 返回文档中心</a></div>
 
     <footer class="doc-footer">
-        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v4.0-decoupled<br>
-        按钮操作手册　|　最后更新：2026 年 8 月
+        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v5.0<br>
+        按钮操作手册　|　最后更新：2026 年 9 月
     </footer>
 
 </div>

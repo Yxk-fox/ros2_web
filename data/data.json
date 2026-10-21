@@ -27,7 +27,22 @@
         "theme",
         "settings",
         "tickets"
-      ]
+      ],
+      "id": "9e6a273f-ba5c-4d84-b36b-56ec0871be08",
+      "onboarding_completed": true,
+      "onboarding_skipped": true,
+      "current_version": "test_install20261021_x86_ros2_2.0",
+      "password_plain": "",
+      "version_notes": {
+        "test_install20261020_x86_ros2_6.0": "rviz2显示路径",
+        "test_install20261019_x86_ros2_1.0": "rviz显示路径",
+        "install_1020_4.0": "rviz显示路径文锐",
+        "test_install20261021_x86_ros2_2.0": "版本：rviz2显示正常"
+      },
+      "previous_version": {
+        "version": "test_install20261020_x86_ros2_6.0",
+        "switched_at": "2026-10-21T09:51:11"
+      }
     },
     "shijie.guo@boonray.com": {
       "password": "$2b$12$xwGJsx.2urVj2rW1rjrzK.T.xYH4aXyY5p2WqPD/FmmGpYOOutaSe",
@@ -45,8 +60,16 @@
         "tickets",
         "monitor",
         "theme",
-        "tools"
-      ]
+        "tools",
+        "data-export"
+      ],
+      "id": "2d57364e-e871-42d3-b5a7-174518daf713",
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "password_plain": "",
+      "version_notes": {},
+      "previous_version": null
     },
     "honglan.wang@boonray.com": {
       "password": "$2b$12$6u6CFId4s5XDBh.EfvoekOKUpCG039sIjluhABRJ3JMjI7s/CQh2a",
@@ -64,8 +87,16 @@
         "tickets",
         "monitor",
         "theme",
-        "tools"
-      ]
+        "tools",
+        "data-export"
+      ],
+      "id": "9d4b26cc-d20a-43ed-a1b6-db1c9179d113",
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "password_plain": "",
+      "version_notes": {},
+      "previous_version": null
     },
     "wenrui.cao@boonray.com": {
       "password": "$2b$12$Se7nkri1xPPX3uJivwCBEONW.lKnNxSMTr6NKrvXTx.dAU4P74lgm",
@@ -83,8 +114,16 @@
         "tickets",
         "monitor",
         "theme",
-        "tools"
-      ]
+        "tools",
+        "data-export"
+      ],
+      "id": "a287a17c-1b3d-4a21-883d-1f487786674f",
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "password_plain": "",
+      "version_notes": {},
+      "previous_version": null
     },
     "ning.jiao@boonray.com": {
       "password": "$2b$12$mUIhIV/ycTtf8OBF8o1LU.BFOKaOCvgCmZh1L/Mj2oLfYyecjETUm",
@@ -102,8 +141,16 @@
         "tickets",
         "monitor",
         "theme",
-        "tools"
-      ]
+        "tools",
+        "data-export"
+      ],
+      "id": "31ee8429-9195-4680-954e-ba59c74ee15d",
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "password_plain": "",
+      "version_notes": {},
+      "previous_version": null
     },
     "yuyong.cao@boonray.com": {
       "password": "$2b$12$DOMIQKmy6iKQ5C19FQ/6duANheTWglam/IdrKvUQs9uciaZxNVlMm",
@@ -121,8 +168,212 @@
         "tickets",
         "monitor",
         "theme",
-        "tools"
-      ]
+        "tools",
+        "data-export"
+      ],
+      "id": "e2a9c12f-3950-4971-af16-8783102db2a7",
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "password_plain": "",
+      "version_notes": {},
+      "previous_version": null
+    },
+    "e2e_1790858072@test.com": {
+      "id": "153334a4-800a-4bd6-909c-ffe6ab99be83",
+      "username": "e2e_1790858072",
+      "password": "$2b$12$.HTUy8ryv.xNTxLPRfQEceqtWyB88B9m4GlYHk2RGjqK1cUvgWniK",
+      "password_plain": "Test1234!",
+      "role": "user",
+      "created_at": "2026-10-01T12:34:32.501284",
+      "permissions": [
+        "welcome",
+        "scripts",
+        "docker",
+        "images",
+        "traffic",
+        "topics",
+        "nodes",
+        "tools",
+        "tickets",
+        "monitor",
+        "theme",
+        "data-export"
+      ],
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "home_folder_path": "/home/fox/robotruck_ros2/e2e_1790858072",
+      "version_notes": {},
+      "previous_version": null
+    },
+    "e2e_1790858094@test.com": {
+      "id": "64eb8684-b3c3-4437-8231-d02f8d5d54e3",
+      "username": "e2e_1790858094",
+      "password": "$2b$12$wTquKxwfZxbFfHEHmr/S7uL.2iJ4mkyEeB7YWJECbv5Qcjj3hQdPa",
+      "password_plain": "Test1234!",
+      "role": "user",
+      "created_at": "2026-10-01T12:34:54.568254",
+      "permissions": [
+        "welcome",
+        "scripts",
+        "docker",
+        "images",
+        "traffic",
+        "topics",
+        "nodes",
+        "tools",
+        "tickets",
+        "monitor",
+        "theme",
+        "data-export"
+      ],
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "home_folder_path": "/home/fox/robotruck_ros2/e2e_1790858094",
+      "version_notes": {},
+      "previous_version": null
+    },
+    "e2e_1790858191@test.com": {
+      "id": "b69cd88a-4f8e-46f8-9133-dda2d64f23d3",
+      "username": "e2e_1790858191",
+      "password": "$2b$12$MDGbFurv9f2OYzCfgQc5p.dgxel7LPZAwEkr9VOMBBdt96BUZFBpO",
+      "password_plain": "Test1234!",
+      "role": "user",
+      "created_at": "2026-10-01T12:36:31.430166",
+      "permissions": [
+        "welcome",
+        "scripts",
+        "docker",
+        "images",
+        "traffic",
+        "topics",
+        "nodes",
+        "tools",
+        "tickets",
+        "monitor",
+        "theme",
+        "data-export"
+      ],
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "home_folder_path": "/home/fox/robotruck_ros2/e2e_1790858191",
+      "version_notes": {},
+      "previous_version": null
+    },
+    "e2e_1790858212@test.com": {
+      "id": "fd5d3a0b-124a-4a46-9155-bfa605944ca9",
+      "username": "e2e_1790858212",
+      "password": "$2b$12$aUUTqv4wRm.W8ee6rkFRz.12s7Q1CzS9Z1J2ityS6thxL/wXcKDHm",
+      "password_plain": "Test1234!",
+      "role": "user",
+      "created_at": "2026-10-01T12:36:52.824255",
+      "permissions": [
+        "welcome",
+        "scripts",
+        "docker",
+        "images",
+        "traffic",
+        "topics",
+        "nodes",
+        "tools",
+        "tickets",
+        "monitor",
+        "theme",
+        "data-export"
+      ],
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "home_folder_path": "/home/fox/robotruck_ros2/e2e_1790858212",
+      "version_notes": {},
+      "previous_version": null
+    },
+    "e2e_1790858383@test.com": {
+      "id": "42d7137f-3a56-488c-a5ea-3571b13a52c1",
+      "username": "e2e_1790858383",
+      "password": "$2b$12$LXSflkNwhW2EnDujp3NoeO6.5H7AufRMPFPlNcrmOJvU0hyzCByc.",
+      "password_plain": "Test1234!",
+      "role": "user",
+      "created_at": "2026-10-01T12:39:43.934083",
+      "permissions": [
+        "welcome",
+        "scripts",
+        "docker",
+        "images",
+        "traffic",
+        "topics",
+        "nodes",
+        "tools",
+        "tickets",
+        "monitor",
+        "theme",
+        "data-export"
+      ],
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "home_folder_path": "/home/fox/robotruck_ros2/e2e_1790858383",
+      "version_notes": {},
+      "previous_version": null
+    },
+    "e2e_1790858413@test.com": {
+      "id": "e28819b8-d3ae-46d5-8e64-5c6f84bc262d",
+      "username": "e2e_1790858413",
+      "password": "$2b$12$XA/nM1iNTb.l5EKdJ9TcMuOgC8IhNYQeoUeIu1BBrUsoPpXdQC6b.",
+      "password_plain": "Test1234!",
+      "role": "user",
+      "created_at": "2026-10-01T12:40:13.639704",
+      "permissions": [
+        "welcome",
+        "scripts",
+        "docker",
+        "images",
+        "traffic",
+        "topics",
+        "nodes",
+        "tools",
+        "tickets",
+        "monitor",
+        "theme",
+        "data-export"
+      ],
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "home_folder_path": "/home/fox/robotruck_ros2/e2e_1790858413",
+      "version_notes": {},
+      "previous_version": null
+    },
+    "e2e_1790858508@test.com": {
+      "id": "15e6a32d-8c64-488e-9257-9280e6a7b91d",
+      "username": "e2e_1790858508",
+      "password": "$2b$12$EjopdDOMz8DzDTO7hFdEA.f4UDS97A89af.RBY4.rr0fXLF0l/R5u",
+      "password_plain": "Test1234!",
+      "role": "user",
+      "created_at": "2026-10-01T12:41:49.172012",
+      "permissions": [
+        "welcome",
+        "scripts",
+        "docker",
+        "images",
+        "traffic",
+        "topics",
+        "nodes",
+        "tools",
+        "tickets",
+        "monitor",
+        "theme",
+        "data-export"
+      ],
+      "onboarding_completed": false,
+      "onboarding_skipped": false,
+      "current_version": "",
+      "home_folder_path": "/home/fox/robotruck_ros2/e2e_1790858508",
+      "version_notes": {},
+      "previous_version": null
     }
   },
   "configs": {}

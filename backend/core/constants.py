@@ -36,6 +36,8 @@ if JWT_SECRET == "CHANGE_ME_TO_A_RANDOM_SECRET":
 JWT_ALGORITHM = SECURITY.get("jwt_algorithm", "HS256")
 JWT_EXPIRE_MINUTES = SECURITY.get("jwt_expire_minutes", 1440)
 BCRYPT_ROUNDS = SECURITY.get("bcrypt_rounds", 12)
+# 用户管理：管理员「重置密码」按钮统一重置为该默认密码（明文存储于 users.password_plain，供管理员查看）
+DEFAULT_RESET_PASSWORD = SECURITY.get("default_reset_password", "B@@nray!123")
 RATE_LIMIT_ENABLED = SECURITY.get("rate_limit_enabled", False)
 RATE_LIMIT_REQUESTS = SECURITY.get("rate_limit_requests", 5)
 RATE_LIMIT_PERIOD = SECURITY.get("rate_limit_period", 60)
@@ -91,13 +93,14 @@ VISUALIZATION_METHODS = VISUALIZATION_CONFIG.get("methods", {})
 ws_clients = []
 traffic_sender = None
 timer_traffic_sender = None
+manual_timer_traffic_sender = None
 
 # 审计日志目录
 os.makedirs(os.path.dirname(AUDIT_LOG_FILE), exist_ok=True)
 
 # 面板权限列表
 ALL_PANELS = [
-    "welcome", "scripts", "advanced-scripts", "vehicle", "docker", "advanced-docker",
+    "welcome", "scripts", "advanced-scripts", "docker", "advanced-docker",
     "images", "traffic", "advanced-fault", "tools", "monitor",
     "simulation", "topics", "nodes", "services", "actions",
     "advanced-extend",

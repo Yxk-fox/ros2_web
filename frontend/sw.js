@@ -10,8 +10,8 @@ Service Worker —— F5 刷新加速
   5. 用户文档中心（/doc/）→ 不拦截，交给后端静态文件处理
 ============================================================ */
 
-var CACHE_NAME = 'ros2-web-v3';
-var STATIC_CACHE = 'ros2-web-static-v3';
+var CACHE_NAME = 'ros2-web-v4';
+var STATIC_CACHE = 'ros2-web-static-v4';
 
 // 需要缓存优先的静态资源路径前缀
 var STATIC_PREFIXES = ['/css/', '/js/', '/images/', '/fonts/', '/ui/'];
@@ -25,7 +25,14 @@ self.addEventListener('install', function(event) {
                 '/css/sj_style.css',
                 '/css/onboarding.css',
                 '/js/sj_script.js',
-                '/js/panels/terminal.js'
+                '/js/sj_validators.js',
+                '/js/onboarding.js',
+                '/js/panels/data_export.js',
+                '/js/panels/terminal.js',
+                '/js/panels/vehicles.js',
+                '/js/panels/monitor_panel.js',
+                '/js/panels/traffic_batch.js',
+                '/js/panels/advanced.js'
             ]).catch(function(err) {
                 // 预缓存失败不阻止 SW 安装
                 console.warn('[SW] 预缓存部分失败:', err);

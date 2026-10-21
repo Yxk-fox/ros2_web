@@ -1,7 +1,7 @@
 {
   "server": {
-    "host": "0.0.0.0",
-    "port": 8875,
+    "host": "127.0.0.1",
+    "port": 18765,
     "ssl_key": "",
     "ssl_cert": ""
   },
@@ -41,7 +41,7 @@
     "audit_log_file": "~/ros2_web/audit.log"
   },
   "database": {
-    "type": "supabase",
+    "type": "json",
     "path": "/home/fox/ros2_web/data/data.json",
     "audit_path": "~/ros2_web/data/audit_logs.json",
     "url": "https://ihbhbnkjaljajvgescih.supabase.co",
@@ -74,13 +74,20 @@
     ]
   },
   "cloud_env": {
-    "current_env": "139",
-    "current_ip": "139.196.75.44",
+    "current_env": "106",
+    "current_ip": "106.14.223.60",
     "ip_map": {
       "106": "106.14.223.60",
       "139": "139.196.75.44",
       "192": "192.168.9.252"
     }
+  },
+  "vehicle_limits": {
+    "admin_quota": 55,
+    "user_quota": 26,
+    "global_max": 300,
+    "base_vnc_port": 5900,
+    "base_web_port": 6080
   },
   "visualization": {
     "default_method": "foxglove",

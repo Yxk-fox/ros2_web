@@ -13,19 +13,19 @@
         <div class="doc-eyebrow">DEVELOPMENT GUIDE · 技术开发团队</div>
         <h1>技术开发文档</h1>
         <div class="doc-meta">
-            <span>版本：4.0-decoupled</span>
+            <span>版本：v5.0</span>
             <span>适用对象：技术开发团队</span>
-            <span>更新：2026 年 8 月</span>
+            <span>更新：2026 年 9 月</span>
         </div>
     </header>
 
     <div class="doc-abstract">
         <div class="abstract-title">摘　要</div>
-        <p>本文档面向技术开发团队，系统阐述 Mock Truck 管理工具的架构设计、目录约定、API 清单、数据库适配、安全机制与二次开发规范。后端采用 core、database、services、routers 四层解耦架构，入口文件 <code>app.py</code> 仅承担装配职责；前端为独立静态文件，通过 REST API 与 WebSocket 与后端交互。本文档旨在为维护者提供足够的设计上下文，使其能够安全地进行功能扩展与缺陷修复。</p>
+        <p>本文档面向技术开发团队，系统阐述 Mock Truck 管理工具的架构设计、目录约定、API 清单、install 多版本管理机制、数据库适配、安全机制与二次开发规范。后端采用 core、database、services、routers 四层解耦架构，入口文件 <code>app.py</code> 仅承担装配职责；v4.0 引入数据导出模块（hdmap 提取与 bag 录制）；v5.0 实现 install 安装目录多版本上传、切换与删除，所有 ROS2 / Docker / 脚本操作均在所选版本目录下执行。前端为独立静态文件，通过 REST API 与 WebSocket 与后端交互。本文档旨在为维护者提供足够的设计上下文，使其能够安全地进行功能扩展与缺陷修复。</p>
     </div>
 
     <div class="doc-keywords">
-        <strong>关键词：</strong>四层解耦架构；FastAPI；WebSocket；REST API；数据库适配；安全机制；二次开发
+        <strong>关键词：</strong>四层解耦架构；FastAPI；WebSocket；REST API；install 多版本管理；数据导出；数据库适配；安全机制；二次开发
     </div>
 
     <nav class="doc-toc">
@@ -37,15 +37,16 @@
             <li><a href="#sec-4">四、REST API 清单</a></li>
             <li><a href="#sec-5">五、WebSocket 通信</a></li>
             <li><a href="#sec-6">六、数据库适配层</a></li>
-            <li><a href="#sec-7">七、安全机制</a></li>
-            <li><a href="#sec-8">八、二次开发规范</a></li>
-            <li><a href="#sec-9">九、部署与运维</a></li>
+            <li><a href="#sec-7">七、install 多版本管理机制</a></li>
+            <li><a href="#sec-8">八、安全机制</a></li>
+            <li><a href="#sec-9">九、二次开发规范</a></li>
+            <li><a href="#sec-10">十、部署与运维</a></li>
         </ol>
     </nav>
 
     <h2 class="section-title" id="sec-1">一、系统架构总览</h2>
 
-    <p>系统采用前后端分离架构。后端基于 FastAPI 提供 REST API 与 WebSocket，封装 Docker、ROS2 与系统资源的调用；前端为纯静态站点，通过 <code>apiGet</code> / <code>apiPost</code> 封装访问后端。鉴权使用 JWT，数据库支持 JSON 文件与 Supabase 两种适配器，可按配置切换。</p>
+    <p>系统采用前后端分离架构。后端基于 FastAPI 提供 REST API 与 WebSocket，封装 Docker、ROS2 与系统资源的调用；前端为纯静态站点，通过 <code>apiGet</code> / <code>apiPost</code> 封装访问后端。鉴权使用 JWT，数据库支持 JSON 文件与 Supabase 两种适配器，可按配置切换。v5.0 起，install 安装目录支持多版本并行存储与按用户切换，版本选择状态持久化于用户表 <code>current_version</code> 字段，核心业务（脚本生成、仿真控制、话题节点）通过统一的路径解析函数获取当前生效的 install 目录。</p>
 
     <figure>
         <pre><code>┌──────────────┐     HTTP/WS      ┌──────────────────────────┐
@@ -94,8 +95,10 @@
     <ul>
         <li><strong>DockerManager</strong>：封装 <code>docker ps / inspect / kill / update / exec</code> 等，统一带 <code>sudo</code> 前缀（<code>DOCKER_PREFIX</code>）。</li>
         <li><strong>SystemMonitor</strong>：采集 CPU、内存、GPU（nvidia-smi）与进程列表。</li>
-        <li><strong>ROS2ScriptGenerator</strong>：依据 launch 文件生成启动脚本。</li>
+        <li><strong>ROS2ScriptGenerator</strong>：依据 launch 文件生成启动脚本，脚本内 install 路径随当前版本目录动态生成。</li>
         <li><strong>TrafficLightSender / TimerTrafficLightSender</strong>：红绿灯模拟的云端联动与计时模式。</li>
+        <li><strong>InstallVersionManager（v5.0）</strong>：install 版本目录的识别、归档、上传解压、切换与删除，含备份目录自愈。</li>
+        <li><strong>DataExporter（v4.0）</strong>：hdmap 地图提取、ros2 bag 全话题录制与打包下载。</li>
     </ul>
 
     <h2 class="section-title" id="sec-3">三、前端结构</h2>
@@ -110,6 +113,8 @@
             <tr><td><code>js/sj_validators.js</code></td><td>输入校验</td></tr>
             <tr><td><code>js/onboarding.js</code></td><td>新手引导</td></tr>
             <tr><td><code>js/panels/terminal.js</code></td><td>终端面板（基于 WebSocket）</td></tr>
+            <tr><td><code>js/panels/data-export.js</code>（v4.0）</td><td>数据导出模块：向 ROS2 容器行注入“提取地图 / 录制 Bag / 下载 Bags”按钮（MutationObserver 监听容器列表变化）</td></tr>
+            <tr><td><code>js/panels/versions.js</code>（v5.0）</td><td>install 版本切换区：版本下拉、切换、删除、上传进度与侧边栏版本徽标</td></tr>
             <tr><td><code>css/sj_style.css</code> / <code>onboarding.css</code></td><td>样式</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td></tr>
         </tbody>
@@ -137,6 +142,13 @@
             <tr><td><code>POST /api/docker/container/{id}/restart</code></td><td>重启容器</td></tr>
             <tr><td><code>GET /api/docker/container/{id}/logs</code></td><td>容器日志</td></tr>
             <tr><td><code>POST /api/docker/container/{id}/exec</code></td><td>容器内执行命令</td></tr>
+            <tr><td rowspan="4">版本管理（v5.0）</td><td><code>GET /api/install/versions</code></td><td>版本列表与当前版本（含旧版回退项）</td></tr>
+            <tr><td><code>POST /api/install/versions/switch</code></td><td>切换当前版本（持久化至用户表）</td></tr>
+            <tr><td><code>POST /api/install/versions/upload</code></td><td>分片上传压缩包并归档为新版本</td></tr>
+            <tr><td><code>DELETE /api/install/versions/{name}</code></td><td>删除版本（目录改名为备份，不物理删除）</td></tr>
+            <tr><td rowspan="3">数据导出（v4.0）</td><td><code>POST /api/export/hdmap</code></td><td>提取容器内高精地图并拷贝到宿主机</td></tr>
+            <tr><td><code>POST /api/export/bag/start | stop</code></td><td>启动 / 停止全话题 mcap 录制</td></tr>
+            <tr><td><code>GET /api/export/bags | DELETE /api/export/bags/{id}</code></td><td>bag 列表查询、下载与删除</td></tr>
             <tr><td>脚本</td><td><code>POST /api/scripts/generate</code></td><td>生成启动脚本</td></tr>
             <tr><td>工单</td><td><code>GET/POST /api/tickets</code></td><td>工单 CRUD</td></tr>
             <tr><td>故障</td><td><code>POST /api/fault/inject</code></td><td>故障注入</td></tr>
@@ -169,23 +181,61 @@
 
     <p>初始化脚本见 <code>data/ros2_web_supabase.sql</code>。切换方式由 <code>DB_TYPE</code> 常量决定。</p>
 
-    <h2 class="section-title" id="sec-7">七、安全机制</h2>
+    <h3 class="subsection-title">6.1 用户表新增字段（v5.0）</h3>
+    <p>为持久化每用户的 install 版本选择，<code>users</code> 表新增 <code>current_version</code> 字段（TEXT，默认空串，空表示使用旧版 install 目录）：</p>
+    <pre><code>ALTER TABLE public.users ADD COLUMN IF NOT EXISTS current_version TEXT DEFAULT '';</code></pre>
+    <p>两个适配器均已同步支持该字段：JSON 适配器在启动时自动为存量用户补齐字段；Supabase 适配器在字段缺失时（PostgREST 返回 <code>PGRST204</code>）会打印上述修复 SQL 并自动降级为“会话级记忆”（切换当次可用，重启丢失），字段补齐后无需重启服务即自动恢复持久化。</p>
+
+    <h2 class="section-title" id="sec-7">七、install 多版本管理机制（v5.0）</h2>
+
+    <h3 class="subsection-title">7.1 目录结构</h3>
+    <p>每个用户工作空间下的版本目录按“压缩包顶层目录名”归档：</p>
+    <pre><code>&lt;工作空间&gt;/                          如 ~/robotruck_ros2/&lt;用户&gt;/
+├── install/                          旧版安装目录（兼容保留，可回退）
+├── &lt;版本A&gt;/
+│   └── install/
+│       ├── setup.bash
+│       └── ...
+├── &lt;版本B&gt;/
+│   └── install/
+├── &lt;版本B&gt;.bak.&lt;时间戳&gt;/            重传同名版本时的自动备份（保留最近 2 份）
+└── &lt;版本&gt;.deleted.&lt;时间戳&gt;/          删除版本时的软删除目录（不物理删除）</code></pre>
+    <p>版本识别规则：工作空间下任何包含 <code>install/setup.bash</code> 的一级子目录视为有效版本；带 <code>.deleted / .bak / .replaced</code> 后缀的目录视为备份，不计入版本列表。</p>
+
+    <h3 class="subsection-title">7.2 切换流程</h3>
+    <ol class="doc-steps">
+        <li>前端提交目标版本名，后端校验该版本目录有效。</li>
+        <li>更新用户表 <code>current_version</code> 字段（持久化）。</li>
+        <li>返回新版本信息，前端约 1 秒后整页刷新，侧边栏徽标与所有面板重新加载。</li>
+        <li>此后脚本生成、仿真控制、话题节点等接口统一按 <code>&lt;工作空间&gt;/&lt;版本&gt;/install/</code> 解析路径。</li>
+    </ol>
+    <div class="doc-warn"><span class="note-label">警告：</span>已生成的启动脚本内路径是固化的，切换版本不会自动改写历史脚本；删除当前生效版本时，系统自动清理 Docker 生成产物并切换到剩余最新版本，无剩余版本则回退旧版 install。</div>
+
+    <h3 class="subsection-title">7.3 上传归档流程</h3>
+    <ol class="doc-steps">
+        <li>前端分片上传压缩包（<code>.zip / .tar.gz / .tgz / .tar.bz2 / .tar</code>，上限 5 GB）至服务端临时目录。</li>
+        <li>解压后按顶层目录名归档为版本目录；同名版本先改名备份（<code>.replaced</code> 后缀，保留最近 2 份）。</li>
+        <li>校验 <code>install/setup.bash</code> 存在后自动切换到新版本并清理临时文件。</li>
+        <li>审计日志记录上传人、版本名与文件大小。</li>
+    </ol>
+
+    <h2 class="section-title" id="sec-8">八、安全机制</h2>
 
     <ul>
         <li><strong>JWT 鉴权</strong>：HS256，默认 1 天有效期，记住我可延至 7/15/30 天。</li>
         <li><strong>密码哈希</strong>：bcrypt，轮数可配（默认 12）。</li>
         <li><strong>速率限制</strong>：基于 <code>slowapi</code>，登录注册默认 5 次 / 分钟。</li>
         <li><strong>命令清洗</strong>：<code>sanitize_command</code> 对容器内执行命令做白名单过滤（可配）。</li>
-        <li><strong>权限校验</strong>：<code>require_permission</code> / <code>require_admin</code> 依赖注入。</li>
-        <li><strong>审计日志</strong>：登录、容器操作、用户管理等写入审计库，可查询与清理。</li>
-        <li><strong>资源隔离</strong>：普通用户仅可见与操作自有资源，<code>_check_container_access</code> 校验归属。</li>
+        <li><strong>权限校验</strong>：<code>require_permission</code> / <code>require_admin</code> 依赖注入；数据导出受 <code>data-export</code> 权限点控制。</li>
+        <li><strong>审计日志</strong>：登录、容器操作、用户管理、版本切换与删除、数据导出等写入审计库，可查询与清理。</li>
+        <li><strong>资源隔离</strong>：普通用户仅可见与操作自有资源，<code>_check_container_access</code> 校验归属；版本管理中普通用户不可指定 <code>target_user</code>，仅管理员可代他人操作。</li>
     </ul>
 
     <div class="doc-warn"><span class="note-label">警告：</span>修改安全相关逻辑（JWT 密钥、命令白名单、权限点）须充分回归测试，避免引入越权或命令注入风险。</div>
 
-    <h2 class="section-title" id="sec-8">八、二次开发规范</h2>
+    <h2 class="section-title" id="sec-9">九、二次开发规范</h2>
 
-    <h3 class="subsection-title">8.1 新增 API</h3>
+    <h3 class="subsection-title">9.1 新增 API</h3>
     <ol class="doc-steps">
         <li>在 <code>routers/api.py</code> 中新增路由函数，使用 <code>@router.get/post</code> 装饰器。</li>
         <li>按需注入 <code>get_current_user</code> / <code>require_permission</code> / <code>require_admin</code>。</li>
@@ -194,7 +244,7 @@
         <li>关键操作写入审计日志（<code>db.add_audit_log</code>）。</li>
     </ol>
 
-    <h3 class="subsection-title">8.2 新增前端面板</h3>
+    <h3 class="subsection-title">9.2 新增前端面板</h3>
     <ol class="doc-steps">
         <li>在 <code>index.html</code> 增加 <code>&lt;div class="panel" id="panel-xxx"&gt;</code>。</li>
         <li>在导航栏增加对应 <code>nav-item</code>，<code>data-panel</code> 指向新面板。</li>
@@ -202,7 +252,7 @@
         <li>需要权限控制的按钮加 <code>admin-only</code> 类或运行时判断 <code>hasPermission</code>。</li>
     </ol>
 
-    <h3 class="subsection-title">8.3 编码约定</h3>
+    <h3 class="subsection-title">9.3 编码约定</h3>
     <ul>
         <li>Python 遵循 PEP 8，类型注解齐全；前端兼容老浏览器，使用 ES5 兼容写法（<code>var</code>、函数表达式）。</li>
         <li>新增常量集中到 <code>constants.py</code>，避免散落硬编码。</li>
@@ -210,9 +260,21 @@
         <li>涉及时间的展示一律以后端权威时间为准，前端不得自维护本地时钟态。</li>
     </ul>
 
-    <h2 class="section-title" id="sec-9">九、部署与运维</h2>
+    <h2 class="section-title" id="sec-10">十、部署与运维</h2>
 
-    <p>部署脚本 <code>deploy.py</code> 支持 <code>--skip-system</code> / <code>--skip-deps</code> / <code>--only-deps</code> 参数，可批量检查并安装依赖、生成 systemd 服务。依赖清单见 <code>redame/requirements.txt</code>。</p>
+    <p>部署脚本 <code>deploy.py</code> 支持 <code>--skip-system</code> / <code>--skip-deps</code> / <code>--only-deps</code> 参数，可批量检查并安装依赖、生成 systemd 服务。依赖清单见 <code>redame/requirements.txt</code>。脚本已适配所有服务器，换机器、换用户名均无需修改任何内容。</p>
+
+    <h3 class="subsection-title">10.1 跨服务器自动适配</h3>
+    <ul>
+        <li><strong>用户名自动获取</strong>：按 <code>SUDO_USER</code>（sudo 执行时的真实用户）→ <code>LOGNAME</code> / <code>USER</code> / <code>USERNAME</code> 环境变量 → <code>getpass.getuser()</code> 兜底的顺序解析。不使用 <code>os.getlogin()</code>，因其依赖控制终端，在 systemd / cron / 无 tty 的 ssh 环境下会抛 <code>OSError</code>。</li>
+        <li><strong>路径自动推导</strong>：项目目录基于脚本所在位置推导，用户家目录由用户名解析，Python 解释器经 <code>shutil.which("python3")</code> 定位，无任何硬编码。</li>
+        <li><strong>docker 组自动配置</strong>：部署时自动检测执行用户是否已在 <code>docker</code> 组（<code>id -nG</code> 校验，<code>/etc/group</code> 兜底），未入组则自动执行 <code>usermod -aG docker &lt;用户&gt;</code>；已入组自动跳过。加入后需重新登录生效。</li>
+    </ul>
+
+    <h3 class="subsection-title">10.2 sudo 权限提示</h3>
+    <p>未加 <code>sudo</code> 直接运行 <code>python3 deploy.py</code> 时，脚本不会静默失败，而是给出明确指引：提示使用 <code>sudo python3 deploy.py</code> 重新执行（sudo 将提示输入当前用户密码），并支持输入 <code>y</code> 由脚本自动以 sudo 重新拉起自身继续部署。<code>--only-deps</code> 模式仅安装 Python 依赖，可免 sudo 运行。</p>
+
+    <div class="doc-note"><span class="note-label">注意：</span>systemd 服务以实际执行用户（sudo 前的真实用户）身份运行，日志与数据目录归属自动正确。直接以 root 身份执行（无 SUDO_USER）时，脚本会跳过 docker 组配置并给出手动处理指引。</div>
 
     <ul>
         <li>服务默认监听 <code>0.0.0.0:8875</code>，CORS 通过 <code>config.json</code> 配置。</li>
@@ -223,7 +285,6 @@
     <div class="doc-references">
         <div class="ref-title">参 考 文 献</div>
         <ol>
-            <li>项目内 <code>redame/README.txt</code>，v4.0-decoupled 解耦架构说明。</li>
             <li>FastAPI 官方文档：依赖注入、安全、WebSocket。</li>
             <li>Docker 官方文档：<code>docker inspect</code> 与 <code>State.StartedAt</code> 字段。</li>
             <li>Supabase Python 客户端文档。</li>
@@ -233,8 +294,8 @@
     <div class="doc-back"><a href="index.html">← 返回文档中心</a></div>
 
     <footer class="doc-footer">
-        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v4.0-decoupled<br>
-        技术开发文档　|　最后更新：2026 年 8 月
+        版权所有 © 上海伯镭科技有限公司　|　Mock Truck 管理工具 v5.0<br>
+        技术开发文档　|　最后更新：2026 年 9 月
     </footer>
 
 </div>

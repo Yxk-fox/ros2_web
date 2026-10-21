@@ -12,7 +12,7 @@
 
 from typing import Optional
 import os
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -37,6 +37,11 @@ class BagRecordRequest(BaseModel):
 
 class BagStopRequest(BaseModel):
     container_name: str
+    target_user: Optional[str] = None
+
+
+class BagDeleteRequest(BaseModel):
+    filenames: list
     target_user: Optional[str] = None
 
 
@@ -140,13 +145,62 @@ async def get_bag_status(
 
 @router.get("/api/data-export/bag/list")
 async def list_bag_files(
+    container_name: Optional[str] = None,
     target_user: Optional[str] = None,
     current_user: dict = Depends(require_permission('data-export'))
 ):
     try:
-        return DataExportService.list_bag_files(current_user, target_user)
+        logger.debug(f"列出bag文件: container={container_name}, user={current_user.get('username')}")
+        return DataExportService.list_bag_files(current_user, target_user, container_name)
     except Exception as e:
         logger.error(f"列出bag文件失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.api_route("/api/data-export/bag/delete", methods=["POST", "DELETE"])
+async def delete_bag_files(
+    request: Request,
+    filenames_param: Optional[str] = None,
+    current_user: dict = Depends(require_permission('data-export'))
+):
+    try:
+        filenames = []
+        target_user = None
+
+        if request.method == "POST":
+            data = await request.json()
+            filenames = data.get("filenames", [])
+            target_user = data.get("target_user")
+        else:
+            if filenames_param:
+                import json as _json
+                try:
+                    filenames = _json.loads(filenames_param)
+                except Exception:
+                    filenames = [f.strip() for f in filenames_param.split(",") if f.strip()]
+            if not filenames:
+                try:
+                    data = await request.json()
+                    filenames = data.get("filenames", [])
+                    target_user = data.get("target_user")
+                except Exception:
+                    pass
+
+        if not filenames:
+            raise HTTPException(status_code=400, detail="未指定要删除的文件")
+        result = DataExportService.delete_bag_files(
+            filenames=filenames,
+            current_user=current_user,
+            target_user=target_user
+        )
+        target = target_user or current_user.get("username", "")
+        db.add_audit_log(current_user["username"], "delete_bag_files",
+                         f"files={filenames} target={target}")
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"删除bag文件失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

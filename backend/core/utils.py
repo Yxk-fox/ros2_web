@@ -11,6 +11,7 @@ import glob
 import shutil
 import socket
 import subprocess
+import time
 import zipfile
 import tarfile
 import tempfile
@@ -184,10 +185,22 @@ def generate_files(root_dir: str, user_input: str, log_callback, sim_dir: str = 
     return True
 
 def run_ros2_cmd(cmd: List[str], timeout: int = 10) -> tuple:
-    """在宿主机上执行 ROS2 命令"""
+    """在宿主机上执行 ROS2 命令
+
+    v5.0：宿主机环境跟随管理员当前选择的版本（版本感知的 setup.bash）
+    """
     env = os.environ.copy()
-    if os.path.exists(SETUP_BASH):
-        full_cmd = f"source {SETUP_BASH} && " + " ".join(cmd)
+    setup_bash = SETUP_BASH
+    try:
+        # 优先使用管理员当前生效版本的 setup.bash；解析失败时回退默认配置
+        from core.workspace import get_admin_install_dir
+        active_setup = os.path.join(get_admin_install_dir(), "setup.bash")
+        if os.path.isfile(active_setup):
+            setup_bash = active_setup
+    except Exception:
+        pass
+    if os.path.exists(setup_bash):
+        full_cmd = f"source {setup_bash} && " + " ".join(cmd)
         shell_cmd = ["bash", "-c", full_cmd]
     else:
         shell_cmd = cmd
@@ -369,6 +382,116 @@ def extract_and_flatten(tmp_path: str, host_install: str):
                 tf.extractall(host_install)
     else:
         raise ValueError("不支持的压缩包格式，仅支持 zip / tar / tar.gz")
+
+
+def extract_versioned_install(tmp_path: str, host_ws: str, fallback_version: str) -> str:
+    """v5.0 版本化解压：将压缩包解压为 <host_ws>/<版本名>/install/ 目录结构
+
+    版本名来源（按优先级）：
+    1. 压缩包顶层唯一目录且其内包含 install/ → 顶层目录名（如 test_install20260904_x86_ros2_5.0）
+    2. 顶层唯一目录且其内直接为 install 内容（含 setup.bash）→ 压缩包文件名
+    3. 顶层直接为 install/ → 压缩包文件名
+    4. 顶层直接为 install 内容（含 setup.bash）→ 压缩包文件名，自动包一层 install/
+
+    同名版本已存在时，旧目录备份为 <host_ws>/<版本名>.replaced.<时间戳>（最多保留2个）
+
+    :return: 实际生效的版本名
+    :raises ValueError: 压缩包内无法识别 install 结构
+    """
+    from core.workspace import sanitize_version_name, is_valid_version_name, VERSION_RESERVED_NAMES
+
+    # 先完整解压到临时目录，识别结构后再落位
+    with tempfile.TemporaryDirectory(prefix="vinstall_") as extract_dir:
+        if zipfile.is_zipfile(tmp_path):
+            with zipfile.ZipFile(tmp_path, 'r') as zf:
+                zf.extractall(extract_dir)
+        elif tarfile.is_tarfile(tmp_path):
+            with tarfile.open(tmp_path, 'r') as tf:
+                tf.extractall(extract_dir)
+        else:
+            raise ValueError("不支持的压缩包格式，仅支持 zip / tar / tar.gz")
+
+        top_entries = [e for e in os.listdir(extract_dir) if not e.startswith('.')]
+        if not top_entries:
+            raise ValueError("压缩包为空")
+
+        src_install = None          # 指向 install 目录本身
+        wrap_src = False            # True 表示 src_install 为 install 内容需包裹
+        version_name = None
+
+        def _looks_like_install(d: str) -> bool:
+            return os.path.isfile(os.path.join(d, "setup.bash"))
+
+        if len(top_entries) == 1 and os.path.isdir(os.path.join(extract_dir, top_entries[0])):
+            top = top_entries[0]
+            top_dir = os.path.join(extract_dir, top)
+            inner_install = os.path.join(top_dir, "install")
+            if os.path.isdir(inner_install):
+                # 结构：X/install/... → 版本名 = X
+                version_name = top
+                src_install = inner_install
+            elif _looks_like_install(top_dir):
+                # 结构：X/setup.bash（X 即 install 内容）→ 版本名 = 压缩包文件名
+                version_name = fallback_version
+                src_install = top_dir
+                wrap_src = True
+            else:
+                raise ValueError(f"压缩包顶层目录 {top} 内未找到 install 目录或 setup.bash，无法识别安装结构")
+        elif "install" in top_entries and os.path.isdir(os.path.join(extract_dir, "install")):
+            # 结构：install/... → 版本名 = 压缩包文件名
+            version_name = fallback_version
+            src_install = os.path.join(extract_dir, "install")
+        elif _looks_like_install(extract_dir):
+            # 结构：setup.bash 直接位于顶层 → 版本名 = 压缩包文件名，包一层 install/
+            version_name = fallback_version
+            src_install = extract_dir
+            wrap_src = True
+        else:
+            raise ValueError("压缩包内未找到 install 目录或 setup.bash，无法识别安装结构")
+
+        version_name = sanitize_version_name(version_name)
+        if not version_name:
+            version_name = sanitize_version_name(fallback_version) or "install_version"
+        if not is_valid_version_name(version_name) or version_name in VERSION_RESERVED_NAMES:
+            raise ValueError(f"无效的版本目录名: {version_name}")
+
+        version_dir = os.path.join(os.path.expanduser(host_ws), version_name)
+        dest_install = os.path.join(version_dir, "install")
+
+        # 同名版本已存在 → 备份旧版本目录（保留最近2个 .replaced.*）
+        if os.path.exists(version_dir):
+            ts = time.strftime("%Y%m%d_%H%M%S")
+            backup_dir = f"{version_dir}.replaced.{ts}"
+            os.makedirs(os.path.dirname(backup_dir), exist_ok=True)
+            shutil.move(version_dir, backup_dir)
+            _prune_backups(f"{version_name}.replaced.", os.path.dirname(backup_dir), keep=2)
+
+        os.makedirs(version_dir, exist_ok=True)
+        if wrap_src:
+            shutil.copytree(src_install, dest_install)
+        else:
+            shutil.move(src_install, dest_install)
+
+        # 校验 setup.bash 是否存在
+        if not os.path.isfile(os.path.join(dest_install, "setup.bash")):
+            raise ValueError("解压后的 install 目录中缺少 setup.bash，请确认压缩包内容")
+
+        return version_name
+
+
+def _prune_backups(prefix: str, parent_dir: str, keep: int = 2):
+    """清理指定前缀的备份目录，仅保留最近 keep 个"""
+    try:
+        backups = sorted(
+            [e for e in os.listdir(parent_dir) if e.startswith(prefix)],
+            reverse=True,
+        )
+        for old in backups[keep:]:
+            old_path = os.path.join(parent_dir, old)
+            if os.path.isdir(old_path):
+                shutil.rmtree(old_path, ignore_errors=True)
+    except Exception:
+        pass
 
 
 def _safe_copy2(src: str, dst: str):

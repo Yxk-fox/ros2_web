@@ -40,6 +40,19 @@ ALTER TABLE public.users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '[]'
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password   TEXT DEFAULT '';
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS onboarding_skipped   BOOLEAN DEFAULT false;
+-- v5.0：install 版本选择（空字符串 = 未选择，回退旧版 <home>/install 目录）
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS current_version TEXT DEFAULT '';
+-- v5.1：版本备注（{版本名: 备注文本} JSONB，前端"安装目录管理"卡片编辑）
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS version_notes JSONB DEFAULT '{}'::jsonb;
+-- v5.1：回滚记录（{"version": ..., "switched_at": ...} JSONB，NULL = 暂无可回滚版本）
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS previous_version JSONB DEFAULT NULL;
+
+-- 旧数据回填（幂等）：已存在 users 表但列为 NULL 时补默认值
+UPDATE public.users SET version_notes = '{}'::jsonb WHERE version_notes IS NULL;
+UPDATE public.users SET previous_version = NULL WHERE previous_version IS NULL;
+
+-- 刷新 PostgREST schema cache（新列立即可见；Supabase 通常自动刷新，此处兜底）
+NOTIFY pgrst, 'reload schema';
 
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users (email);
@@ -243,7 +256,7 @@ INSERT INTO public.users (id, email, username, home_folder_path, role, permissio
 VALUES (
     '13f53708-62b9-407d-a4eb-1c1c3bc43f2b',
     'admin', 'admin', '~/robotruck_ros2', 'admin',
-    '["welcome","scripts","advanced-scripts","vehicle","docker","advanced-docker","images","traffic","advanced-fault","batch","tools","simulation","topics","nodes","services","actions","advanced-env","advanced-extend","advanced-global","monitor","advanced-monitor","theme","settings"]'::jsonb,
+    '["welcome","scripts","advanced-scripts","docker","advanced-docker","images","traffic","advanced-fault","batch","tools","simulation","topics","nodes","services","actions","advanced-env","advanced-extend","advanced-global","monitor","advanced-monitor","theme","settings"]'::jsonb,
     '$2b$12$JCHjdliHgg9kN84WzR7RHewl.LYBUEAHT8OEsVMGuW8XSMooIaKXa',
     '2026-06-21 10:04:27.975851+00', '2026-07-16 08:37:59.873076+00'
 )
@@ -260,11 +273,11 @@ ON CONFLICT (email) DO UPDATE SET
 --           邮箱 @ 前的 . 替换为 _（与服务器实际目录、Web 注册创建路径一致）
 INSERT INTO public.users (id, email, username, home_folder_path, role, permissions, password, created_at, updated_at)
 VALUES
-    ('608056f4-b196-4d1f-9a93-498de70e546d', 'shijie.guo@boonray.com',  'shijie_guo',  '~/robotruck_ros2/shijie_guo',  'user', '["welcome","scripts","vehicle","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-21 11:12:07.256708+00', '2026-07-16 08:39:54.286196+00'),
-    ('717de141-1362-4f40-8a1c-b86ec3468a65', 'ning.jiao@boonray.com',   'ning_jiao',   '~/robotruck_ros2/ning_jiao',   'user', '["welcome","scripts","vehicle","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-22 13:17:57.899983+00', '2026-07-16 08:16:43.018728+00'),
-    ('fd94eb73-c5cc-45d1-8e97-86cb89ce3403', 'honglan.wang@boonray.com','honglan_wang','~/robotruck_ros2/honglan_wang','user', '["welcome","scripts","vehicle","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-22 13:15:53.547720+00', '2026-07-16 08:16:43.018728+00'),
-    ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'wenrui.cao@boonray.com',  'wenrui_cao',  '~/robotruck_ros2/wenrui_cao',  'user', '["welcome","scripts","vehicle","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-22 13:17:35.213183+00', '2026-07-16 08:16:43.018728+00'),
-    ('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'yuyong.cao@boonray.com', 'yuyong_cao',  '~/robotruck_ros2/yuyong_cao',  'user', '["welcome","scripts","vehicle","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-23 08:10:30.654037+00', '2026-07-16 08:16:43.018728+00')
+    ('608056f4-b196-4d1f-9a93-498de70e546d', 'shijie.guo@boonray.com',  'shijie_guo',  '~/robotruck_ros2/shijie_guo',  'user', '["welcome","scripts","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-21 11:12:07.256708+00', '2026-07-16 08:39:54.286196+00'),
+    ('717de141-1362-4f40-8a1c-b86ec3468a65', 'ning.jiao@boonray.com',   'ning_jiao',   '~/robotruck_ros2/ning_jiao',   'user', '["welcome","scripts","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-22 13:17:57.899983+00', '2026-07-16 08:16:43.018728+00'),
+    ('fd94eb73-c5cc-45d1-8e97-86cb89ce3403', 'honglan.wang@boonray.com','honglan_wang','~/robotruck_ros2/honglan_wang','user', '["welcome","scripts","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-22 13:15:53.547720+00', '2026-07-16 08:16:43.018728+00'),
+    ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'wenrui.cao@boonray.com',  'wenrui_cao',  '~/robotruck_ros2/wenrui_cao',  'user', '["welcome","scripts","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-22 13:17:35.213183+00', '2026-07-16 08:16:43.018728+00'),
+    ('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'yuyong.cao@boonray.com', 'yuyong_cao',  '~/robotruck_ros2/yuyong_cao',  'user', '["welcome","scripts","docker","traffic","advanced-fault","batch","tools","simulation","topics","nodes","theme"]'::jsonb, '$2b$12$KrTpSJ3/QBse56f0HH0T3uFsGfSOf45nwoUxxJrgRJAHCAR3NYhkC', '2026-06-23 08:10:30.654037+00', '2026-07-16 08:16:43.018728+00')
 ON CONFLICT (email) DO UPDATE SET
     username         = EXCLUDED.username,
     home_folder_path = EXCLUDED.home_folder_path,

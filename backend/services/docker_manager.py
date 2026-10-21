@@ -27,7 +27,7 @@ class DockerManager:
 
     @classmethod
     def list_containers(cls, running_only=True, filter_name=None, filter_image=None):
-        """列出 Docker 容器"""
+        """列出 Docker 容器（filter_name 支持前缀匹配与 ! 前缀排除）"""
         fmt = "{{.Names}}\t{{.Status}}\t{{.Image}}\t{{.CreatedAt}}"
         cmd = DOCKER_PREFIX.split() + ["docker", "ps"] + ([] if running_only else ["-a"]) + ["--format", fmt]
         rc, out, _ = cls.run_cmd(cmd)
@@ -40,8 +40,14 @@ class DockerManager:
             parts = line.split('\t')
             if len(parts) >= 4:
                 name, status, image, created = parts[0], parts[1], parts[2], parts[3]
-                if filter_name and not name.startswith(filter_name):
-                    continue
+                if filter_name:
+                    if filter_name.startswith('!'):
+                        # ★★★ 修复：按名称排除（旧逻辑按镜像排除时，镜像为未打标签ID的
+                        # ros2 容器会被错误归入"其他容器"）
+                        if name.startswith(filter_name[1:]):
+                            continue
+                    elif not name.startswith(filter_name):
+                        continue
                 if filter_image:
                     if filter_image.startswith('!'):
                         exclude_image = filter_image[1:]
@@ -51,6 +57,50 @@ class DockerManager:
                         if filter_image not in image:
                             continue
                 containers.append({"name": name, "status": status, "image": image, "created": created})
+        return containers
+
+    @classmethod
+    def list_containers_detailed(cls, running_only=True, filter_name=None, filter_image=None):
+        """单次 docker ps 批量获取容器详情（ID/名称/状态/镜像/创建时间/云IP label）
+
+        ★★★ 性能优化：合并原先 list_containers + 单独的 ID/label 查询两次子进程调用为一次，
+        避免每次容器列表刷新执行多个 docker 子进程。
+        """
+        fmt = "{{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}\t{{.CreatedAt}}\t{{.Label \"ros2.cloud_ip\"}}"
+        cmd = DOCKER_PREFIX.split() + ["docker", "ps"] + ([] if running_only else ["-a"]) + ["--format", fmt]
+        rc, out, err = cls.run_cmd(cmd)
+        if rc != 0:
+            logger.warning(f"docker ps 批量获取容器详情失败: {err[:200]}")
+            return []
+        containers = []
+        for line in out.split('\n'):
+            if not line.strip():
+                continue
+            parts = line.split('\t')
+            if len(parts) < 5:
+                continue
+            cid, name, status, image, created = parts[0], parts[1], parts[2], parts[3], parts[4]
+            cloud_ip = parts[5] if len(parts) >= 6 and parts[5] and parts[5] != "<no value>" else ""
+            if filter_name:
+                if filter_name.startswith('!'):
+                    if name.startswith(filter_name[1:]):
+                        continue
+                elif not name.startswith(filter_name):
+                    continue
+            if filter_image:
+                if filter_image.startswith('!'):
+                    if filter_image[1:] in image:
+                        continue
+                elif filter_image not in image:
+                    continue
+            containers.append({
+                "id": cid[:12],
+                "name": name,
+                "status": status,
+                "image": image,
+                "created": created,
+                "cloud_ip": cloud_ip,
+            })
         return containers
 
     @classmethod
@@ -145,9 +195,11 @@ class DockerManager:
         if not tar_path.endswith('.tar') and not tar_path.endswith('.tgz'):
             return -1, "", "仅支持 .tar 或 .tgz 文件"
         size = os.path.getsize(tar_path)
-        if size > 5 * 1024**3:
-            return -1, "", "文件大小超过 5GB 限制"
-        return cls.run_cmd(cls._docker("load", "-i", tar_path))
+        if size > 10 * 1024**3:
+            return -1, "", "文件大小超过 10GB 限制"
+        # 大镜像导入耗时较长（GB 级可能需要数分钟），超时放宽到 10 分钟，
+        # 避免默认 30 秒超时导致导入被中断
+        return cls.run_cmd(cls._docker("load", "-i", tar_path), timeout=600)
 
     @classmethod
     def remove_image(cls, image_name):

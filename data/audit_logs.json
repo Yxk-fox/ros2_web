@@ -8554,5 +8554,3257 @@
     "username": "admin",
     "action": "login_success",
     "details": "登录成功"
+  },
+  {
+    "timestamp": "2026-10-01T12:34:32.501622",
+    "username": "e2e_1790858072@test.com",
+    "action": "register",
+    "details": "新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/e2e_1790858072"
+  },
+  {
+    "timestamp": "2026-10-01T12:34:32.773134",
+    "username": "e2e_1790858072@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:34:33.378384",
+    "username": "e2e_1790858072@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:34:33.661828",
+    "username": "e2e_1790858072@test.com",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:34:54.568600",
+    "username": "e2e_1790858094@test.com",
+    "action": "register",
+    "details": "新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/e2e_1790858094"
+  },
+  {
+    "timestamp": "2026-10-01T12:34:54.824140",
+    "username": "e2e_1790858094@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:35:27.635381",
+    "username": "e2e_1790858094@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:35:27.884003",
+    "username": "e2e_1790858094@test.com",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:36:31.430605",
+    "username": "e2e_1790858191@test.com",
+    "action": "register",
+    "details": "新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/e2e_1790858191"
+  },
+  {
+    "timestamp": "2026-10-01T12:36:31.698905",
+    "username": "e2e_1790858191@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:36:52.824662",
+    "username": "e2e_1790858212@test.com",
+    "action": "register",
+    "details": "新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/e2e_1790858212"
+  },
+  {
+    "timestamp": "2026-10-01T12:36:53.108025",
+    "username": "e2e_1790858212@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:37:04.471266",
+    "username": "e2e_1790858191@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:37:04.738785",
+    "username": "e2e_1790858191@test.com",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:37:25.873212",
+    "username": "e2e_1790858212@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:37:26.134534",
+    "username": "e2e_1790858212@test.com",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:39:43.934528",
+    "username": "e2e_1790858383@test.com",
+    "action": "register",
+    "details": "新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/e2e_1790858383"
+  },
+  {
+    "timestamp": "2026-10-01T12:39:44.193522",
+    "username": "e2e_1790858383@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:39:44.668619",
+    "username": "e2e_1790858383@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:39:44.935602",
+    "username": "e2e_1790858383@test.com",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:40:13.640102",
+    "username": "e2e_1790858413@test.com",
+    "action": "register",
+    "details": "新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/e2e_1790858413"
+  },
+  {
+    "timestamp": "2026-10-01T12:40:13.892828",
+    "username": "e2e_1790858413@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:40:14.382338",
+    "username": "e2e_1790858413@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:40:14.646180",
+    "username": "e2e_1790858413@test.com",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:41:49.172460",
+    "username": "e2e_1790858508@test.com",
+    "action": "register",
+    "details": "新用户注册，角色 user，工作目录: /home/fox/robotruck_ros2/e2e_1790858508"
+  },
+  {
+    "timestamp": "2026-10-01T12:41:49.432491",
+    "username": "e2e_1790858508@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:41:49.910256",
+    "username": "e2e_1790858508@test.com",
+    "action": "login_success",
+    "details": "登录成功, token有效1天"
+  },
+  {
+    "timestamp": "2026-10-01T12:41:50.167186",
+    "username": "e2e_1790858508@test.com",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:46:19.043966",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-01T12:51:19.502677",
+    "username": "admin",
+    "action": "login_failed",
+    "details": "用户名或密码错误"
+  },
+  {
+    "timestamp": "2026-10-01T12:54:19.170128",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-01T12:54:24.000880",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-01T12:54:39.331602",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-01T12:54:54.022157",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T01:38:12.666263",
+    "username": "admin",
+    "action": "login_success",
+    "details": "登录成功, token有效7天"
+  },
+  {
+    "timestamp": "2026-10-09T01:38:12.704147",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T02:13:44.579761",
+    "username": "admin",
+    "action": "login_success",
+    "details": "登录成功, token有效7天"
+  },
+  {
+    "timestamp": "2026-10-09T02:13:44.787251",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T02:13:44.965346",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T02:14:14.842754",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T02:14:42.166222",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 68 个脚本"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:13.397805",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:15.185683",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:17.063979",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:18.019368",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:33.701583",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:40.631655",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "36 scripts, version=test_install20260922_x86_ros2_4.0"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:48.069610",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T02:23:51.537356",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T02:24:03.763188",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T02:24:17.138464",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T02:46:51.942270",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T04:48:21.208950",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T05:13:07.895068",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T05:13:21.794496",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T05:13:37.962230",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T05:46:37.661452",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T05:47:07.719852",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-09T07:45:36.578188",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-09T09:06:18.945538",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-10T01:31:48.553135",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-10T01:31:52.920573",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-10T01:32:22.991583",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-10T01:32:28.821451",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 38 个脚本"
+  },
+  {
+    "timestamp": "2026-10-10T01:32:30.959387",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "36 scripts, version=test_install20260922_x86_ros2_4.0"
+  },
+  {
+    "timestamp": "2026-10-10T01:32:40.564909",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 192 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-10T01:32:40.623575",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=192.168.9.252 target=self"
+  },
+  {
+    "timestamp": "2026-10-10T01:33:11.068614",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_s_g02__test_install20260922_x86_ros2_4.0.sh"
+  },
+  {
+    "timestamp": "2026-10-10T01:33:32.049350",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20260922_x86_ros2_4.0_s_g02"
+  },
+  {
+    "timestamp": "2026-10-10T01:34:42.618864",
+    "username": "admin",
+    "action": "update_truck_config",
+    "details": "trucks_g02.yaml: {'start_x': 140.51596069335938, 'start_y': 2369.330078125, 'start_yaw': -79.70938678393766}"
+  },
+  {
+    "timestamp": "2026-10-10T01:35:29.425259",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_s_g02__test_install20260922_x86_ros2_4.0.sh"
+  },
+  {
+    "timestamp": "2026-10-10T01:36:39.358602",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20260922_x86_ros2_4.0_s_g02"
+  },
+  {
+    "timestamp": "2026-10-10T01:37:30.886682",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-10T01:38:02.463611",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_s_g02__test_install20260922_x86_ros2_4.0.sh"
+  },
+  {
+    "timestamp": "2026-10-10T01:38:06.752338",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-10T02:17:04.733141",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "1 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-10T02:17:27.439499",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-10T03:51:49.628044",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-10T03:51:53.416645",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "0 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-10T03:57:34.331246",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-10T03:57:49.760063",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-10T03:58:04.398381",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-10T05:33:11.319299",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-10T05:33:41.371635",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-10T06:01:54.457334",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-10T06:02:01.043657",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-10T06:02:01.105588",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-10T06:02:23.664731",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_s_g02__test_install20260922_x86_ros2_4.0.sh"
+  },
+  {
+    "timestamp": "2026-10-10T06:02:54.119502",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_test_whl_004__test_install20260922_x86_ros2_4.0.sh"
+  },
+  {
+    "timestamp": "2026-10-10T06:03:03.856569",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20260922_x86_ros2_4.0_s_g02"
+  },
+  {
+    "timestamp": "2026-10-10T06:04:03.197189",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20260922_x86_ros2_4.0_test_whl_004"
+  },
+  {
+    "timestamp": "2026-10-10T06:04:25.470016",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_test_whl_004__test_install20260922_x86_ros2_4.0.sh"
+  },
+  {
+    "timestamp": "2026-10-10T06:14:55.003158",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20260922_x86_ros2_4.0_test_whl_004"
+  },
+  {
+    "timestamp": "2026-10-10T06:15:19.952915",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T01:55:18.463724",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T01:55:54.479553",
+    "username": "admin",
+    "action": "install_version_switch",
+    "details": "target=admin, version=(旧版install), scripts=36, task_id=e588eea9a497412ab5184ea422f6b155"
+  },
+  {
+    "timestamp": "2026-10-12T01:55:56.470850",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T01:56:18.535323",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T02:09:17.927739",
+    "username": "admin",
+    "action": "install_upload",
+    "details": "size=307425043, version=test_install20261012_x86_ros2_1.0, target=self, auto_switched=True"
+  },
+  {
+    "timestamp": "2026-10-12T02:09:19.845282",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T02:09:24.607995",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261012_100924_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-12T02:09:28.929210",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261012_100928_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-12T02:09:38.018505",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T02:47:57.929453",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T02:49:28.000090",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T03:34:51.189651",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T05:15:41.775667",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T05:16:37.565385",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T05:16:45.612292",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261012_131645_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-12T05:16:48.294012",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261012_131648_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:17.131878",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c50 -> fz_c50"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:21.321759",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c51 -> fz_c51"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:23.304974",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c52 -> fz_c52"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:26.298185",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c53 -> fz_c53"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:28.957934",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c54 -> fz_c54"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:31.295660",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c55 -> fz_c55"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:34.689658",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c56 -> fz_c56"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:37.722683",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c57 -> fz_c57"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:40.293687",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c58 -> fz_c58"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:42.888009",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c59 -> fz_c59"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:46.319774",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c60 -> fz_c60"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:48.664679",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c61 -> fz_c61"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:50.836534",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c62 -> fz_c62"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:52.725349",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c63 -> fz_c63"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:54.452415",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c64 -> fz_c64"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:56.387842",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c65 -> fz_c65"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:58.158332",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c66 -> fz_c66"
+  },
+  {
+    "timestamp": "2026-10-12T05:19:59.975347",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c67 -> fz_c67"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:03.586434",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c68 -> fz_c68"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:05.588370",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c69 -> fz_c69"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:08.968620",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c70 -> fz_c70"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:11.272667",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c71 -> fz_c71"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:15.063470",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c72 -> fz_c72"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:17.398514",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c73 -> fz_c73"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:19.287222",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c74 -> fz_c74"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:21.849424",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c75 -> fz_c75"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:24.499313",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c76 -> fz_c76"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:26.235300",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c77 -> fz_c77"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:28.147396",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c78 -> fz_c78"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:30.137665",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c79 -> fz_c79"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:32.152177",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c80 -> fz_c80"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:35.371900",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:35.427287",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:36.421030",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:36.476270",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:40.301115",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 74 个脚本"
+  },
+  {
+    "timestamp": "2026-10-12T05:20:41.477153",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "32 scripts, version=test_install20261012_x86_ros2_1.0"
+  },
+  {
+    "timestamp": "2026-10-12T05:21:06.493355",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "2 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-12T05:22:36.166908",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "29 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-12T05:29:18.507240",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c51"
+  },
+  {
+    "timestamp": "2026-10-12T05:29:19.360230",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c78"
+  },
+  {
+    "timestamp": "2026-10-12T05:29:20.159632",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c77"
+  },
+  {
+    "timestamp": "2026-10-12T05:29:22.514702",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c52"
+  },
+  {
+    "timestamp": "2026-10-12T05:29:24.666922",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c54"
+  },
+  {
+    "timestamp": "2026-10-12T05:31:31.471070",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c63"
+  },
+  {
+    "timestamp": "2026-10-12T05:45:05.026237",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T05:58:31.251411",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T06:03:42.866142",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T06:03:55.784511",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "25 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-12T06:07:48.052357",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T06:25:22.197873",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T06:25:56.727822",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "10 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-12T06:26:58.025942",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T06:32:44.898308",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "10 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-12T06:41:34.233097",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c62"
+  },
+  {
+    "timestamp": "2026-10-12T06:55:47.003071",
+    "username": "admin",
+    "action": "container_exec",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c80 -> ros2 topic echo /localization/localization_data --once"
+  },
+  {
+    "timestamp": "2026-10-12T07:14:17.494802",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T07:14:31.521990",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T08:01:45.571612",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T08:01:55.590978",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 192 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T08:01:55.625455",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=192.168.9.252 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T08:47:49.405202",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T08:48:19.470067",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T09:17:39.673932",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 192 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T09:17:39.736757",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=192.168.9.252 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T09:18:26.203907",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "19 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-12T09:18:27.542303",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T09:18:51.706042",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "19 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-12T09:19:25.033467",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T09:19:25.090196",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-12T09:19:54.035418",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "19 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-12T09:22:40.197673",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T09:46:57.124816",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T09:52:30.839628",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T09:52:43.572196",
+    "username": "admin",
+    "action": "container_exec",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c51 -> ros2 topic echo /localization/localization_data --once"
+  },
+  {
+    "timestamp": "2026-10-12T09:53:13.335519",
+    "username": "admin",
+    "action": "container_exec",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c62 -> ros2 topic echo /localization/localization_data --once"
+  },
+  {
+    "timestamp": "2026-10-12T10:11:05.686390",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-12T10:17:41.515018",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-12T10:17:52.271210",
+    "username": "admin",
+    "action": "extract_hdmap",
+    "details": "container=ros2_admin_test_install20261012_x86_ros2_1.0_fz_c50 sn=fz_c50 target=admin"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:47.223337",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c70"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:49.160871",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c51"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:50.249694",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c80"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:51.756486",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c62"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:53.834375",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c72"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:55.018966",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c75"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:55.906677",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c69"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:57.623993",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c74"
+  },
+  {
+    "timestamp": "2026-10-13T01:12:59.097994",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c79"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:00.596546",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c55"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:01.997383",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c57"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:03.326603",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c64"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:03.874239",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c61"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:05.334798",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c67"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:06.791033",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c59"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:07.380104",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c56"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:08.807978",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c76"
+  },
+  {
+    "timestamp": "2026-10-13T01:13:10.226800",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c58"
+  },
+  {
+    "timestamp": "2026-10-13T03:20:24.412003",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261012_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-13T05:43:10.974215",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-13T05:43:41.015884",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-13T05:45:45.601503",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 139 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-13T05:45:45.658422",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=139.196.75.44 target=self"
+  },
+  {
+    "timestamp": "2026-10-13T05:46:50.276844",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c76__test_install20261012_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-13T05:49:20.533531",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-13T05:49:20.599227",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-13T07:05:51.633934",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T03:47:09.801944",
+    "username": "admin",
+    "action": "login_success",
+    "details": "登录成功, token有效7天"
+  },
+  {
+    "timestamp": "2026-10-14T03:47:09.843009",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T04:03:40.102222",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T04:44:40.751029",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:05.948729",
+    "username": "admin",
+    "action": "install_upload",
+    "details": "size=307976325, version=test_install20261014_x86_ros2_2.0, target=self, auto_switched=True"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:07.792152",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:11.276582",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261014_142211_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:17.403943",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261014_142217_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:20.009022",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:42.474859",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261014_142242_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:46.864165",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-14T06:22:46.912821",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-14T06:23:53.530450",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 34 个脚本"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:00.603023",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c50 -> fz_c50"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:03.565419",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c51 -> fz_c51"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:07.323317",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c52 -> fz_c52"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:08.939327",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c53 -> fz_c53"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:10.700811",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c54 -> fz_c54"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:12.309676",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c55 -> fz_c55"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:22.829039",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:22.874968",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:26.915080",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "7 scripts, version=test_install20261014_x86_ros2_2.0"
+  },
+  {
+    "timestamp": "2026-10-14T06:24:52.150674",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "6 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-14T07:05:15.713024",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T07:06:06.668097",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T07:22:54.883060",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T07:22:56.696991",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T07:41:12.912584",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T07:42:06.800797",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T07:53:22.940066",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T08:04:36.313697",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T08:55:46.065125",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T09:27:59.869867",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T09:54:30.237696",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T09:54:55.015365",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T10:06:21.534098",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-14T10:06:28.774080",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "6 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-14T10:06:52.873540",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-14T10:33:56.284984",
+    "username": "admin",
+    "action": "clean_dir",
+    "details": "logs target=self"
+  },
+  {
+    "timestamp": "2026-10-14T10:38:57.402770",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-15T05:57:49.393725",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-15T06:02:19.495969",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-15T07:44:12.795134",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-15T07:48:42.881952",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-15T08:04:14.371909",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-15T08:12:44.525336",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-15T09:41:46.512647",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-15T09:46:16.610381",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-15T10:15:02.936510",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T00:35:46.521460",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T01:30:41.813172",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T02:06:28.336804",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T02:06:42.398180",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T02:40:43.816122",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T02:40:58.950510",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T02:43:22.702891",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c51__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-16T02:43:41.125887",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-16T03:19:19.800002",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T03:31:42.997240",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T03:32:50.004038",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T03:33:17.208427",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T03:34:14.341951",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T03:34:23.276340",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T03:44:44.586813",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T03:53:10.805159",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T03:54:20.863463",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T04:29:27.017632",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T04:40:57.271311",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T05:29:37.506303",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T05:33:07.619770",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T07:54:31.197699",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T08:03:31.404822",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T09:55:02.643542",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T10:25:18.185720",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261014_x86_ros2_2.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-16T10:25:19.488015",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261014_x86_ros2_2.0_fz_c51"
+  },
+  {
+    "timestamp": "2026-10-16T10:26:03.563823",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T10:27:29.874238",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T10:34:30.013398",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-16T10:35:48.408856",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-16T10:41:18.545381",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T02:11:53.663550",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T02:12:03.364531",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T02:12:03.402271",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T02:12:31.157941",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T03:22:29.869896",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T03:22:59.930094",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T03:40:51.860446",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T03:41:15.695162",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T03:46:54.926165",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c51__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T04:50:27.937848",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "2 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-19T04:50:32.443955",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 139 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T04:50:32.474313",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=139.196.75.44 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T04:54:45.527537",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "2 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-19T05:39:09.632404",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "2 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-19T05:59:16.129572",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T05:59:16.165945",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T05:59:38.188474",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T06:04:01.272150",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261014_x86_ros2_2.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-19T06:04:07.077557",
+    "username": "admin",
+    "action": "clean_dir",
+    "details": "logs target=self"
+  },
+  {
+    "timestamp": "2026-10-19T06:04:29.887243",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T06:23:52.283989",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T07:22:15.576773",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T07:22:22.441235",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261014_x86_ros2_2.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-19T07:22:45.337737",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c51__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T07:23:18.314119",
+    "username": "admin",
+    "action": "install_version_switch",
+    "details": "target=admin, version=test_install20261012_x86_ros2_1.0, scripts=7, task_id=a1f5d651d0044d96a129207ac148f4ab"
+  },
+  {
+    "timestamp": "2026-10-19T07:23:20.235177",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T07:23:30.451745",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 16 个脚本"
+  },
+  {
+    "timestamp": "2026-10-19T07:23:31.548415",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "32 scripts, version=test_install20261012_x86_ros2_1.0"
+  },
+  {
+    "timestamp": "2026-10-19T07:23:33.763232",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T07:23:56.281368",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c57__test_install20261012_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T08:01:56.860154",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "2 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-19T08:02:25.684085",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c55__test_install20261012_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T08:02:27.876125",
+    "username": "admin",
+    "action": "sync_time",
+    "details": "success=1, failed=1"
+  },
+  {
+    "timestamp": "2026-10-19T08:06:06.190161",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c71__test_install20261012_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T08:06:08.385652",
+    "username": "admin",
+    "action": "sync_time",
+    "details": "success=1, failed=2"
+  },
+  {
+    "timestamp": "2026-10-19T08:06:31.861768",
+    "username": "admin",
+    "action": "sync_time",
+    "details": "success=1, failed=2"
+  },
+  {
+    "timestamp": "2026-10-19T08:17:30.317550",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "2 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-19T08:36:27.031717",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "0 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-19T09:45:15.930986",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T09:55:12.567510",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T09:59:42.351470",
+    "username": "admin",
+    "action": "install_upload",
+    "details": "size=308015100, version=test_install20261019_x86_ros2_1.0, target=self, auto_switched=True"
+  },
+  {
+    "timestamp": "2026-10-19T09:59:44.637642",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T09:59:52.406565",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:01.355809",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:01.411285",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:03.679281",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c55 -> fz_c55"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:12.226804",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261019_180012_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:16.579970",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261019_180016_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:25.323110",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c50 -> fz_c50"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:28.778055",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:28.823375",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:29.609592",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:29.665548",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:36.431218",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 34 个脚本"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:37.119522",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "2 scripts, version=test_install20261019_x86_ros2_1.0"
+  },
+  {
+    "timestamp": "2026-10-19T10:00:58.407934",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261019_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T10:01:43.762495",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261019_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-19T10:02:06.785256",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261019_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T10:06:20.938167",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T10:49:35.711971",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T10:49:42.075175",
+    "username": "admin",
+    "action": "install_version_switch",
+    "details": "target=admin, version=test_install20261014_x86_ros2_2.0, scripts=2, task_id=d88f16d77a83473796082b0a06d623b3"
+  },
+  {
+    "timestamp": "2026-10-19T10:49:44.024632",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T10:49:49.176769",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261019_184949_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-19T10:49:53.268481",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261019_184953_install_deploy.tar.gz copied=50 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-19T10:49:57.730408",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 6 个脚本"
+  },
+  {
+    "timestamp": "2026-10-19T10:49:58.475893",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "7 scripts, version=test_install20261014_x86_ros2_2.0"
+  },
+  {
+    "timestamp": "2026-10-19T10:50:20.966286",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261014_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-19T10:50:25.089068",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-19T10:50:56.217204",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261019_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-19T10:54:26.764473",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-19T11:32:37.385358",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T01:30:46.069589",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "1 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-20T01:30:58.420718",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T01:48:17.187468",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T01:48:53.932913",
+    "username": "admin",
+    "action": "install_upload",
+    "details": "size=308027439, version=test_install20261020_x86_ros2_1.0, target=self, auto_switched=True"
+  },
+  {
+    "timestamp": "2026-10-20T01:48:55.674267",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T01:48:55.990162",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T01:54:56.612685",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 9 个脚本"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:02.371031",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_095502_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:05.817379",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_095505_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:11.162957",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c50 -> fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:14.453667",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:14.499611",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:15.174529",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:15.226290",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:22.159556",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "2 scripts, version=test_install20261020_x86_ros2_1.0"
+  },
+  {
+    "timestamp": "2026-10-20T01:55:42.511616",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T02:08:15.957689",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T02:16:46.124560",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T02:19:13.129543",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T02:32:30.010909",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T02:32:32.664179",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T02:32:43.384173",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T02:54:07.790547",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T03:01:45.291539",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T03:02:07.607919",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T03:10:38.176985",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T03:13:29.543888",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T03:14:42.053179",
+    "username": "admin",
+    "action": "container_exec",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50 -> ros2 topic echo /localization/localization_data --once"
+  },
+  {
+    "timestamp": "2026-10-20T03:14:47.181898",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T03:14:56.079912",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T03:30:37.506606",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T03:38:29.403633",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T03:50:42.467957",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T03:56:36.604240",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T06:27:12.321210",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T06:27:36.349856",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T07:36:31.773581",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T07:36:31.805715",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T07:36:34.820976",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T07:36:55.563960",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T07:44:47.202422",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T07:47:26.560202",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T07:47:28.068067",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T07:47:32.044167",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_154731_install_deploy.tar.gz copied=15 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-20T07:47:56.520220",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T07:48:12.607629",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T07:48:14.656806",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T08:36:14.446549",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T08:36:17.589594",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T08:39:39.642025",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T08:52:44.760894",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T08:53:05.163475",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T08:53:05.251159",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T08:55:05.308376",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T09:02:59.193335",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T09:03:07.905095",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c55 -> fz_c55"
+  },
+  {
+    "timestamp": "2026-10-20T09:03:10.047462",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-20T09:03:10.095845",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-20T09:03:14.057742",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "3 scripts, version=test_install20261020_x86_ros2_1.0"
+  },
+  {
+    "timestamp": "2026-10-20T09:03:34.717480",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c55__test_install20261020_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T09:15:00.062422",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c55"
+  },
+  {
+    "timestamp": "2026-10-20T09:15:00.522707",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T09:17:41.433600",
+    "username": "admin",
+    "action": "install_upload",
+    "details": "size=310163805, version=install_1020_4.0, target=self, auto_switched=True"
+  },
+  {
+    "timestamp": "2026-10-20T09:17:43.242406",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T09:17:55.492056",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:10.543090",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_171810_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:13.808472",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_171813_install_deploy.tar.gz copied=9 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:17.433858",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c55 -> fz_c55"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:22.663395",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c50 -> fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:26.167365",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c51 -> fz_c51"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:28.214125",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c52 -> fz_c52"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:30.048284",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c53 -> fz_c53"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:31.797031",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c54 -> fz_c54"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:34.126796",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:34.176140",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:35.037406",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:35.090029",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:38.151655",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 5 个脚本"
+  },
+  {
+    "timestamp": "2026-10-20T09:18:38.782180",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "7 scripts, version=install_1020_4.0"
+  },
+  {
+    "timestamp": "2026-10-20T09:19:03.168845",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "6 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-20T09:50:20.407072",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_install_1020_4.0_fz_c53"
+  },
+  {
+    "timestamp": "2026-10-20T09:50:49.901362",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c53__install_1020_4.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T09:51:07.720811",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_install_1020_4.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T09:51:12.197428",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "5 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-20T09:51:23.507457",
+    "username": "admin",
+    "action": "clean_dir",
+    "details": "logs target=self"
+  },
+  {
+    "timestamp": "2026-10-20T09:51:49.792916",
+    "username": "admin",
+    "action": "batch_execute_scripts",
+    "details": "6 scripts, mode=并行"
+  },
+  {
+    "timestamp": "2026-10-20T09:52:06.354673",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T09:52:14.202212",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T09:53:10.820360",
+    "username": "admin",
+    "action": "install_version_switch",
+    "details": "target=admin, version=test_install20261019_x86_ros2_1.0, scripts=7, task_id=8c64070fd91f46b386b4444b0b24b44b"
+  },
+  {
+    "timestamp": "2026-10-20T09:53:12.632039",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T09:53:29.813487",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 16 个脚本"
+  },
+  {
+    "timestamp": "2026-10-20T09:53:36.424046",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T09:53:37.686116",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_install_1020_4.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T09:53:46.790379",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "2 scripts, version=test_install20261019_x86_ros2_1.0"
+  },
+  {
+    "timestamp": "2026-10-20T09:54:07.534415",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261019_x86_ros2_1.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T09:55:36.466739",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261019_x86_ros2_1.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T10:28:23.540873",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T10:28:33.378092",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T11:33:02.741844",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T12:31:57.046629",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:36.213584",
+    "username": "admin",
+    "action": "install_upload",
+    "details": "size=309810876, version=test_install20261020_x86_ros2_6.0, target=self, auto_switched=True"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:36.383406",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_203236_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:36.428510",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_203236_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:38.054754",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:40.327702",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:41.107600",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261020_203241_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:46.162989",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c50 -> fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:48.543231",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:48.575344",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:49.785302",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:49.820772",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:53.387497",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 4 个脚本"
+  },
+  {
+    "timestamp": "2026-10-20T12:32:54.404693",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "2 scripts, version=test_install20261020_x86_ros2_6.0"
+  },
+  {
+    "timestamp": "2026-10-20T12:33:16.526169",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_6.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T12:39:27.313515",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261020_x86_ros2_6.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-20T12:39:50.472420",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261020_x86_ros2_6.0.sh"
+  },
+  {
+    "timestamp": "2026-10-20T12:48:37.864132",
+    "username": "admin",
+    "action": "stop_all_ros2",
+    "details": "6 containers (all)"
+  },
+  {
+    "timestamp": "2026-10-20T12:48:45.982281",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T01:20:15.002498",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T01:50:05.639646",
+    "username": "admin",
+    "action": "install_version_note",
+    "details": "target=admin, version=test_install20261020_x86_ros2_6.0, note=rviz2显示路径"
+  },
+  {
+    "timestamp": "2026-10-21T01:50:15.059171",
+    "username": "admin",
+    "action": "install_version_note",
+    "details": "target=admin, version=test_install20261019_x86_ros2_1.0, note=rviz显示路径"
+  },
+  {
+    "timestamp": "2026-10-21T01:50:33.410677",
+    "username": "admin",
+    "action": "install_version_note",
+    "details": "target=admin, version=install_1020_4.0, note=rviz显示路径文锐"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:11.804301",
+    "username": "admin",
+    "action": "install_upload",
+    "details": "size=309812274, version=test_install20261021_x86_ros2_2.0, target=self, auto_switched=True"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:13.746038",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:23.885277",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:30.870574",
+    "username": "admin",
+    "action": "bk_clean",
+    "details": "sub=all target=self backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261021_095130_bk_clean_all.tar.gz"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:35.726689",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 4 个脚本"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:44.946075",
+    "username": "admin",
+    "action": "install_deploy",
+    "details": "target=self clean=False backup=/home/fox/robotruck_ros2/Docker/bk/.bk_backups/bk_backup_20261021_095144_install_deploy.tar.gz copied=8 skipped=3"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:52.854707",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c50 -> fz_c50"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:55.328286",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c51 -> fz_c51"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:57.265438",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c52 -> fz_c52"
+  },
+  {
+    "timestamp": "2026-10-21T01:51:59.411458",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c53 -> fz_c53"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:01.372039",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c54 -> fz_c54"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:03.661925",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c55 -> fz_c55"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:06.070011",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c56 -> fz_c56"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:07.921299",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c57 -> fz_c57"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:09.907060",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c58 -> fz_c58"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:11.861387",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c59 -> fz_c59"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:14.260803",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c60 -> fz_c60"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:17.942479",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c61 -> fz_c61"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:20.833790",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c62 -> fz_c62"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:22.614106",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c63 -> fz_c63"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:24.330260",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c64 -> fz_c64"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:25.824912",
+    "username": "admin",
+    "action": "batch_generate",
+    "details": "fz_c65 -> fz_c65"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:29.604673",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "mock_truck target=self"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:29.660714",
+    "username": "admin",
+    "action": "sync_folder",
+    "details": "simulation_launches target=self"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:35.516955",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T01:52:43.813340",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T01:53:26.145436",
+    "username": "admin",
+    "action": "login_success",
+    "details": "登录成功, token有效7天"
+  },
+  {
+    "timestamp": "2026-10-21T01:53:26.176612",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T01:54:44.189155",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "17 scripts, version=test_install20261021_x86_ros2_2.0"
+  },
+  {
+    "timestamp": "2026-10-21T01:57:31.277510",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261021_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-21T02:03:44.937060",
+    "username": "admin",
+    "action": "install_version_note",
+    "details": "target=admin, version=test_install20261021_x86_ros2_2.0, note=版本：rviz2显示正常"
+  },
+  {
+    "timestamp": "2026-10-21T02:10:45.802514",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T02:10:53.851413",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T02:10:55.665215",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T02:10:56.003180",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T02:10:57.142322",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:00.278551",
+    "username": "admin",
+    "action": "stop_container",
+    "details": "ros2_admin_test_install20261021_x86_ros2_2.0_fz_c50"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:04.395314",
+    "username": "admin",
+    "action": "clear_scripts",
+    "details": "清空 19 个脚本"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:09.785914",
+    "username": "admin",
+    "action": "install_delete",
+    "details": "target=self, version=test_install20261020_x86_ros2_6.0, cleaned={}"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:18.285276",
+    "username": "admin",
+    "action": "install_delete",
+    "details": "target=self, version=test_install20261019_x86_ros2_1.0, cleaned={}"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:24.056980",
+    "username": "admin",
+    "action": "install_delete",
+    "details": "target=self, version=test_install20261012_x86_ros2_1.0, cleaned={}"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:25.721299",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:28.621796",
+    "username": "admin",
+    "action": "install_delete",
+    "details": "target=self, version=test_install20261014_x86_ros2_2.0, cleaned={}"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:45.511247",
+    "username": "admin",
+    "action": "switch_cert",
+    "details": "切换到 106 证书 target=self"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:45.657686",
+    "username": "admin",
+    "action": "switch_cloud_ip",
+    "details": "ip=106.14.223.60 target=self"
+  },
+  {
+    "timestamp": "2026-10-21T02:11:51.594977",
+    "username": "admin",
+    "action": "generate_scripts",
+    "details": "16 scripts, version=test_install20261021_x86_ros2_2.0"
+  },
+  {
+    "timestamp": "2026-10-21T02:12:34.850139",
+    "username": "admin",
+    "action": "execute_script",
+    "details": "start_docker_ros2_fz_c50__test_install20261021_x86_ros2_2.0.sh"
+  },
+  {
+    "timestamp": "2026-10-21T02:13:24.873657",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T02:13:29.366110",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T02:13:37.727260",
+    "username": "admin",
+    "action": "websocket_connected",
+    "details": "WebSocket 连接"
+  },
+  {
+    "timestamp": "2026-10-21T02:13:46.890531",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T02:13:56.895052",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
+  },
+  {
+    "timestamp": "2026-10-21T02:14:00.962262",
+    "username": "admin",
+    "action": "websocket_disconnected",
+    "details": "WebSocket 断开"
   }
 ]

@@ -237,6 +237,8 @@
         <div class="sidebar-header">
             <h2>🚀 Mock Truck</h2>
             <div class="version" id="sidebarUserInfo">未登录</div>
+            <!-- v5.0 当前 install 版本徽章（版本感知，全局展示） -->
+            <div class="version" id="sidebarVersionBadge" style="display:none;margin-top:2px;" title="当前使用的 install 版本"></div>
         </div>
 
         <!-- 导航菜单 -->
@@ -250,21 +252,17 @@
             <!-- 容器与脚本 -->
             <div class="nav-section" id="nav-section-containers">
                 <div class="nav-section-title">容器与脚本</div>
-                <div class="nav-item" data-panel="scripts" data-tip="📜 脚本" onclick="toggleSubMenu('scripts')">
+                <div class="nav-item" data-panel="scripts" data-tip="📜 脚本与启动" onclick="toggleSubMenu('scripts')">
                     <span class="icon">📜</span>
-                    <span class="label">脚本生成</span>
+                    <span class="label">脚本与启动</span>
                 </div>
                 <div class="nav-item nav-sub" data-panel="advanced-scripts" data-tip="📜 脚本增强" style="display:none;">
                     <span class="icon">📜</span>
                     <span class="label">脚本执行增强</span>
                 </div>
-                <div class="nav-item" data-panel="vehicle" data-tip="🚛 仿真车启动">
+                <div class="nav-item" data-panel="docker" data-tip="🚛 仿真车管理" onclick="toggleSubMenu('docker')">
                     <span class="icon">🚛</span>
-                    <span class="label">仿真车启动</span>
-                </div>
-                <div class="nav-item" data-panel="docker" data-tip="🐳 Docker" onclick="toggleSubMenu('docker')">
-                    <span class="icon">🐳</span>
-                    <span class="label">Docker 管理</span>
+                    <span class="label">仿真车管理</span>
                 </div>
                 <div class="nav-item nav-sub" data-panel="advanced-docker" data-tip="🐳 容器增强" style="display:none;">
                     <span class="icon">🐳</span>
@@ -459,8 +457,9 @@
                     <!-- v3.6 部署确认 & 操作历史入口 -->
                     <div id="installDeployBar" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #eee;">
                         <div class="btn-group" style="flex-wrap:wrap;gap:6px;">
-                            <button class="btn btn-sm btn-success" id="deployBkBtn" onclick="deployInstallToBk()">🚀 部署到bk空间</button>
-                            <button class="btn btn-sm btn-secondary" onclick="showBkHistoryModal()">📜 操作历史 / 回滚</button>
+                            <button class="btn btn-sm btn-success" id="deployBkBtn" onclick="deployInstallToBk()">🚀 创建该版本对应模板</button>
+                            <!-- v5.1 操作历史/回滚按钮暂时下线，功能保留未删除 -->
+                            <button class="btn btn-sm btn-secondary" onclick="showBkHistoryModal()" style="display:none;">📜 操作历史 / 回滚</button>
                         </div>
                     </div>
                 </div>
@@ -638,12 +637,12 @@
             </div>
 
             <!-- ============================================================
-            面板：Docker 管理
+            面板：仿真车管理
             ============================================================ -->
             <div class="panel" id="panel-docker">
                 <div class="card">
                     <div class="card-title">🎯 容器选择状态</div>
-                    <div id="containerSelectStatus" style="font-size:14px; padding:4px 0;">⚠️ 未选中容器，ROS2 功能不可用</div>
+                    <div id="containerSelectStatus" style="font-size:14px; padding:4px 0;">⚠️ 未选中容器，ROS2 部分功能不可用</div>
                 </div>
                 <div class="card">
                     <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
@@ -659,12 +658,11 @@
                             <button class="btn btn-warning admin-only" onclick="stopAllRos2()">⏹ 停止全部 ROS2</button>
                             <button class="btn btn-outline admin-only" onclick="syncTime()">🕐 同步时间</button>
                         </div>
-                        <div style="overflow-x:auto">
+                        <div style="overflow-x:auto;overflow-y:visible;">
                             <table class="data-table">
                                 <thead>
                                     <tr>
                                         <th>名称</th>
-                                        <th>镜像</th>
                                         <th>容器运行状态</th>
                                         <th>运行时长</th>
                                         <th>云平台连接</th>
@@ -685,7 +683,7 @@
                         <div>
                             <button class="btn btn-sm" onclick="loadContainerLogs('docker')">🐳 Docker 日志</button>
                             <button class="btn btn-sm" onclick="loadContainerLogs('ros2')">🤖 ROS2 日志</button>
-                            <button class="btn btn-sm btn-outline" onclick="document.getElementById('containerLogCard').style.display='none'">✕ 关闭</button>
+                            <button class="btn btn-sm btn-outline" onclick="closeContainerLogs()">✕ 关闭</button>
                         </div>
                     </div>
                     <div class="log-container" id="containerLogContent"></div>
@@ -723,7 +721,7 @@
             </div>
 
             <!-- ============================================================
-            面板：脚本生成（8个路径只读）
+            面板：脚本与启动（8个路径只读）
             ============================================================ -->
             <div class="panel" id="panel-scripts">
                 <div class="card" data-card-id="scripts-launch">
@@ -783,12 +781,6 @@
                     <div id="genResult" style="margin-top:14px;"></div>
                     </div>
                 </div>
-                </div>
-
-            <!-- ============================================================
-            面板：仿真车启动
-            ============================================================ -->
-            <div class="panel" id="panel-vehicle">
                 <div class="card">
                     <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
                         <span>📄 启动车辆</span>
@@ -815,7 +807,28 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="card" data-card-id="scripts-report">
+                    <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>📊 运行报告</span>
+                        <span class="collapse-toggle" onclick="toggleCard('scripts-report')"><span id="scripts-report-icon">▶</span> 展开</span>
+                    </div>
+                    <div class="collapsible-content" id="scripts-report-content">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+                            <div class="btn-group" id="reportRangeBtns" style="margin:0">
+                                <button class="btn btn-sm btn-outline" data-range="1h" onclick="setReportRange('1h')">1小时</button>
+                                <button class="btn btn-sm btn-outline" data-range="24h" onclick="setReportRange('24h')">24小时</button>
+                                <button class="btn btn-sm" data-range="7d" onclick="setReportRange('7d')">7天</button>
+                                <button class="btn btn-sm btn-outline" data-range="30d" onclick="setReportRange('30d')">30天</button>
+                            </div>
+                            <button class="btn btn-sm btn-outline" onclick="loadRunReport()">🔄 刷新</button>
+                            <button class="btn btn-sm btn-outline" onclick="exportRunReportCSV()">📥 导出 CSV</button>
+                        </div>
+                        <div id="reportSummary" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px"></div>
+                        <div id="reportTables" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+                        <div id="reportRecent" style="margin-top:12px"></div>
+                    </div>
+                </div>
+                </div>
 
             <!-- ============================================================
             面板：镜像管理
@@ -835,10 +848,14 @@
                     <div class="card-title">📥 导入镜像</div>
                     <div style="display:flex;gap:8px">
                         <input type="text" id="imageTarPath" placeholder="镜像 tar 文件路径" style="flex:1">
-                        <input type="file" id="imageTarFile" accept=".tar" style="display:none" onchange="onImageFileSelect(this)">
+                        <input type="file" id="imageTarFile" accept=".tar,.tgz" style="display:none" onchange="onImageFileSelect(this)">
                         <button class="btn btn-outline" onclick="document.getElementById('imageTarFile').click()">📁 打开</button>
-                        <button class="btn" onclick="loadImage()">📥 导入</button>
+                        <button class="btn" id="loadImageBtn" onclick="loadImage()">📥 导入</button>
                     </div>
+                    <div class="progress-bar-container" id="imageImportProgress" style="margin-top:12px">
+                        <div class="progress-bar-fill" id="imageImportProgressFill"></div>
+                    </div>
+                    <div id="imageImportStatus" style="font-size:12px;color:var(--text-secondary);margin-top:6px;display:none"></div>
                 </div>
             </div>
 
@@ -851,6 +868,39 @@
                     <button class="btn btn-outline" id="autoRefreshBtn" onclick="toggleAutoRefresh()">⏯ 自动刷新</button>
                 </div>
                 <div class="monitor-grid" id="monitorGrid"></div>
+                <div class="card" style="margin-top:16px" data-card-id="monitor-trend">
+                    <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>📊 趋势视图</span>
+                        <span class="collapse-toggle" onclick="toggleCard('monitor-trend')"><span id="monitor-trend-icon">▼</span> 收起</span>
+                    </div>
+                    <div class="collapsible-content expanded" id="monitor-trend-content">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+                            <select id="trendMetric" class="input" style="width:auto" onchange="setTrendMetric(this.value)"></select>
+                            <div class="btn-group" id="trendRangeBtns" style="margin:0">
+                                <button class="btn btn-sm" data-range="1h" onclick="setTrendRange('1h')">1小时</button>
+                                <button class="btn btn-sm" data-range="6h" onclick="setTrendRange('6h')">6小时</button>
+                                <button class="btn btn-sm" data-range="24h" onclick="setTrendRange('24h')">24小时</button>
+                                <button class="btn btn-sm" data-range="7d" onclick="setTrendRange('7d')">7天</button>
+                            </div>
+                            <button class="btn btn-sm btn-outline" onclick="loadTrend()">🔄 刷新</button>
+                        </div>
+                        <div id="trendChart" style="min-height:200px"></div>
+                        <div id="trendSummary" style="font-size:12px;color:var(--text-secondary);margin-top:6px"></div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:16px" data-card-id="monitor-alerts">
+                    <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>🚨 告警中心 <span id="alertBadge" style="display:none;background:#ef4444;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;margin-left:6px">0</span></span>
+                        <span class="collapse-toggle" onclick="toggleCard('monitor-alerts')"><span id="monitor-alerts-icon">▶</span> 展开</span>
+                    </div>
+                    <div class="collapsible-content" id="monitor-alerts-content">
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                            <button class="btn btn-sm btn-outline" onclick="clearAlertCenter()">🗑 清空</button>
+                            <span style="font-size:11px;color:var(--text-secondary)">实时推送，最多保留 50 条</span>
+                        </div>
+                        <div id="alertCenterList" style="max-height:320px;overflow-y:auto"></div>
+                    </div>
+                </div>
                 <div class="card" style="margin-top:16px" data-card-id="monitor-gpu">
                     <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
                         <span>🖥 GPU 信息</span>
@@ -993,8 +1043,6 @@
                                 <div class="card">
                     <div class="card-title">计时红绿灯模拟</div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-                        <div><label style="font-size:12px">模式：自动</label>
-                        </div>
                         <div>
                             <label style="font-size:12px">SN 标识</label>
                             <input type="text" id="ttmSn" value="js_light">
@@ -1016,6 +1064,56 @@
                         <button class="btn btn-error" id="ttmStopBtn" onclick="stopTimerTrafficLight()" disabled>⏹ 停止</button>
                     </div>
                     <div style="margin-top:8px;font-size:13px">状态: <span id="ttmStatus">未运行</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">人工模式计时红绿灯模拟</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+                        <div>
+                            <label style="font-size:12px">SN 标识</label>
+                            <input type="text" id="mtmSn" value="js_001">
+                        </div>
+                        <div><label style="font-size:12px">端口</label><input type="number" id="mtmPort" value="1234"></div>
+                        <div><label style="font-size:12px">目标 IP（可下拉选择或手动修改）</label>
+                            <input type="text" id="mtmHost" list="mtmHostList" value="106.14.223.60" placeholder="目标 UDP 地址">
+                            <datalist id="mtmHostList">
+                                <option value="106.14.223.60"></option>
+                                <option value="139.196.75.44"></option>
+                                <option value="192.168.9.252"></option>
+                            </datalist>
+                        </div>
+                        <div><label style="font-size:12px">remain_time / duration（可下拉选择或手动修改）</label>
+                            <input type="number" id="mtmManualTime" list="mtmManualTimeList" value="255" min="0" max="255">
+                            <datalist id="mtmManualTimeList">
+                                <option value="255"></option>
+                                <option value="0"></option>
+                                <option value="15"></option>
+                                <option value="30"></option>
+                                <option value="60"></option>
+                            </datalist>
+                        </div>
+                        <div><label style="font-size:12px">auto_mode（1自动倒计时 / 2人工）</label>
+                            <select id="mtmAutoMode">
+                                <option value="2" selected>2 - 人工</option>
+                                <option value="1">1 - 自动倒计时</option>
+                            </select>
+                        </div>
+                        <div><label style="font-size:12px">灯态</label>
+                            <select id="mtmState">
+                                <option value="0" selected>0 - 黄闪(默认)</option>
+                                <option value="1">1 - 黄灯</option>
+                                <option value="2">2 - 红灯</option>
+                                <option value="3">3 - 绿灯</option>
+                                <option value="4">4 - 绿灯闪烁</option>
+                                <option value="5">5 - 黑灯</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-success" id="mtmStartBtn" onclick="startManualTimerTrafficLight()">▶ 启动</button>
+                        <button class="btn btn-error" id="mtmStopBtn" onclick="stopManualTimerTrafficLight()" disabled>⏹ 停止</button>
+                        <button class="btn btn-warning" id="mtmStateBtn" onclick="setManualTimerTrafficState()" disabled>🔁 切换灯态</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:13px">状态: <span id="mtmStatus">未运行</span></div>
                 </div>
                 <div class="card">
                     <div class="card-title">交通红绿灯模拟</div>
@@ -1100,6 +1198,50 @@
                     </div>
 
                     <div class="traffic-status-bar" id="trafficStatusBar">MQTT: 未连接 | 模式: 自动 | 主灯: 绿灯 | 次灯: 红灯</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">⛏️ 破碎站红绿灯模拟</div>
+                    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">纯 UDP 广播 light_state，无 HTTP/MQTT，三阶段循环（对应 ck/lk_light_state*.py）</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+                        <div><label style="font-size:12px">SN 标识</label>
+                            <input type="text" id="clSn" value="hz_test_light01"></div>
+                        <div><label style="font-size:12px">端口</label><input type="number" id="clPort" value="1234"></div>
+                        <div><label style="font-size:12px">目标 IP</label>
+                            <select id="clHost">
+                                <option value="106.14.223.60" selected>106.14.223.60</option>
+                                <option value="139.196.75.44">139.196.75.44</option>
+                                <option value="192.168.9.252">192.168.9.252</option>
+                            </select></div>
+                        <div><label style="font-size:12px">发送间隔 (秒)</label><input type="number" id="clInterval" value="1" min="0.5" max="10" step="0.5"></div>
+                        <div><label style="font-size:12px">红灯 (秒)</label><input type="number" id="clRed" value="10" min="1" max="300"></div>
+                        <div><label style="font-size:12px">绿灯 (秒)</label><input type="number" id="clGreen" value="30" min="1" max="600"></div>
+                        <div><label style="font-size:12px">黄灯 (秒)</label><input type="number" id="clYellow" value="3" min="1" max="60"></div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-success" id="clStartBtn" onclick="startCrushingLight()">▶ 启动</button>
+                        <button class="btn btn-error" id="clStopBtn" onclick="stopCrushingLight()" disabled>⏹ 停止</button>
+                        <button class="btn btn-outline" onclick="checkCrushingStatus()">🔄 刷新</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:13px">状态: <span id="clStatus">未运行</span></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+                        <span>➕ 动态红绿灯面板</span>
+                        <span style="font-size:11px;color:var(--text-secondary)">配置存浏览器 localStorage</span>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+                        <select id="newPanelType" style="padding:6px 10px">
+                            <option value="timer">⏱️ 计时红绿灯</option>
+                            <option value="manual_timer">🎛️ 人工计时红绿灯</option>
+                            <option value="traffic">🚦 交通红绿灯</option>
+                            <option value="crushing">⛏️ 破碎站红绿灯</option>
+                        </select>
+                        <button class="btn btn-success" onclick="addTrafficPanel()">➕ 新增面板</button>
+                        <button class="btn btn-outline" onclick="resetTrafficPanels()">↩ 重置默认</button>
+                        <span style="font-size:11px;color:var(--text-secondary)" id="trafficPanelCount"></span>
+                    </div>
+                    <div id="trafficDynamicPanels"></div>
                 </div>
             </div>
 
@@ -1202,7 +1344,7 @@
                             <input type="text" id="settingsSearchInput" placeholder="🔍 搜索配置项..." oninput="filterSettingsItems()" style="width:100%; padding:8px 12px; border:1px solid var(--border-color); border-radius:var(--radius); background:var(--bg-input);">
                         </div>
                         <div style="display:grid; grid-template-columns: 1fr; gap:12px; padding:8px 0;">
-                            <!-- 脚本生成页面 -->
+                            <!-- 脚本与启动页面 -->
                             <div class="setting-item">
                                 <div class="setting-content">
                                     <div class="setting-label">📂 Launch 文件扫描</div>
@@ -1224,11 +1366,11 @@
                                 </label>
                             </div>
                             
-                            <!-- 仿真车启动页面 -->
+                            <!-- 脚本与启动页面 -->
                             <div class="setting-item">
                                 <div class="setting-content">
                                     <div class="setting-label">📄 启动车辆 </div>
-                                    <div class="setting-desc">控制仿真车启动页面脚本列表的默认显示状态</div>
+                                    <div class="setting-desc">控制脚本与启动页面脚本列表的默认显示状态</div>
                                 </div>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="settingScriptsExpand" onchange="toggleScriptsDefaultExpand()">
@@ -1256,7 +1398,7 @@
                                 </label>
                             </div>
                             
-                            <!-- Docker 管理页面 -->
+                            <!-- 仿真车管理页面 -->
                             <div class="setting-item">
                                 <div class="setting-content">
                                     <div class="setting-label">🐳 容器管理增强</div>
@@ -1837,6 +1979,14 @@
                     <div class="btn-group" style="margin-top:4px"><button class="btn btn-sm" onclick="loadPlugins()">🔄 刷新</button></div>
                     <div id="pluginsList" style="margin-top:8px;font-size:12px"></div>
                 </div>
+                <div class="card"><div class="card-title">🧰 辅助测试工具</div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                        <button class="btn btn-success btn-sm" onclick="launchMockTools()">🚀 启动桌面工具</button>
+                        <button class="btn btn-sm" onclick="loadMockToolsInfo()">🔄 刷新</button>
+                        <span id="mockToolsStatus" style="font-size:12px;opacity:0.6"></span>
+                    </div>
+                    <div id="mockToolsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px"></div>
+                </div>
             </div>
 
             <!-- ============================================================
@@ -1946,7 +2096,7 @@
 
     <!-- ===== 外部依赖（xterm） —— 已改为按需加载，见 sj_script.js loadTerminalModule() ===== -->
 
-    <!-- ===== 自定义函数脚本 ===== -->
+    <!-- ===== 自定义函数脚本（核心，首屏同步加载） ===== -->
     <script src="js/sj_script.js"></script>
     <!-- ===== 正则校验脚本 ===== -->
     <script src="js/sj_validators.js"></script>
@@ -1954,6 +2104,11 @@
     <script src="js/onboarding.js"></script>
     <!-- ===== 数据导出功能脚本（MutationObserver 注入按钮） ===== -->
     <script src="js/panels/data_export.js"></script>
+    <!-- ===== T-6.0-02 面板懒加载（defer 不阻塞首屏渲染，DOMContentLoaded 前执行） ===== -->
+    <script defer src="js/panels/vehicles.js"></script>
+    <script defer src="js/panels/monitor_panel.js"></script>
+    <script defer src="js/panels/traffic_batch.js"></script>
+    <script defer src="js/panels/advanced.js"></script>
 
     <!-- ========== 预留扩展区域（HTML 底部） ========== -->
     <!-- 预留用于未来扩展，如新增面板、组件等 -->
@@ -2090,7 +2245,7 @@
     v3.6 操作历史 / 回滚 模态框
     ============================================================ -->
     <div id="bkHistoryModal" class="modal-overlay" style="display:none;z-index:10000;align-items:flex-start;padding-top:5vh;">
-        <div class="modal-content" style="max-width:90vw;width:900px;height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="modal-content" style="max-width:96vw;width:min(1200px,96vw);height:82vh;display:flex;flex-direction:column;overflow:hidden;">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--border-color);flex-shrink:0;background:white;">
                 <h3 style="margin:0;color:var(--text-primary);">📜 操作历史 / 回滚</h3>
                 <div style="display:flex;gap:8px;">

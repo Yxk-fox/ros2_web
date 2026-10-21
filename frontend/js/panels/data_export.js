@@ -42,13 +42,6 @@
         });
     }
 
-    function _hasDataExportPerm() {
-        if (typeof hasPermission === 'function') {
-            return hasPermission('data-export');
-        }
-        return false;
-    }
-
     function _isRos2Container(containerName) {
         return containerName && (
             containerName.indexOf('ros2') >= 0 ||
@@ -67,63 +60,35 @@
         if (!containerName) return;
 
         var isRos2 = _isRos2Container(containerName);
-        var hasPerm = _hasDataExportPerm();
 
         if (!isRos2) return;
 
-        var moreContainer = actionButtons.querySelector('.more-actions-container');
-        var insertBefore = moreContainer || null;
+        var btnExtract = document.createElement('button');
+        btnExtract.className = 'btn btn-sm btn-outline action-btn';
+        btnExtract.innerHTML = '<span class="btn-icon">🗺️</span><span class="btn-text">提取地图</span>';
+        btnExtract.onclick = function() {
+            _openHdmapModal(containerName);
+            closeDropdowns && closeDropdowns();
+        };
+        actionButtons.appendChild(btnExtract);
 
-        if (hasPerm) {
-            var wrapper = document.createElement('span');
-            wrapper.setAttribute('data-export-wrapper', 'true');
-            wrapper.style.cssText = 'display:contents;';
+        var btnRecord = document.createElement('button');
+        btnRecord.className = 'btn btn-sm btn-outline action-btn';
+        btnRecord.innerHTML = '<span class="btn-icon">⏺️</span><span class="btn-text">录制Bag</span>';
+        btnRecord.onclick = function() {
+            _openBagRecordModal(containerName);
+            closeDropdowns && closeDropdowns();
+        };
+        actionButtons.appendChild(btnRecord);
 
-            var btnExtract = document.createElement('button');
-            btnExtract.className = 'btn btn-sm btn-outline action-btn';
-            btnExtract.innerHTML = '<span class="btn-icon">🗺️</span><span class="btn-text">提取地图</span>';
-            btnExtract.onclick = function() {
-                _openHdmapModal(containerName);
-                closeDropdowns && closeDropdowns();
-            };
-            wrapper.appendChild(btnExtract);
-
-            var btnRecord = document.createElement('button');
-            btnRecord.className = 'btn btn-sm btn-outline action-btn';
-            btnRecord.innerHTML = '<span class="btn-icon">⏺️</span><span class="btn-text">录制Bag</span>';
-            btnRecord.onclick = function() {
-                _openBagRecordModal(containerName);
-                closeDropdowns && closeDropdowns();
-            };
-            wrapper.appendChild(btnRecord);
-
-            var btnDownload = document.createElement('button');
-            btnDownload.className = 'btn btn-sm btn-outline action-btn';
-            btnDownload.innerHTML = '<span class="btn-icon">📦</span><span class="btn-text">下载Bags</span>';
-            btnDownload.onclick = function() {
-                _openBagListModal(containerName);
-                closeDropdowns && closeDropdowns();
-            };
-            wrapper.appendChild(btnDownload);
-
-            if (insertBefore) {
-                actionButtons.insertBefore(wrapper, insertBefore);
-            } else {
-                actionButtons.appendChild(wrapper);
-            }
-        }
-
-        var moreActions = row.querySelector('.more-actions');
-        if (moreActions) {
-            var vizDropdown = moreActions.querySelector('.dropdown');
-            if (vizDropdown) {
-                if (insertBefore) {
-                    actionButtons.insertBefore(vizDropdown, insertBefore);
-                } else {
-                    actionButtons.appendChild(vizDropdown);
-                }
-            }
-        }
+        var btnDownload = document.createElement('button');
+        btnDownload.className = 'btn btn-sm btn-outline action-btn';
+        btnDownload.innerHTML = '<span class="btn-icon">📦</span><span class="btn-text">下载Bags</span>';
+        btnDownload.onclick = function() {
+            _openBagListModal(containerName);
+            closeDropdowns && closeDropdowns();
+        };
+        actionButtons.appendChild(btnDownload);
 
         row.setAttribute(INJECTED_FLAG, 'true');
     }
@@ -380,21 +345,61 @@
     }
 
     function _openBagListModal(containerName) {
-        var body = _createModal('📦 我的Bags - ' + containerName, '600px');
+        var body = _createModal('📦 我的Bags - ' + containerName, '650px');
 
         body.innerHTML = '<div id="bag-list-status" style="margin:12px 0;"></div>' +
-            '<div style="max-height:400px;overflow:auto;"><table id="bag-list-table" style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid var(--border-color,#e5e7eb);"><th style="text-align:left;padding:8px;">文件名</th><th style="text-align:right;padding:8px;">大小</th><th style="text-align:right;padding:8px;">操作</th></tr></thead><tbody></tbody></table></div>' +
-            '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;"><button id="bag-list-refresh" class="btn btn-sm btn-outline">🔄 刷新</button></div>';
+            '<div style="max-height:400px;overflow:auto;"><table id="bag-list-table" style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:2px solid var(--border-color,#e5e7eb);"><th style="width:30px;padding:8px;text-align:center;"><input type="checkbox" id="bag-select-all" style="cursor:pointer;"></th><th style="text-align:left;padding:8px;">文件名</th><th style="text-align:right;padding:8px;">大小</th><th style="text-align:right;padding:8px;width:180px;">操作</th></tr></thead><tbody></tbody></table></div>' +
+            '<div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:12px;">' +
+            '<div><span id="bag-selected-count" style="color:var(--text-secondary);font-size:13px;">已选 0 个</span></div>' +
+            '<div style="display:flex;gap:8px;">' +
+            '<button id="bag-list-delete-selected" class="btn btn-sm btn-error" style="display:none;">🗑️ 删除选中</button>' +
+            '<button id="bag-list-refresh" class="btn btn-sm btn-outline">🔄 刷新</button>' +
+            '</div></div>';
 
         var statusDiv = body.querySelector('#bag-list-status');
         var tbody = body.querySelector('#bag-list-table tbody');
         var refreshBtn = body.querySelector('#bag-list-refresh');
+        var deleteSelectedBtn = body.querySelector('#bag-list-delete-selected');
+        var selectAllCb = body.querySelector('#bag-select-all');
+        var selectedCountSpan = body.querySelector('#bag-selected-count');
+
+        function updateSelectedCount() {
+            var checked = tbody.querySelectorAll('.bag-row-check:checked');
+            selectedCountSpan.textContent = '已选 ' + checked.length + ' 个';
+            deleteSelectedBtn.style.display = checked.length > 0 ? '' : 'none';
+            var totalCheckboxes = tbody.querySelectorAll('.bag-row-check').length;
+            selectAllCb.checked = (totalCheckboxes > 0 && checked.length === totalCheckboxes);
+            selectAllCb.indeterminate = (checked.length > 0 && checked.length < totalCheckboxes);
+        }
+
+        function deleteFiles(filenames, callback) {
+            if (!filenames || filenames.length === 0) return;
+            apiPost('/api/data-export/bag/delete', { filenames: filenames }).then(function(data) {
+                if (data.success) {
+                    showToast('已删除 ' + data.deleted_count + ' 个文件', 'success');
+                    if (data.failed && data.failed.length > 0) {
+                        showToast(data.failed.length + ' 个文件删除失败', 'warning');
+                    }
+                } else {
+                    showToast('删除失败', 'error');
+                }
+                if (callback) callback();
+            }).catch(function(err) {
+                showToast('删除请求失败: ' + err.message, 'error');
+                if (callback) callback();
+            });
+        }
 
         function loadList() {
             statusDiv.innerHTML = '<span style="color:var(--text-secondary);">加载中...</span>';
             tbody.innerHTML = '';
 
-            apiGet('/api/data-export/bag/list').then(function(data) {
+            var url = '/api/data-export/bag/list';
+            if (containerName) {
+                url += '?container_name=' + encodeURIComponent(containerName);
+            }
+
+            apiGet(url).then(function(data) {
                 if (data.success && data.files && data.files.length > 0) {
                     tbody.innerHTML = '';
                     data.files.forEach(function(f) {
@@ -402,26 +407,74 @@
                         tr.style.borderBottom = '1px solid var(--border-color,#e5e7eb);';
                         var mtime = new Date(f.mtime * 1000);
                         var timeStr = mtime.toLocaleString();
-                        tr.innerHTML = '<td style="padding:8px;"><div style="font-weight:500;">' + escapeHtml(f.name) + '</div><div style="font-size:12px;color:var(--text-muted);">' + timeStr + '</div></td>' +
+                        tr.innerHTML = '<td style="padding:8px;text-align:center;"><input type="checkbox" class="bag-row-check" data-filename="' + escapeHtml(f.name) + '" style="cursor:pointer;"></td>' +
+                            '<td style="padding:8px;"><div style="font-weight:500;">' + escapeHtml(f.name) + '</div><div style="font-size:12px;color:var(--text-muted);">' + timeStr + '</div></td>' +
                             '<td style="padding:8px;text-align:right;">' + f.size_mb + ' MB</td>' +
-                            '<td style="padding:8px;text-align:right;"><button class="btn btn-sm btn-primary bag-dl-btn" data-filename="' + escapeHtml(f.name) + '">📥 下载</button></td>';
+                            '<td style="padding:8px;text-align:right;"><button class="btn btn-sm btn-primary bag-dl-btn" data-filename="' + escapeHtml(f.name) + '">📥 下载</button> <button class="btn btn-sm btn-error bag-del-btn" data-filename="' + escapeHtml(f.name) + '">🗑️ 删除</button></td>';
                         tbody.appendChild(tr);
                     });
-                    var dlBtns = tbody.querySelectorAll('.bag-dl-btn');
-                    dlBtns.forEach(function(btn) {
+
+                    tbody.querySelectorAll('.bag-dl-btn').forEach(function(btn) {
                         btn.onclick = function() {
                             _downloadFile(btn.getAttribute('data-filename'));
                         };
                     });
+
+                    tbody.querySelectorAll('.bag-del-btn').forEach(function(btn) {
+                        btn.onclick = function() {
+                            var fname = btn.getAttribute('data-filename');
+                            if (typeof customConfirm === 'function') {
+                                customConfirm('确定要删除文件 "' + fname + '" 吗？', function() {
+                                    deleteFiles([fname], loadList);
+                                });
+                            } else {
+                                if (confirm('确定要删除文件 "' + fname + '" 吗？')) {
+                                    deleteFiles([fname], loadList);
+                                }
+                            }
+                        };
+                    });
+
+                    tbody.querySelectorAll('.bag-row-check').forEach(function(cb) {
+                        cb.onchange = updateSelectedCount;
+                    });
+
                     statusDiv.innerHTML = '<span style="color:#10b981;">共 ' + data.files.length + ' 个文件</span>';
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="3" style="padding:24px;text-align:center;color:var(--text-secondary);">暂无bag文件</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--text-secondary);">暂无bag文件</td></tr>';
                     statusDiv.innerHTML = '<span style="color:var(--text-secondary);">bag目录为空</span>';
                 }
+                updateSelectedCount();
             }).catch(function(err) {
                 statusDiv.innerHTML = '<span style="color:#ef4444;">加载失败: ' + escapeHtml(err.message) + '</span>';
             });
         }
+
+        selectAllCb.onchange = function() {
+            var checkboxes = tbody.querySelectorAll('.bag-row-check');
+            checkboxes.forEach(function(cb) {
+                cb.checked = selectAllCb.checked;
+            });
+            updateSelectedCount();
+        };
+
+        deleteSelectedBtn.onclick = function() {
+            var checked = tbody.querySelectorAll('.bag-row-check:checked');
+            var filenames = [];
+            checked.forEach(function(cb) {
+                filenames.push(cb.getAttribute('data-filename'));
+            });
+            if (filenames.length === 0) return;
+            if (typeof customConfirm === 'function') {
+                customConfirm('确定要删除选中的 ' + filenames.length + ' 个文件吗？', function() {
+                    deleteFiles(filenames, loadList);
+                });
+            } else {
+                if (confirm('确定要删除选中的 ' + filenames.length + ' 个文件吗？')) {
+                    deleteFiles(filenames, loadList);
+                }
+            }
+        };
 
         refreshBtn.onclick = loadList;
         loadList();

@@ -17,6 +17,7 @@ from logger import logger
 from core.constants import SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, AUDIT_ENABLED, AUDIT_LOG_FILE, ALL_PANELS
 from core.security import hash_password, verify_password
 from core.utils import generate_username_from_email
+from core.cache import _memory_cache
 
 
 class SupabaseDatabase:
@@ -28,6 +29,12 @@ class SupabaseDatabase:
         self.key = key
         self.service_role_key = service_role_key
         self._client: Optional[Client] = None
+        # v5.0：users.current_version 列是否就绪（PostgREST 无法执行 DDL，缺失时需手动在 SQL Editor 加列）
+        self.current_version_column_ok = True
+        # v5.1：版本元数据扩展列（version_notes 备注JSONB / previous_version 回滚记录JSONB）
+        self.version_meta_columns_ok = {"version_notes": True, "previous_version": True}
+        # v5.2：users.password_plain 列是否就绪（明文密码备份，供管理员查看；缺失时降级为不写入但功能不阻断）
+        self.password_plain_column_ok = True
         self._init_client()
 
     def _init_client(self):
@@ -42,7 +49,11 @@ class SupabaseDatabase:
             self._client = None
 
     def _migrate_onboarding_columns(self):
-        """尝试添加新手引导相关字段（幂等操作）"""
+        """尝试添加新手引导相关字段（幂等操作）
+
+        v5.0：同时探测 current_version 列（install 版本选择），
+        PostgREST 不支持 DDL，缺失时记录日志提示手动执行 SQL。
+        """
         if not self._client:
             return
         try:
@@ -58,6 +69,91 @@ class SupabaseDatabase:
                 "ALTER TABLE public.users ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT false;\n"
                 "ALTER TABLE public.users ADD COLUMN IF NOT EXISTS onboarding_skipped BOOLEAN DEFAULT false;"
             )
+        # v5.0：探测 current_version 列（缺失会导致版本切换/上传自动切换保存失败）
+        try:
+            self._client.table("users").select("current_version").limit(1).execute()
+            self.current_version_column_ok = True
+            logger.info("v5.0 版本字段 current_version 已存在，跳过迁移")
+        except Exception:
+            self.current_version_column_ok = False
+            logger.warning(
+                "v5.0 字段 current_version 不存在，install 版本切换将无法保存。"
+                "请在 Supabase SQL Editor 中执行以下 SQL：\n"
+                "ALTER TABLE public.users ADD COLUMN IF NOT EXISTS current_version TEXT DEFAULT '';"
+            )
+        # v5.1：探测版本元数据扩展列（version_notes / previous_version）
+        self._probe_version_meta_columns()
+        # v5.2：探测 password_plain 列（明文密码备份，供管理员查看；缺失时降级不写入，功能不阻断）
+        self._probe_password_plain_column()
+
+    def _probe_password_plain_column(self):
+        """v5.2：探测 users.password_plain 列是否就绪（PostgREST 无法 DDL，缺失时仅提示）"""
+        if not self._client:
+            return
+        try:
+            self._client.table("users").select("password_plain").limit(1).execute()
+            self.password_plain_column_ok = True
+        except Exception:
+            self.password_plain_column_ok = False
+            logger.warning(
+                "v5.2 字段 users.password_plain 不存在，用户管理页「查看密码」将无法展示明文。"
+                "请在 Supabase SQL Editor 中执行以下 SQL：\n"
+                "ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password_plain TEXT DEFAULT '';"
+            )
+
+    def recheck_password_plain_column(self) -> bool:
+        """v5.2：实时复查 users.password_plain 列是否已就绪（补列后免重启自愈）"""
+        if not self._client:
+            return self.password_plain_column_ok
+        try:
+            self._client.table("users").select("password_plain").limit(1).execute()
+            if not self.password_plain_column_ok:
+                logger.info("v5.2 字段 password_plain 已就绪（实时复查通过）")
+            self.password_plain_column_ok = True
+        except Exception:
+            self.password_plain_column_ok = False
+        return self.password_plain_column_ok
+
+    def _probe_version_meta_columns(self):
+        """v5.1：逐个探测 users.version_notes / previous_version 列是否就绪"""
+        if not self._client:
+            return
+        for col in ("version_notes", "previous_version"):
+            try:
+                self._client.table("users").select(col).limit(1).execute()
+                self.version_meta_columns_ok[col] = True
+            except Exception:
+                self.version_meta_columns_ok[col] = False
+                logger.warning(
+                    f"v5.1 字段 users.{col} 不存在，相关功能（"
+                    + ("版本备注" if col == "version_notes" else "一键回滚")
+                    + "）将不可用。请在 Supabase SQL Editor 中执行以下 SQL：\n"
+                    "ALTER TABLE public.users ADD COLUMN IF NOT EXISTS version_notes JSONB DEFAULT '{}'::jsonb;\n"
+                    "ALTER TABLE public.users ADD COLUMN IF NOT EXISTS previous_version JSONB DEFAULT NULL;"
+                )
+
+    def recheck_version_meta_columns(self) -> dict:
+        """v5.1：实时复查 version_notes / previous_version 列是否已就绪（免重启自愈）"""
+        if not self._client:
+            return dict(self.version_meta_columns_ok)
+        self._probe_version_meta_columns()
+        return dict(self.version_meta_columns_ok)
+
+    def recheck_version_column(self) -> bool:
+        """v5.0：实时复查 users.current_version 列是否已就绪
+
+        管理员在 Supabase SQL Editor 补列后无需重启服务，下一次版本切换即可成功。
+        """
+        if not self._client:
+            return self.current_version_column_ok
+        try:
+            self._client.table("users").select("current_version").limit(1).execute()
+            if not self.current_version_column_ok:
+                logger.info("v5.0 版本字段 current_version 已就绪（实时复查通过）")
+            self.current_version_column_ok = True
+        except Exception:
+            self.current_version_column_ok = False
+        return self.current_version_column_ok
 
     def _ensure_default_admin(self):
         """确保存在默认管理员账户；Supabase 模式下默认密码也存储在 public.users 表中"""
@@ -68,21 +164,27 @@ class SupabaseDatabase:
             if admins.data:
                 for admin in admins.data:
                     if not admin.get("password"):
-                        self._client.table("users").update({
-                            "password": hash_password("Boonray2020!")
-                        }).eq("id", admin["id"]).execute()
+                        update_payload = {"password": hash_password("Boonray2020!")}
+                        # v5.2：同步写入明文密码备份（列就绪时）
+                        if self.password_plain_column_ok:
+                            update_payload["password_plain"] = "Boonray2020!"
+                        self._client.table("users").update(update_payload).eq("id", admin["id"]).execute()
                         logger.info(f"已为管理员 {admin.get('email', admin.get('username'))} 初始化默认密码")
                 return
 
             user_id = str(uuid.uuid4())
-            self._client.table("users").insert({
+            insert_payload = {
                 "id": user_id,
                 "email": "admin",
                 "username": "admin",
                 "home_folder_path": os.path.expanduser("~/robotruck_ros2"),
                 "role": "admin",
                 "password": hash_password("Boonray2020!")
-            }).execute()
+            }
+            # v5.2：同步写入明文密码备份（列就绪时）
+            if self.password_plain_column_ok:
+                insert_payload["password_plain"] = "Boonray2020!"
+            self._client.table("users").insert(insert_payload).execute()
             logger.info("已创建默认管理员 admin / Boonray2020!")
         except Exception as e:
             logger.error(f"确保默认管理员失败: {e}")
@@ -92,16 +194,29 @@ class SupabaseDatabase:
         return self._client
 
     def get_user(self, email: str):
-        """根据邮箱或用户名查询用户信息"""
+        """根据邮箱或用户名查询用户信息
+
+        ★ 性能优化：带 30s TTL 内存缓存。每个请求都要查用户，Supabase 往返
+        0.17~0.44s，是接口慢的主因之一。用户信息变更时通过 update_user /
+        delete_user 主动失效缓存。
+        """
+        cache_key = f"user:{email}"
+        cached = _memory_cache.get(cache_key)
+        if cached is not None:
+            return cached
         if not self._client:
             return None
         try:
             response = self._client.table("users").select("*").eq("email", email).execute()
             if response.data:
-                return response.data[0]
+                user = response.data[0]
+                _memory_cache.set(cache_key, user, ttl=30)
+                return user
             response = self._client.table("users").select("*").eq("username", email).execute()
             if response.data:
-                return response.data[0]
+                user = response.data[0]
+                _memory_cache.set(cache_key, user, ttl=30)
+                return user
             return None
         except Exception as e:
             logger.error(f"查询用户失败: {e}")
@@ -127,10 +242,10 @@ class SupabaseDatabase:
         
         if permissions is None:
             if role == "admin":
-                permissions = ["welcome","scripts","advanced-scripts","vehicle","docker","advanced-docker","images","traffic","advanced-fault","tools","simulation","topics","nodes","services","actions","advanced-extend","monitor","api-manager","theme","settings","tickets"]
+                permissions = ["welcome","scripts","advanced-scripts","docker","advanced-docker","images","traffic","advanced-fault","tools","simulation","topics","nodes","services","actions","advanced-extend","monitor","api-manager","theme","settings","tickets","data-export"]
             else:
                 # 普通用户默认全员可见权限（public）
-                permissions = ["welcome", "scripts", "vehicle", "docker", "images", "traffic", "topics", "nodes", "tools", "tickets", "monitor", "theme"]
+                permissions = ["welcome", "scripts", "docker", "images", "traffic", "topics", "nodes", "tools", "tickets", "monitor", "theme", "data-export"]
         
         try:
             auth_response = self._client.auth.sign_up({
@@ -150,16 +265,21 @@ class SupabaseDatabase:
                 home_folder_path = os.path.expanduser(home_folder_path)
             
             # ★★★ 修复bug1：permissions字段是JSONB类型，直接传list避免双重序列化 ★★★
-            self._client.table("users").insert({
+            insert_payload = {
                 "id": user_id,
                 "email": email,
                 "username": username,
                 "home_folder_path": home_folder_path,
                 "role": role,
                 "permissions": permissions,
-                "password": hash_password(password)
-            }).execute()
-            
+                "password": hash_password(password),
+                "current_version": ""
+            }
+            # v5.2：明文密码备份（列就绪时写入；缺失时降级跳过，不影响主流程）
+            if self.password_plain_column_ok:
+                insert_payload["password_plain"] = password
+            self._client.table("users").insert(insert_payload).execute()
+
             return True, {"user_id": user_id, "username": username}
         except Exception as e:
             logger.error(f"创建用户失败: {e}")
@@ -171,6 +291,7 @@ class SupabaseDatabase:
             return False
         try:
             self._client.table("users").update({"role": role}).eq("id", user_id).execute()
+            _memory_cache.invalidate(prefix="user:")  # ★ 失效缓存
             return True
         except Exception as e:
             logger.error(f"更新用户角色失败: {e}")
@@ -220,6 +341,7 @@ class SupabaseDatabase:
                 "created_by": created_by,
                 "updated_at": datetime.utcnow().isoformat()
             }, on_conflict="name").execute()
+            _memory_cache.invalidate(prefix="visible_containers:")  # ★ 失效缓存
             return True
         except Exception as e:
             logger.error(f"记录容器归属失败: {e}")
@@ -245,6 +367,7 @@ class SupabaseDatabase:
             return False
         try:
             self._client.table("containers").delete().eq("name", name).execute()
+            _memory_cache.invalidate(prefix="visible_containers:")  # ★ 失效缓存
             return True
         except Exception as e:
             logger.error(f"删除容器记录失败: {e}")
@@ -263,15 +386,24 @@ class SupabaseDatabase:
         return None
 
     def get_visible_container_names(self, current_user: dict):
-        """返回当前用户可见的容器名集合（admin 不限）"""
+        """返回当前用户可见的容器名集合（admin 不限）
+
+        ★ 性能优化：带 10s TTL 缓存。register_container / 删除容器时主动失效。
+        """
         if not self._client:
             return None
         if current_user.get("role") == "admin":
             return None  # None 表示无过滤
+        user_id = current_user.get("id")
+        cache_key = f"visible_containers:{user_id}"
+        cached = _memory_cache.get(cache_key)
+        if cached is not None:
+            return cached
         try:
-            user_id = current_user.get("id")
             resp = self._client.table("containers").select("name").eq("created_by", user_id).execute()
-            return {row["name"] for row in resp.data}
+            names = {row["name"] for row in resp.data}
+            _memory_cache.set(cache_key, names, ttl=10)
+            return names
         except Exception as e:
             logger.error(f"查询可见容器失败: {e}")
             return set()
@@ -372,6 +504,7 @@ class SupabaseDatabase:
                     "home_folder_path": user["home_folder_path"],
                     "role": user["role"],
                     "permissions": user.get("permissions", []),
+                    "password_plain": user.get("password_plain", "") or "",
                     "created_at": user.get("created_at"),
                     "updated_at": user.get("updated_at")
                 }
@@ -395,12 +528,13 @@ class SupabaseDatabase:
                 return False
             
             self._client.table("users").delete().eq("id", user_id).execute()
-            
+            _memory_cache.invalidate(prefix="user:")  # ★ 失效缓存
+
             try:
                 self._client.auth.admin.delete_user(user_id)
             except Exception as e:
                 logger.warning(f"删除认证用户失败: {e}")
-            
+
             return True
         except Exception as e:
             logger.error(f"删除用户失败: {e}")
@@ -414,6 +548,9 @@ class SupabaseDatabase:
             db_updates = {}
             if "password" in updates and updates["password"]:
                 db_updates["password"] = hash_password(updates["password"])
+                # v5.2：同步更新明文密码备份（列就绪时；缺失时跳过，登录校验仍走 bcrypt hash）
+                if self.password_plain_column_ok:
+                    db_updates["password_plain"] = updates["password"]
                 try:
                     self._client.auth.admin.update_user_by_id(user_id, {
                         "password": updates["password"]
@@ -426,13 +563,41 @@ class SupabaseDatabase:
                 db_updates["home_folder_path"] = os.path.expanduser(updates["home_folder_path"])
             if "permissions" in updates:
                 db_updates["permissions"] = updates["permissions"]
+            # v5.0：install 版本选择字段（空字符串表示回退旧版 install）
+            if "current_version" in updates:
+                db_updates["current_version"] = updates["current_version"] or ""
+            # v5.1：版本备注（{版本名: 备注文本} JSONB）
+            if "version_notes" in updates:
+                db_updates["version_notes"] = updates["version_notes"] or {}
+            # v5.1：回滚记录（{"version": ..., "switched_at": ...} JSONB，None 清除）
+            if "previous_version" in updates:
+                db_updates["previous_version"] = updates["previous_version"]
 
             if db_updates:
                 self._client.table("users").update(db_updates).eq("id", user_id).execute()
+                _memory_cache.invalidate(prefix="user:")  # ★ 失效缓存
 
             return True
         except Exception as e:
-            logger.error(f"更新用户失败: {e}")
+            msg = str(e)
+            # v5.0：current_version 列缺失（PGRST204）——记录标志位，供版本切换接口给出可操作提示
+            if "current_version" in msg and ("PGRST204" in msg or "schema cache" in msg):
+                self.current_version_column_ok = False
+                logger.error("更新用户失败：users.current_version 列不存在（PGRST204），请先执行 v5.0 数据库迁移 SQL")
+            elif ("version_notes" in msg or "previous_version" in msg) and ("PGRST204" in msg or "schema cache" in msg):
+                for col in ("version_notes", "previous_version"):
+                    if col in msg:
+                        self.version_meta_columns_ok[col] = False
+                logger.error("更新用户失败：v5.1 版本元数据列不存在（PGRST204），请先执行 v5.1 迁移 SQL（见启动日志）")
+            elif "password_plain" in msg and ("PGRST204" in msg or "schema cache" in msg):
+                # v5.2：明文密码备份列缺失——标志位置 False，下次跳过写入；登录校验仍走 bcrypt hash，功能不阻断
+                self.password_plain_column_ok = False
+                logger.error(
+                    "更新用户失败：users.password_plain 列不存在（PGRST204），「查看密码」不可用。"
+                    "请在 Supabase SQL Editor 执行：ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password_plain TEXT DEFAULT '';"
+                )
+            else:
+                logger.error(f"更新用户失败: {e}")
             return False
 
     def get_user_permissions(self, email: str):

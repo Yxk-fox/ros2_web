@@ -99,8 +99,44 @@ if RATE_LIMIT_ENABLED:
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ---------- 4. 路由注册 ----------
+from routers.files import router as files_router
+from routers.ros2 import router as ros2_router
+from routers.vehicles import router as vehicles_router
+from routers.visualization import router as visualization_router
+from routers.docker import router as docker_router
+from routers.scripts import router as scripts_router
 from routers.api import router as api_router
+from routers.fault import router as fault_router
+from routers.tickets import router as tickets_router
+from routers.auth import router as auth_router
+from routers.system import router as system_router
+from routers.fleet import router as fleet_router
+from routers.monitor import router as monitor_router
+from routers.remote import router as remote_router
+from routers.config_api import router as config_api_router
 app.include_router(api_router)
+app.include_router(files_router)
+app.include_router(ros2_router)
+app.include_router(vehicles_router)
+app.include_router(visualization_router)
+app.include_router(docker_router)
+app.include_router(scripts_router)
+app.include_router(fault_router)
+app.include_router(tickets_router)
+app.include_router(auth_router)
+app.include_router(system_router)
+app.include_router(fleet_router)
+app.include_router(monitor_router)
+app.include_router(remote_router)
+app.include_router(config_api_router)
+
+# ---------- 4.1 资源监控历史采样守护（T-5.2-03，v5.2） ----------
+from services.metrics_history import start_metrics_history
+
+@app.on_event("startup")
+async def start_metrics_history_task():
+    """启动资源指标采样守护线程（30s 间隔，崩溃自动重启，不影响主服务）"""
+    start_metrics_history()
 
 # ---------- 5. 静态文件挂载 ----------
 FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")

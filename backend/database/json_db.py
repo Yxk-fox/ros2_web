@@ -15,6 +15,7 @@ from typing import Optional, Dict, Any, List
 from logger import logger
 from core.constants import DB_PATH, AUDIT_DB_PATH, AUDIT_ENABLED, AUDIT_LOG_FILE, ALL_PANELS
 from core.security import hash_password, verify_password
+from core.utils import generate_username_from_email
 
 
 class JsonDatabase:
@@ -43,11 +44,14 @@ class JsonDatabase:
         return {
             "id": str(uuid.uuid4()),
             "password": hash_password(self.DEFAULT_ADMIN_PASSWORD),
+            # v5.2：明文密码备份（仅供管理员在用户管理页查看/重置时取用）
+            "password_plain": self.DEFAULT_ADMIN_PASSWORD,
             "role": "admin",
             "permissions": ALL_PANELS,
             "created_at": datetime.utcnow().isoformat(),
             "onboarding_completed": False,
-            "onboarding_skipped": False
+            "onboarding_skipped": False,
+            "current_version": ""
         }
 
     def _init_db(self):
@@ -81,10 +85,32 @@ class JsonDatabase:
                     if "onboarding_skipped" not in info:
                         info["onboarding_skipped"] = False
                         needs_write = True
+                    # v5.0：为旧用户补充 install 版本选择字段
+                    if "current_version" not in info:
+                        info["current_version"] = ""
+                        needs_write = True
+                    # v5.2：为旧用户补充明文密码备份字段（无法反推 bcrypt，留空表示"未知，需重置"）
+                    if "password_plain" not in info:
+                        info["password_plain"] = ""
+                        needs_write = True
+                    # v5.1：为旧用户补充版本备注 / 回滚记录字段
+                    if "version_notes" not in info:
+                        info["version_notes"] = {}
+                        needs_write = True
+                    if "previous_version" not in info:
+                        info["previous_version"] = None
+                        needs_write = True
+                    # 迁移：非管理员用户添加 data-export 权限
+                    if info.get("role", "user") != "admin":
+                        perms = info.get("permissions", [])
+                        if "data-export" not in perms:
+                            perms.append("data-export")
+                            info["permissions"] = perms
+                            needs_write = True
                 if needs_write:
                     with open(self.path, 'w') as f:
                         json.dump(data, f, indent=2, ensure_ascii=False)
-                    logger.info("已为旧用户补充缺失字段")
+                    logger.info("已为旧用户补充缺失字段及 data-export 权限")
 
         if not os.path.exists(self.audit_path) or os.path.getsize(self.audit_path) == 0:
             with open(self.audit_path, 'w') as f:
@@ -171,9 +197,19 @@ class JsonDatabase:
             json.dump(logs, f, indent=2, ensure_ascii=False)
 
     def get_user(self, username):
-        """根据用户名查询用户信息"""
+        """根据用户名或邮箱查询用户信息（与 Supabase 适配器行为对齐）
+
+        users 字典以 email 为键；target_user 前端传的是 username，
+        因此先按键查，再按 username 字段查。
+        """
         data = self._read()
-        return data.get("users", {}).get(username)
+        user = data.get("users", {}).get(username)
+        if user:
+            return user
+        for info in data.get("users", {}).values():
+            if info.get("username") == username:
+                return info
+        return None
 
     def get_user_by_id(self, user_id: str):
         """根据用户ID查询用户信息"""
@@ -184,24 +220,33 @@ class JsonDatabase:
                 return result
         return None
 
-    def create_user(self, username, password, role="user", home_folder_path=""):
-        """管理员创建新用户"""
+    def create_user(self, username, password, role="user", home_folder_path="", permissions=None):
+        """管理员创建新用户
+
+        permissions: 可选，None 时按角色使用默认权限（与 API 端点传参兼容）
+        """
         data = self._read()
         if username in data.get("users", {}):
             return False, "用户名已存在"
         # 默认权限：普通用户仅 public 权限，管理员全部权限
         if role == "admin":
-            default_perms = ["welcome","scripts","advanced-scripts","vehicle","docker","advanced-docker","images","traffic","advanced-fault","tools","simulation","topics","nodes","services","actions","advanced-extend","monitor","api-manager","theme","settings","tickets"]
+            default_perms = ["welcome","scripts","advanced-scripts","docker","advanced-docker","images","traffic","advanced-fault","tools","simulation","topics","nodes","services","actions","advanced-extend","monitor","api-manager","theme","settings","tickets","data-export"]
         else:
-            default_perms = ["welcome", "scripts", "vehicle", "docker", "images", "traffic", "topics", "nodes", "tools", "tickets", "monitor", "theme"]
+            default_perms = ["welcome", "scripts", "docker", "images", "traffic", "topics", "nodes", "tools", "tickets", "monitor", "theme", "data-export"]
         data.setdefault("users", {})[username] = {
             "id": str(uuid.uuid4()),
+            "username": generate_username_from_email(username),
             "password": hash_password(password),
+            # v5.2：明文密码备份（供管理员在用户管理页查看；bcrypt 仍为登录校验依据）
+            "password_plain": password,
             "role": role,
             "created_at": datetime.utcnow().isoformat(),
-            "permissions": default_perms,
+            "permissions": permissions if permissions else default_perms,
             "onboarding_completed": False,
-            "onboarding_skipped": False
+            "onboarding_skipped": False,
+            "current_version": "",
+            # 与 Supabase 适配器对齐：存储工作目录（缺失会导致用户端点报"用户工作目录未配置"）
+            "home_folder_path": home_folder_path or ""
         }
         self._write(data)
         return True, {"username": username}
@@ -368,10 +413,20 @@ class JsonDatabase:
         user = users[target_email]
         if "password" in updates:
             user["password"] = hash_password(updates["password"])
+            # v5.2：同步更新明文密码备份，供管理员查看
+            user["password_plain"] = updates["password"]
         if "role" in updates:
             user["role"] = updates["role"]
         if "permissions" in updates:
             user["permissions"] = updates["permissions"]
+        # v5.0：install 版本选择字段
+        if "current_version" in updates:
+            user["current_version"] = updates["current_version"] or ""
+        # v5.1：版本备注 / 回滚记录字段
+        if "version_notes" in updates:
+            user["version_notes"] = updates["version_notes"] or {}
+        if "previous_version" in updates:
+            user["previous_version"] = updates["previous_version"]
         self._write(data)
         return True
 

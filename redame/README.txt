@@ -1,9 +1,9 @@
 """
 版权所有：上海伯镭科技有限公司
 @File    :  README.txt
-@Time    :  2026/07/21
+@Time    :  2026/08/28
 @Author  :  Fox
-@Version :  4.0-decoupled
+@Version :  v3.5
 @Desc    :  Mock Truck 管理工具 - 项目说明文档（解耦版）
 
             代码结构：
@@ -26,8 +26,8 @@
 采用前后端分离架构，后端使用 FastAPI + WebSocket，前端为独立静态文件。
 所有功能均通过 REST API 和 WebSocket 与后端交互。
 
-版本: 4.0-decoupled
-更新日期: 2026-07-21
+版本: v3.5
+更新日期: 2026-08-28
 
 v4.0-decoupled 主要更新：
   🏗️ 架构解耦
@@ -54,6 +54,46 @@ v4.0-decoupled 主要更新：
     - 通过 MutationObserver 向容器列表动态注入按钮，不修改原有代码
     - 用户隔离：bag/hdmap 文件仅落地到当前用户空间（~/robotruck_ros2/<user>/Docker/bags/）
     - 专用下载接口 GET /api/data-export/bag/download，权限 data-export
+
+v4.0.1 部署适配（2026-08-26）：
+  🚀 deploy.py 一键部署跨服务器适配
+    - 用户名全自动获取：SUDO_USER > LOGNAME/USER/USERNAME 环境变量 > getpass 兜底，
+      适配所有服务器（含 systemd / cron / ssh 无 tty 环境），无需修改任何脚本内容
+    - 自动加入 docker 组：部署时自动检测并 usermod -aG docker <用户>，
+      已在组中自动跳过，加入后提示需重新登录生效
+    - 非 root 运行时友好提示：提示使用 sudo 重新执行（sudo 会提示输入当前用户密码），
+      并支持选择由脚本自动以 sudo 重新拉起自身
+    - systemd 服务以实际执行用户身份运行，用户家目录 / Python 路径 / 项目路径全部自动推导
+
+v3.5 容器管理与性能优化（2026-08-28）：
+  🐛 缺陷修复
+    - 管理员 Docker 管理面板看不到用户的 ROS2 容器
+      根因：前端"ROS2容器"按钮按镜像名过滤（filter_image=ros2_），而用户容器镜像
+      显示为未打标签的镜像 ID（如 88fc0f0bc583），不含"ros2_"字符串，全部被过滤。
+      修复：改按容器名前缀过滤（filter_name=ros2_），后端返回 is_ros2 标志供前端判断。
+      同步修正"其他容器"按钮排除逻辑（!ros2_ 按名称排除，而非按镜像排除）。
+    - 删除 install 时未同步清空 Docker 目录
+      根因：/api/install/delete 仅 move install 目录到备份，残留 bags/rosbag、
+      logs/容器日志、scripts/启动脚本、bk/生成的 .yaml/.py/.sh、.bk_backups 历史备份。
+      修复：新增 _cleanup_user_docker_dir()，删除时同步清理：
+        · bags/logs/scripts 清空内容（保留目录）
+        · bk 递归删 .yaml/.yml/.py/.sh，保留 start_docker_template.sh / .pem / .rviz
+        · .bk_backups 整体删除
+        · Docker 根目录杂项（log.zip 等）清理，仅保留 bags/bk/logs/scripts 四个标准目录
+  ⚡ 性能优化（8 并发请求总耗时 1.90s → 0.65s）
+    - 高频只读端点 async def → def：FastAPI 自动放入线程池执行，
+      docker 子进程 / nvidia-smi / psutil / 目录扫描不再阻塞事件循环。
+      涉及端点：system_status / system_monitor / list_images / list_containers /
+      get_install_status / list_scripts / get_default_paths / get_quota_status /
+      traffic_status / get_light_status / list_truck_configs / get_truck_config
+    - Supabase 查询加 TTL 内存缓存：get_user 30s、get_visible_container_names 10s；
+      update_user / delete_user / update_user_role / register_container /
+      remove_container_record 主动失效缓存
+    - 容器列表接口合并 2 次 docker ps 子进程为 1 次（list_containers_detailed）
+  🎨 UI 优化
+    - 容器列表去除"镜像"列（名称/状态/运行时长/云平台连接/操作 共5列）
+    - 名称/状态/运行时长/云平台连接 4 列等宽自适应，操作列按按钮内容自适应
+    - 操作按钮过多自动换行到第二排，按钮配色改用渐变 + 阴影美化
 
 ================================================================================
                           解耦架构说明
@@ -278,10 +318,26 @@ v4.0-decoupled 主要更新：
     cd ~/ros2_web
     sudo python3 deploy.py
 
+部署脚本已适配所有服务器，无需按机器修改任何内容：
+    - 用户名自动获取：优先读取 SUDO_USER（sudo 执行时的真实用户），
+      其次 LOGNAME / USER / USERNAME 环境变量，最后 getpass 兜底；
+      兼容 systemd / cron / ssh 无控制终端环境
+    - 自动加入 docker 组：部署时自动检测执行用户是否在 docker 组，
+      未入组则自动执行 usermod -aG docker <用户>；已入组自动跳过
+    - 非 root 运行时的提示：直接执行 python3 deploy.py 会提示
+      "请使用 sudo 重新执行（sudo 将提示输入当前用户密码）"，
+      并可选择由脚本自动以 sudo 重新拉起自身，无需手动重敲命令
+    - 路径全自动推导：项目目录 / 用户家目录 / Python 解释器路径均自动获取，
+      换服务器、换用户名均可直接使用
+
+注意：
+    - docker 组权限加入后需注销并重新登录（或执行 newgrp docker）才生效
+    - 部署报告中的默认账号为 admin / Boonray2020!，首次登录后请立即修改
+
 参数说明：
     --skip-system    跳过系统环境检查与安装（Python/Docker/Git），仅部署应用
     --skip-deps      跳过 Python 依赖安装
-    --only-deps      仅安装 Python 依赖，跳过系统服务部署
+    --only-deps      仅安装 Python 依赖，跳过系统服务部署（免 sudo）
 
 示例：
     # 全新部署
@@ -329,10 +385,12 @@ v4.0-decoupled 主要更新：
 
   deploy.py 已支持跨用户部署，无需修改脚本即可在不同用户下使用：
 
-  - 用户名自动识别：通过 SUDO_USER / os.getlogin() 获取当前执行用户
+  - 用户名自动识别：SUDO_USER > LOGNAME/USER/USERNAME > getpass 兜底，
+    兼容 systemd / cron / ssh 无 tty 环境（不使用依赖控制终端的 os.getlogin()）
   - 项目路径自动识别：基于脚本所在目录推导，无需硬编码
   - HOME 目录自动推导：systemd 服务文件中 PATH 包含 ~/.local/bin
   - Python 解释器自动定位：使用 shutil.which("python3") 查找
+  - docker 组自动配置：未入组自动 usermod -aG docker 加入，已入组跳过
 
   在新用户下部署只需：
     # 1. 切换到目标用户
@@ -344,7 +402,7 @@ v4.0-decoupled 主要更新：
     # 3. 修改项目归属
     chown -R <目标用户>:<目标用户> ~/ros2_web
 
-    # 4. 执行部署（需 sudo 权限）
+    # 4. 执行部署（需 sudo 权限；忘记加 sudo 时脚本会提示并可直接确认自动重跑）
     cd ~/ros2_web
     sudo python3 deploy.py
 
@@ -555,6 +613,16 @@ Q: deploy.py 为什么要 sudo？
 A: 因为需要安装系统级软件、写入 systemd 服务文件、配置 Docker 组权限。
    使用 --skip-system --only-deps 可免 sudo 仅安装 Python 依赖。
 
+Q: 忘记加 sudo 直接运行 python3 deploy.py 会怎样？
+A: 脚本不会直接报错退出，而是提示"请使用 sudo 重新执行（sudo 将提示
+   输入当前用户密码）"，并询问是否由脚本自动以 sudo 重新拉起自身，
+   输入 y 确认后 sudo 会提示输入密码并继续部署，无需手动重敲命令。
+
+Q: 换了一台服务器 / 换了用户名，deploy.py 需要改哪里？
+A: 什么都不用改。脚本自动获取真实执行用户（SUDO_USER / LOGNAME / USER
+   环境变量 + getpass 兜底），自动推导项目路径、家目录与 Python 路径，
+   自动检测并加入 docker 组，任何服务器直接 sudo python3 deploy.py 即可。
+
 ================================================================================
                           技术架构
 ================================================================================
@@ -583,8 +651,8 @@ A: 因为需要安装系统级软件、写入 systemd 服务文件、配置 Dock
 ================================================================================
 
 © Boonray 伯镭科技
-版本: 4.0-decoupled
-日期: 2026-07-21
+版本: v3.5
+日期: 2026-08-28
 作者: Fox
 
 ================================================================================
